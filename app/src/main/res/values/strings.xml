@@ -40,6 +40,11 @@
     <!-- FIREBASE ERROR -->
     <string name="email_in_use">this email is already registered</string>
 
+    <!-- ACTION MENU -->
+    <string name="menu_action_settings">Settings</string>
+    <string name="menu_action_logout">Logout</string>
+    <string name="menu_action_about">About</string>
+
 
 
 </resources>

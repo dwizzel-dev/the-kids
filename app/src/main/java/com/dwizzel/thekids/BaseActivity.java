@@ -22,7 +22,7 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mAuth = Auth.getInstance();
         //start la activity principale de la class qui extends
-        startMainApp();
+        startMainActivity();
     }
 
     @Override
@@ -37,8 +37,16 @@ public class BaseActivity extends AppCompatActivity {
 
     }
 
-    protected void startMainApp() {
+    protected void startMainActivity() {
         //will be overrided by other activities
+    }
+
+    protected void signOutUser(){
+        if(mAuth != null){
+            mAuth.signOut();
+        }
+        //on reload l'activity qui va checker si est logue ou pas
+        recreate();
     }
 
 }

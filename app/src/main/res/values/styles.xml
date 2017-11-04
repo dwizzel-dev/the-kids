@@ -11,6 +11,9 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+    <style name="AppTheme.Toolbar" parent="@android:style/Widget.Toolbar">
+        <item name="titleTextColor">@color/white</item>
+    </style>
     <style name="AppTheme.FrameLayoutWhite">
         <item name="android:background">@color/white</item>
     </style>
