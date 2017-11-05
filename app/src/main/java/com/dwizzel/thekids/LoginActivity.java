@@ -29,9 +29,9 @@ public class LoginActivity extends AppCompatActivity {
         buttSignIn.setOnClickListener(
             new View.OnClickListener() {
                 public void onClick(View v) {
-                    //Intent intent = new Intent(this, SignInActivity.class);
+                    Intent intent = new Intent(LoginActivity.this, SignInUserActivity.class);
                     //start activity
-                    //startActivity(intent);
+                    startActivity(intent);
                 }
             });
 

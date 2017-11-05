@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 
 
 import com.dwizzel.utils.Auth;
+import com.dwizzel.utils.Utils;
 //import com.google.firebase.auth.FirebaseAuth;
 //import com.google.firebase.auth.FirebaseUser;
 
@@ -45,7 +46,10 @@ public class BaseActivity extends AppCompatActivity {
         if(mAuth != null){
             mAuth.signOut();
         }
-        //on reload l'activity qui va checker si est logue ou pas
+        //
+        Utils utils = Utils.getInstance();
+        utils.showToastMsg(BaseActivity.this, R.string.toast_signed_out);
+        //on reload l'activity dans laquelle il est qui va checker si est logue ou pas
         recreate();
     }
 

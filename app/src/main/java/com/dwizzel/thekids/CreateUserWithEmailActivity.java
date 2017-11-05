@@ -1,6 +1,5 @@
 package com.dwizzel.thekids;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.transition.Fade;
@@ -13,18 +12,11 @@ import android.transition.Slide;
 import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.Gravity;
-import android.util.Patterns;
-import java.util.regex.Pattern;
 
 import com.dwizzel.utils.Auth;
 import com.dwizzel.utils.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-/*
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-*/
 
 import com.google.firebase.auth.AuthResult;
 
@@ -38,8 +30,6 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     private String psw = "";
     private Integer currFragmentNum;
     private FragmentManager mFragmentManager;
-    private ProgressDialog mProgressDialog;
-    //private FirebaseAuth mAuth;
     private Auth mAuth;
     private Utils mUtils;
 
@@ -47,11 +37,10 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_user_with_email);
-        setTitle(R.string.register_with_email);
+        setTitle(R.string.register_with_email_title);
         //fragment manager pour les anim transition
         mFragmentManager = getSupportFragmentManager();
         //le auth de firebase
-        //mAuth = FirebaseAuth.getInstance();
         mAuth = Auth.getInstance();
         //utilitaires de base pour messages et autres
         mUtils = Utils.getInstance();
@@ -68,7 +57,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        hideProgressDialog();
+        mUtils.hideProgressDialog();
     }
 
     public String getPsw() {
@@ -87,11 +76,6 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         this.email = email;
     }
 
-    private boolean isValidEmail(String email) {
-        Pattern pattern = Patterns.EMAIL_ADDRESS;
-        return pattern.matcher(email).matches();
-    }
-
     private void gotoFragmentAndShowErrors(int fragNum, int msgId){
         Bundle bundle = new Bundle();
         bundle.putInt("msg", msgId);
@@ -100,8 +84,9 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
 
     protected int setEmailFromFragment(String email) {
         //set le email
-        if(email.equals("") || !isValidEmail(email)){
-            return R.string.email_invalid;
+        int err = mUtils.isValidEmail(email);
+        if(err != 0){
+            return err;
             }
         //le setter du email
         setEmail(email);
@@ -112,11 +97,10 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     }
 
     protected int setPswFromFragment(String[] psw) {
-        Log.w(TAG, String.format("%s : %s", psw[0], psw[1]));
-        if(!psw[0].equals(psw[1])){
-            return R.string.psw_not_the_same;
-        }else if(psw[0].length() < 6){
-            return R.string.psw_too_short;
+        //set le psw
+        int err = mUtils.isValidPsw(psw);
+        if(err != 0){
+            return err;
             }
         //le setter du password
         setPsw(psw[0]);
@@ -129,7 +113,8 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     private void userRegistrationFinished(){
         //on affiche qu'il est logue
         String email = mAuth.getUserInfos().getEmail();
-        mUtils.showToastMsg(CreateUserWithEmailActivity.this, email);
+        mUtils.showToastMsg(CreateUserWithEmailActivity.this,
+                getResources().getString(R.string.toast_connected_as, email));
         //on va a activity principal
         Intent intent = new Intent(CreateUserWithEmailActivity.this, HomeActivity.class);
         //start activity
@@ -137,98 +122,42 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     }
 
     private void createUser() {
-        boolean isConnected = mUtils.checkConnectivity(getApplicationContext());
-        //avertir si pas connecte
-        if(!isConnected){
-            mUtils.showToastMsg(CreateUserWithEmailActivity.this, R.string.err_no_connectivity);
-        }else {
-            //le progress bar
-            showProgressDialog();
-            //on va faire un listener sur le resultat
-            /*
-            mAuth.setOnCompleteListener(new OnCompleteListener() {
-                @Override
-                public void onComplete(@NonNull Task task) {
-                    Log.w(TAG, task.getException());
-                }
-            });
-            */
+
+        //on va faire un listener sur le resultat
+        try {
             mAuth.createUser(CreateUserWithEmailActivity.this, email, psw)
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
-                        public void onComplete(@NonNull Task<AuthResult> task){
+                        public void onComplete(@NonNull Task<AuthResult> task) {
                             Log.w(TAG, "CREATE::onComplete[001]");
                             //on hide le loader
-                            hideProgressDialog();
+                            mUtils.hideProgressDialog();
                             //handling errors
                             if (!task.isSuccessful()) {
                                 try {
                                     throw task.getException();
                                 } catch (FirebaseAuthUserCollisionException existEmail) {
                                     //email exist
-                                    Log.w(TAG, existEmail);
                                     gotoFragmentAndShowErrors(0, R.string.email_in_use);
                                 } catch (FirebaseAuthInvalidCredentialsException invalidEmail) {
                                     //invalid email
-                                    Log.w(TAG, invalidEmail);
                                     gotoFragmentAndShowErrors(0, R.string.email_invalid);
                                 } catch (Exception e) {
                                     //whatever else
                                 }
-                            }else{
+                            } else {
                                 //pas erreur alors on continue
                                 userRegistrationFinished();
                             }
                         }
                     });
+            //pas exception de conn alors on show le loader
+            mUtils.showProgressDialog(CreateUserWithEmailActivity.this);
 
-            /*
-            mAuth.createUserWithEmailPsw(CreateUserWithEmailActivity.this, email, psw)
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            Log.w(TAG, "createUserWithEmailPsw::onComplete[1]");
-
-
-                        }
-                    });
-            */
-            /*
-            mAuth.createUserWithEmailAndPassword(email, psw)
-                    .addOnCompleteListener(CreateUserWithEmailActivity.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            String exceptionMsg = "";
-                            if (!task.isSuccessful()) {
-                                try {
-                                    throw task.getException();
-                                } catch (FirebaseAuthUserCollisionException existEmail) {
-                                    //email exist
-                                    exceptionMsg = existEmail.getMessage();
-                                    gotoFragmentAndShowErrors(0, R.string.email_in_use);
-                                } catch (FirebaseAuthInvalidCredentialsException invalidEmail) {
-                                    //invalid email
-                                    exceptionMsg = invalidEmail.getMessage();
-                                    gotoFragmentAndShowErrors(0, R.string.email_invalid);
-                                } catch (Exception e) {
-                                    //whatever else
-                                    exceptionMsg = e.getMessage();
-                                }
-
-                            }
-                            //on hide le loader
-                            hideProgressDialog();
-                            //on check les exceptions
-                            Log.w(TAG, exceptionMsg);
-                            //si pas exception alors on signin le user
-                            if(exceptionMsg.isEmpty()) {
-                                userRegistrationFinished();
-                            }
-
-                        }
-                    });
-            */
-
+        }catch (Exception e) {
+            Log.w(TAG, e.getMessage());
+            //un prob de pas de connection
+            mUtils.showToastMsg(CreateUserWithEmailActivity.this, R.string.err_no_connectivity);
         }
     }
 
@@ -286,24 +215,4 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
 
 
     }
-
-    private void showProgressDialog() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage(getString(R.string.dialog_loading));
-            mProgressDialog.setIndeterminate(true);
-        }
-        mProgressDialog.show();
-    }
-
-    private void hideProgressDialog() {
-        if(mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-        }
-    }
-
-
-
-
-
 }

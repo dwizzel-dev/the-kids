@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
 
     <application
         android:allowBackup="true"
@@ -29,10 +30,16 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".CreateUserActivity"
-            android:parentActivityName=".LoginActivity"></activity>
+            android:parentActivityName=".LoginActivity" />
         <activity
             android:name=".CreateUserWithEmailActivity"
-            android:parentActivityName=".CreateUserActivity"></activity>
+            android:parentActivityName=".CreateUserActivity" />
+        <activity
+            android:name=".SignInUserActivity"
+            android:parentActivityName=".LoginActivity" />
+        <activity
+            android:name=".SignInUserWithEmailActivity"
+            android:parentActivityName=".SignInUserActivity"></activity>
     </application>
 
 </manifest>
