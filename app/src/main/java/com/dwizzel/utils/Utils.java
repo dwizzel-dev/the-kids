@@ -96,10 +96,10 @@ public class Utils {
             if(!psw[0].equals(psw[1])) {
                 return R.string.psw_not_the_same;
             }
-        }else if(psw.length == 1){
-            if(psw[0].length() < 6) {
-                return R.string.psw_too_short;
-            }
+        }
+        //check juste le premier
+        if(psw[0].length() < 6) {
+            return R.string.psw_too_short;
         }
         return 0;
     }

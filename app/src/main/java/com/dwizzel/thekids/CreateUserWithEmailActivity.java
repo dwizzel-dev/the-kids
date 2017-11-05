@@ -22,6 +22,7 @@ import com.google.firebase.auth.AuthResult;
 
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 public class CreateUserWithEmailActivity extends AppCompatActivity {
 
@@ -139,6 +140,9 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
                                 } catch (FirebaseAuthUserCollisionException existEmail) {
                                     //email exist
                                     gotoFragmentAndShowErrors(0, R.string.email_in_use);
+                                }catch (FirebaseAuthWeakPasswordException weakPsw) {
+                                    //invalid email
+                                    gotoFragmentAndShowErrors(0, R.string.psw_weak);
                                 } catch (FirebaseAuthInvalidCredentialsException invalidEmail) {
                                     //invalid email
                                     gotoFragmentAndShowErrors(0, R.string.email_invalid);
