@@ -109,9 +109,9 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
 
     private void userSignInFinished(){
         //on affiche qu'il est logue
-        String email = mAuth.getUserInfos().getEmail();
+        String loginName = mAuth.getUserLoginName();
         mUtils.showToastMsg(SignInUserWithEmailActivity.this,
-                getResources().getString(R.string.toast_connected_as, email));
+                getResources().getString(R.string.toast_connected_as, loginName));
         //on va a activity principal
         Intent intent = new Intent(SignInUserWithEmailActivity.this, HomeActivity.class);
         //start activity

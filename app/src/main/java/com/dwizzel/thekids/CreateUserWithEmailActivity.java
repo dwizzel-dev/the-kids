@@ -113,9 +113,9 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
 
     private void userRegistrationFinished(){
         //on affiche qu'il est logue
-        String email = mAuth.getUserInfos().getEmail();
+        String loginName = mAuth.getUserLoginName();
         mUtils.showToastMsg(CreateUserWithEmailActivity.this,
-                getResources().getString(R.string.toast_connected_as, email));
+                getResources().getString(R.string.toast_connected_as, loginName));
         //on va a activity principal
         Intent intent = new Intent(CreateUserWithEmailActivity.this, HomeActivity.class);
         //start activity

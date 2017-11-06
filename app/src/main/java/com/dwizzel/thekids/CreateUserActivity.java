@@ -7,18 +7,26 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.dwizzel.utils.Auth;
+import com.dwizzel.utils.Utils;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
 
-/****
-
- https://dzone.com/articles/managing-multiple-ui-layouts
-https://stackoverflow.com/questions/4817900/android-fragments-and-animation
-
- */
+/***
+ * https://dzone.com/articles/managing-multiple-ui-layouts
+ * https://stackoverflow.com/questions/4817900/android-fragments-and-animation
+ * https://developers.facebook.com/apps/135994336994028/fb-login/quickstart/
+ * https://developers.facebook.com/docs/facebook-login/android
+ * */
 
 
 public class CreateUserActivity extends AppCompatActivity {
 
-    private final static String TAG = "CreateUserActivity ::";
+    private final static String TAG = "THEKIDS::";
+    CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,5 +45,46 @@ public class CreateUserActivity extends AppCompatActivity {
                     }
                 });
 
+        callbackManager = CallbackManager.Factory.create();
+
+        LoginManager.getInstance().registerCallback(callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        Log.w(TAG, "onSuccess");
+                        userFacebookSignInFinished();
+                    }
+                    @Override
+                    public void onCancel() {
+                        Log.w(TAG, "onCancel");
+                    }
+                    @Override
+                    public void onError(FacebookException exception) {
+                        Log.w(TAG, "onError");
+                    }
+
+                });
+
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    private void userFacebookSignInFinished(){
+        //on affiche qu'il est logue
+        Auth auth = Auth.getInstance();
+        Utils utils = Utils.getInstance();
+        String loginName = auth.getUserLoginName();
+        utils.showToastMsg(CreateUserActivity.this,
+                getResources().getString(R.string.toast_connected_as, loginName));
+        //on va a activity principal
+        Intent intent = new Intent(CreateUserActivity.this, HomeActivity.class);
+        //start activity
+        startActivity(intent);
+    }
+
 }

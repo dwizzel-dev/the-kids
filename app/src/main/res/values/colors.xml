@@ -12,4 +12,5 @@
     <color name="bgButton">#ff3c00</color>
     <color name="textButtonEmpty">#ca3000</color>
     <color name="bgButtonEmpty">#ffffff</color>
+    <color name="blueFacebook">#4267B2</color>
 </resources>

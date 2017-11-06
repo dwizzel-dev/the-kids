@@ -49,7 +49,8 @@ public class BaseActivity extends AppCompatActivity {
         //
         Utils utils = Utils.getInstance();
         utils.showToastMsg(BaseActivity.this, R.string.toast_signed_out);
-        //on reload l'activity dans laquelle il est qui va checker si est logue ou pas
+        //on reload l'activity dans laquelle il est,
+        //qui va checker si est logue ou pas
         recreate();
     }
 
