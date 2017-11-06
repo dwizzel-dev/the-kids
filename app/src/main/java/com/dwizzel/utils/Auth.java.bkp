@@ -17,7 +17,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Observable;
 import java.util.Observer;
 
-public class Auth extends Observable{
+public class Auth{
 
     private static Auth sInst = null;
     private FirebaseAuth mFirebaseAuth;
@@ -166,7 +166,7 @@ public class Auth extends Observable{
 
     }
 
-    public void signInFacebookUser(Activity activity) throws Exception {
+    public Task<String> signInFacebookUser(Activity activity) throws Exception {
 
         try {
             //on va checker si est connecte au net avant
@@ -178,19 +178,12 @@ public class Auth extends Observable{
                 if (mFacebookLogin == null) {
                     mFacebookLogin = new FacebookLogin();
                 }
-                mFacebookLogin.setFacebookLogin(activity);
-                //on met un seul observer
-                mFacebookLogin.deleteObservers();
-                //on creer un observer
                 mFacebookLogin.addObserver(new Observer() {
-                    public void update(Observable obj, Object arg) {
-                        Log.w(TAG, arg.toString());
-                        setChanged();
-                        notifyObservers("successfull login[1]");
-                    }
-                });
-                //on ramene le observer
-
+                        public void update(Observable obj, Object arg) {
+                            Log.w(TAG, arg.toString());
+                        }
+                    });
+                return mFacebookLogin.signInFacebookUser(activity);
             }
         }catch(Exception e){
             Log.w(TAG, "AUTH_SIGNIN::EXCEPTION[000]");

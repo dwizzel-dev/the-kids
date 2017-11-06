@@ -9,19 +9,14 @@ import android.widget.Button;
 
 import com.dwizzel.utils.Auth;
 import com.dwizzel.utils.Utils;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.Profile;
-import com.facebook.ProfileTracker;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
+
+import java.util.Observable;
+import java.util.Observer;
 
 public class SignInUserActivity extends AppCompatActivity {
 
     private final static String TAG = "THEKIDS::";
-    private CallbackManager facebookCallbackManager;
+    private Auth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,58 +36,19 @@ public class SignInUserActivity extends AppCompatActivity {
                     }
                 });
 
-        //facebook
-        LoginButton loginButton = findViewById(R.id.facebook_button);
-        //pour avoir au moins le nom
-        loginButton.setReadPermissions("public_profile");
 
-        //facebookCallBack
-        facebookCallbackManager = CallbackManager.Factory.create();
-        LoginManager.getInstance().registerCallback(facebookCallbackManager,
-                new FacebookCallback<LoginResult>() {
+        mAuth = Auth.getInstance();
+        signInFacebookUser();
 
-                    private ProfileTracker mProfileTracker;
-
-                    @Override
-                    public void onSuccess(LoginResult loginResult){
-                        Log.w(TAG, "facebook.onSuccess");
-                        Profile profile = Profile.getCurrentProfile();
-                        if(profile == null){
-                            Log.v(TAG, "facebook.ProfileTracker()");
-                            mProfileTracker = new ProfileTracker(){
-                                @Override
-                                protected void onCurrentProfileChanged(Profile oldProfile,
-                                                                       Profile currentProfile) {
-                                    Log.v(TAG, "facebook.onCurrentProfileChanged()");
-                                    mProfileTracker.stopTracking();
-                                    Profile.setCurrentProfile(currentProfile);
-                                    //on load seuleement une fois l'info recu
-                                    userFacebookSignInFinished();
-
-                                }
-                            };
-                        }else{
-                            Log.v(TAG, String.format("facebook.getFirstName(): %s", profile.getFirstName()));
-                        }
-                        //userFacebookSignInFinished();
-                    }
-                    @Override
-                    public void onCancel() {
-                        Log.w(TAG, "facebook.onCancel");
-                    }
-                    @Override
-                    public void onError(FacebookException exception) {
-                        Log.w(TAG, "facebook.onError");
-                    }
-
-                });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        facebookCallbackManager.onActivityResult(requestCode, resultCode, data);
+        //to receive the result from the facebook callback
+        mAuth.facebookCallBackManager(requestCode, resultCode, data);
     }
+
 
     private void userFacebookSignInFinished(){
         //on affiche qu'il est logue
@@ -106,5 +62,29 @@ public class SignInUserActivity extends AppCompatActivity {
         //start activity
         startActivity(intent);
     }
+
+
+    private void signInFacebookUser() {
+
+        //on va faire un listener sur le resultat
+        try {
+            //
+            mAuth.signInFacebookUser(SignInUserActivity.this);
+            mAuth.deleteObservers();
+            mAuth.addObserver(new Observer() {
+                public void update(Observable obj, Object arg) {
+                    Log.w(TAG, arg.toString());
+                    userFacebookSignInFinished();
+                }
+            });
+
+        }catch (Exception e) {
+            Log.w(TAG, e.getMessage());
+            //un prob de pas de connection
+
+        }
+
+    }
+
 
 }

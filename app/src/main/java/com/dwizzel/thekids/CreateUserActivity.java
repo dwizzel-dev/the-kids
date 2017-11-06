@@ -12,8 +12,11 @@ import com.dwizzel.utils.Utils;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
 /***
  * https://dzone.com/articles/managing-multiple-ui-layouts
@@ -45,14 +48,39 @@ public class CreateUserActivity extends AppCompatActivity {
                     }
                 });
 
+        //facebook
+        LoginButton loginButton = findViewById(R.id.facebook_button);
+        //pour avoir au moins le nom
+        loginButton.setReadPermissions("public_profile");
+
         callbackManager = CallbackManager.Factory.create();
 
         LoginManager.getInstance().registerCallback(callbackManager,
                 new FacebookCallback<LoginResult>() {
+
+                    private ProfileTracker mProfileTracker;
+
                     @Override
                     public void onSuccess(LoginResult loginResult) {
                         Log.w(TAG, "onSuccess");
-                        userFacebookSignInFinished();
+                        Profile profile = Profile.getCurrentProfile();
+                        if(profile == null){
+                            Log.v(TAG, "facebook.ProfileTracker()");
+                            mProfileTracker = new ProfileTracker(){
+                                @Override
+                                protected void onCurrentProfileChanged(Profile oldProfile,
+                                                                       Profile currentProfile) {
+                                    Log.v(TAG, "facebook.onCurrentProfileChanged()");
+                                    mProfileTracker.stopTracking();
+                                    Profile.setCurrentProfile(currentProfile);
+                                    //on load seuleement une fois l'info recu
+                                    userFacebookSignInFinished();
+                                }
+                            };
+                        }else{
+                            Log.v(TAG, String.format("facebook.getFirstName(): %s", profile.getFirstName()));
+                        }
+
                     }
                     @Override
                     public void onCancel() {
