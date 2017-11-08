@@ -7,16 +7,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.dwizzel.Const;
 import com.dwizzel.utils.Auth;
 import com.dwizzel.utils.Utils;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.Profile;
-import com.facebook.ProfileTracker;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
+
+import java.util.Observable;
+import java.util.Observer;
 
 /***
  * https://dzone.com/articles/managing-multiple-ui-layouts
@@ -28,8 +24,9 @@ import com.facebook.login.widget.LoginButton;
 
 public class CreateUserActivity extends AppCompatActivity {
 
-    private final static String TAG = "THEKIDS::";
-    CallbackManager callbackManager;
+    private final static String TAG = "TheKids.CreateUserActiv";
+    private Auth mAuth;
+    private Utils mUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,57 +45,17 @@ public class CreateUserActivity extends AppCompatActivity {
                     }
                 });
 
-        //facebook
-        LoginButton loginButton = findViewById(R.id.facebook_button);
-        //pour avoir au moins le nom
-        loginButton.setReadPermissions("public_profile");
-
-        callbackManager = CallbackManager.Factory.create();
-
-        LoginManager.getInstance().registerCallback(callbackManager,
-                new FacebookCallback<LoginResult>() {
-
-                    private ProfileTracker mProfileTracker;
-
-                    @Override
-                    public void onSuccess(LoginResult loginResult) {
-                        Log.w(TAG, "onSuccess");
-                        Profile profile = Profile.getCurrentProfile();
-                        if(profile == null){
-                            Log.v(TAG, "facebook.ProfileTracker()");
-                            mProfileTracker = new ProfileTracker(){
-                                @Override
-                                protected void onCurrentProfileChanged(Profile oldProfile,
-                                                                       Profile currentProfile) {
-                                    Log.v(TAG, "facebook.onCurrentProfileChanged()");
-                                    mProfileTracker.stopTracking();
-                                    Profile.setCurrentProfile(currentProfile);
-                                    //on load seuleement une fois l'info recu
-                                    userFacebookSignInFinished();
-                                }
-                            };
-                        }else{
-                            Log.v(TAG, String.format("facebook.getFirstName(): %s", profile.getFirstName()));
-                        }
-
-                    }
-                    @Override
-                    public void onCancel() {
-                        Log.w(TAG, "onCancel");
-                    }
-                    @Override
-                    public void onError(FacebookException exception) {
-                        Log.w(TAG, "onError");
-                    }
-
-                });
+        mUtils = Utils.getInstance();
+        mAuth = Auth.getInstance();
+        signInFacebookUser();
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
+        //to receive the result from the facebook callback
+        mAuth.facebookCallBackManager(requestCode, resultCode, data);
     }
 
 
@@ -114,5 +71,39 @@ public class CreateUserActivity extends AppCompatActivity {
         //start activity
         startActivity(intent);
     }
+
+    private void signInFacebookUser() {
+
+        //on va faire un listener sur le resultat
+        try {
+            //
+            mAuth.initFacebookLogin(CreateUserActivity.this);
+            mAuth.deleteObservers();
+            mAuth.addObserver(new Observer() {
+                public void update(Observable obj, Object arg) {
+                    Log.w(TAG, "mAuth.update: " + arg);
+                    switch ((int)arg){
+                        case Const.notif.TYPE_NOTIF_LOADING:
+                            mUtils.showProgressDialog(CreateUserActivity.this);
+                            break;
+                        case Const.notif.TYPE_NOTIF_SIGNED:
+                            mUtils.hideProgressDialog();
+                            userFacebookSignInFinished();
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            });
+
+        }catch (Exception e) {
+            Log.w(TAG, e.getMessage());
+            //un prob de pas de connection
+
+        }
+
+    }
+
 
 }

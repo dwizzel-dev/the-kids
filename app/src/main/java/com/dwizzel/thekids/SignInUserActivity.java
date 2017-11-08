@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.dwizzel.utils.Auth;
+import com.dwizzel.Const;
 import com.dwizzel.utils.Utils;
 
 import java.util.Observable;
@@ -15,8 +16,9 @@ import java.util.Observer;
 
 public class SignInUserActivity extends AppCompatActivity {
 
-    private final static String TAG = "THEKIDS::";
+    private final static String TAG = "TheKids.SignInUserActiv";
     private Auth mAuth;
+    private Utils mUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +38,7 @@ public class SignInUserActivity extends AppCompatActivity {
                     }
                 });
 
-
+        mUtils = Utils.getInstance();
         mAuth = Auth.getInstance();
         signInFacebookUser();
 
@@ -64,17 +66,29 @@ public class SignInUserActivity extends AppCompatActivity {
     }
 
 
+
     private void signInFacebookUser() {
 
         //on va faire un listener sur le resultat
         try {
             //
-            mAuth.signInFacebookUser(SignInUserActivity.this);
+            mAuth.initFacebookLogin(SignInUserActivity.this);
             mAuth.deleteObservers();
             mAuth.addObserver(new Observer() {
                 public void update(Observable obj, Object arg) {
-                    Log.w(TAG, arg.toString());
-                    userFacebookSignInFinished();
+                    Log.w(TAG, "mAuth.update: " + arg);
+                    switch ((int)arg){
+                        case Const.notif.TYPE_NOTIF_LOADING:
+                            mUtils.showProgressDialog(SignInUserActivity.this);
+                            break;
+                        case Const.notif.TYPE_NOTIF_SIGNED:
+                            mUtils.hideProgressDialog();
+                            userFacebookSignInFinished();
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
             });
 
