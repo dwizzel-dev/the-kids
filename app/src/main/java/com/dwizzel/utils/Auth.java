@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.dwizzel.Const;
-import com.dwizzel.thekids.ObserverObject;
+import com.dwizzel.models.NotifObjectObserver;
 import com.facebook.AccessToken;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -27,9 +27,10 @@ public class Auth extends Observable {
     private static final String TAG = "TheKids.Auth";
     private static Auth sInst;
     private static FirebaseAuth sFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
+    private static FirebaseUser sFirebaseUser;
     private static Utils sUtils;
-    private FacebookLogin mFacebookLogin;
+    private FacebookLogin sFacebookLogin;
+    private static int iCount = 0;
 
 
     private Auth() {
@@ -46,33 +47,41 @@ public class Auth extends Observable {
                 sFirebaseAuth = FirebaseAuth.getInstance();
             }
         }
+        Log.w(TAG, "count:" + iCount++);
         return sInst;
     }
 
     public String getUserLoginName() {
-        if (mFirebaseUser != null) {
-            return mFirebaseUser.getEmail();
+        if (sFirebaseUser != null) {
+            return sFirebaseUser.getEmail();
         }
         /*
-        if (mFirebaseUser != null) {
+        if (sFirebaseUser != null) {
             //si firebase user
             Log.w(TAG, "getUserLoginName: firebase");
-            return mFirebaseUser.getEmail();
-        } else if (mFacebookLogin != null) {
+            return sFirebaseUser.getEmail();
+        } else if (sFacebookLogin != null) {
             //si facebook user
             Log.w(TAG, "getUserLoginName: facebook");
-            return mFacebookLogin.getUserLoginName();
+            return sFacebookLogin.getUserLoginName();
         }
         */
         return "...";
+    }
+
+    public String getUserID() throws Exception{
+        if (sFirebaseUser != null) {
+            return sFirebaseUser.getUid();
+        }
+        throw new Exception("no uid");
     }
 
 
     public boolean isSignedIn() {
         //check via le firebase si on est logue ou pas
         if (sFirebaseAuth != null) {
-            mFirebaseUser = sFirebaseAuth.getCurrentUser();
-            if (mFirebaseUser != null) {
+            sFirebaseUser = sFirebaseAuth.getCurrentUser();
+            if (sFirebaseUser != null) {
                 Log.w(TAG, "isSignedIn: firebase");
                 return true;
             }
@@ -85,17 +94,17 @@ public class Auth extends Observable {
     public void signOut() {
         Log.w(TAG, "signOut");
 
-        if(mFacebookLogin == null){
-            mFacebookLogin = new FacebookLogin();
-            mFacebookLogin.logOut();
+        if(sFacebookLogin == null){
+            sFacebookLogin = new FacebookLogin();
+            sFacebookLogin.logOut();
         }
         if (sFirebaseAuth == null){
             sFirebaseAuth = FirebaseAuth.getInstance();
         }
         try {
-            mFacebookLogin.logOut();
+            sFacebookLogin.logOut();
             sFirebaseAuth.signOut();
-            mFirebaseUser = null;
+            sFirebaseUser = null;
         } catch (Exception e) {
             //
         }
@@ -121,15 +130,15 @@ public class Auth extends Observable {
                                 Log.w(TAG, "createUserWithEmailAndPassword.onComplete");
                                 if (task.isSuccessful()) {
                                     //on va chercher les infos du user
-                                    mFirebaseUser = sFirebaseAuth.getCurrentUser();
+                                    sFirebaseUser = sFirebaseAuth.getCurrentUser();
                                 } else {
-                                    Log.w(TAG, "createUserWithEmailAndPassword: failure", task.getException());
+                                    Log.w(TAG, "createUserWithEmailAndPassword.exception: ", task.getException());
                                 }
                             }
                         });
             }
         } catch (Exception e) {
-            Log.w(TAG, "createUser exception: ", e);
+            Log.w(TAG, "createUser.exception: ", e);
             throw new Exception("no internet connection");
         }
 
@@ -153,15 +162,15 @@ public class Auth extends Observable {
                                 Log.w(TAG, "signInWithEmailAndPassword.onComplete");
                                 if (task.isSuccessful()) {
                                     //on va chercher les infos du user
-                                    mFirebaseUser = sFirebaseAuth.getCurrentUser();
+                                    sFirebaseUser = sFirebaseAuth.getCurrentUser();
                                 } else {
-                                    Log.w(TAG, "signInWithEmailAndPassword: failure", task.getException());
+                                    Log.w(TAG, "signInWithEmailAndPassword.exception", task.getException());
                                 }
                             }
                         });
             }
         } catch (Exception e) {
-            Log.w(TAG, "signInUser exception: ", e);
+            Log.w(TAG, "signInUser.exception: ", e);
             throw new Exception("no internet connection");
         }
 
@@ -175,7 +184,7 @@ public class Auth extends Observable {
                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
 
                     private void notifyParent(Object arg){
-                        Log.d(TAG, "notifyParent:" + arg);
+                        Log.w(TAG, "notifyParent:" + arg);
                         setChanged();
                         notifyObservers(arg);
                     }
@@ -184,8 +193,8 @@ public class Auth extends Observable {
                     public void onComplete (@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()){
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential: success");
-                            mFirebaseUser = sFirebaseAuth.getCurrentUser();
+                            Log.w(TAG, "signInWithCredential: success");
+                            sFirebaseUser = sFirebaseAuth.getCurrentUser();
                             notifyParent(Const.notif.TYPE_NOTIF_SIGNED);
 
                         } else {
@@ -207,25 +216,25 @@ public class Auth extends Observable {
             if (!isConnected) {
                 throw new Exception("no internet connection");
             }else{
-                if (mFacebookLogin == null) {
-                    mFacebookLogin = new FacebookLogin();
+                if (sFacebookLogin == null) {
+                    sFacebookLogin = new FacebookLogin();
                 }
-                mFacebookLogin.setFacebookLogin(activity);
+                sFacebookLogin.setFacebookLogin(activity);
                 //on met un seul observer
-                mFacebookLogin.deleteObservers();
+                sFacebookLogin.deleteObservers();
                 //on creer un observer sur le login de facebook
-                mFacebookLogin.addObserver(new Observer() {
+                sFacebookLogin.addObserver(new Observer() {
 
                     private void notifyParent(Object arg){
-                        Log.d(TAG, "notifyParent:" + arg);
+                        Log.w(TAG, "notifyParent:" + arg);
                         setChanged();
                         notifyObservers(arg);
                     }
 
                     // notifier le observer qui a besoin du nom pour afficher un Toast
                     public void update(Observable obj, Object arg) {
-                        Log.w(TAG, "mFacebookLogin.update:" + arg);
-                        ObserverObject observerObject = (ObserverObject)arg;
+                        Log.w(TAG, "sFacebookLogin.update:" + arg);
+                        NotifObjectObserver observerObject = (NotifObjectObserver)arg;
                         if(observerObject != null) {
                             switch (observerObject.getType()) {
                                 case Const.notif.TYPE_NOTIF_LOGIN:
@@ -239,7 +248,7 @@ public class Auth extends Observable {
                                     }
                                     break;
                                 case Const.notif.TYPE_NOTIF_PROFILE:
-                                    Log.w(TAG, "mFacebookLogin.update: " + "TYPE_NOTIF_PROFILE");
+                                    Log.w(TAG, "sFacebookLogin.update: " + "TYPE_NOTIF_PROFILE");
                                     break;
                                 default:
                                     break;
@@ -259,13 +268,13 @@ public class Auth extends Observable {
     }
 
     public void facebookCallBackManager(int requestCode, int resultCode, Intent data){
-        if(mFacebookLogin != null) {
-            mFacebookLogin.facebookCallBackManager(requestCode, resultCode, data);
+        if(sFacebookLogin != null) {
+            sFacebookLogin.facebookCallBackManager(requestCode, resultCode, data);
         }
     }
 
     public void disableFacebookButton(){
-        mFacebookLogin.disableFacebookButton();
+        sFacebookLogin.disableFacebookButton();
 
     }
 

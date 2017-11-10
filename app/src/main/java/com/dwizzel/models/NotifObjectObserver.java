@@ -1,4 +1,4 @@
-package com.dwizzel.thekids;
+package com.dwizzel.models;
 
 import android.app.Activity;
 
@@ -9,13 +9,13 @@ import com.facebook.AccessToken;
  * Created by Dwizzel on 07/11/2017.
  */
 
-public class ObserverObject extends Object{
+public class NotifObjectObserver extends Object{
 
     private int type;
     private AccessToken token;
     private Activity activity;
 
-    public ObserverObject(int type, AccessToken token, Activity activity){
+    public NotifObjectObserver(int type, AccessToken token, Activity activity){
         this.type = type;
         this.token = token;
         this.activity = activity;

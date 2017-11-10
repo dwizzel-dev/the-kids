@@ -16,12 +16,12 @@ import com.dwizzel.utils.Utils;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    private Auth mAuth;
+    private static Auth sAuth;
+    private boolean bLaunched = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        checkIfLoguedIn();
     }
 
     @Override
@@ -31,26 +31,31 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private void checkIfLoguedIn(){
-        if (mAuth == null) {
-            mAuth = Auth.getInstance();
+        if (sAuth == null) {
+            sAuth = Auth.getInstance();
         }
-        if(!mAuth.isSignedIn()) {
+        if(!sAuth.isSignedIn()) {
             //le login page
             Intent intent = new Intent(this, LoginActivity.class);
             //start activity de login car pas encore logue
             //start activity and clear the backStack
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }else {
-            startMainActivity();
+            //sinon repart toujours l'acitivity
+            if(!bLaunched) {
+                bLaunched = true;
+                startMainActivity();
+            }
         }
     }
 
     protected abstract void startMainActivity();
 
     protected void signOutUser(){
-        if(mAuth != null){
-            mAuth.signOut();
+        if(sAuth != null){
+            sAuth.signOut();
         }
         //
         Utils utils = Utils.getInstance();

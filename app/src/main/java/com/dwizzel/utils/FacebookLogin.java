@@ -5,12 +5,12 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 
-import com.dwizzel.thekids.ObserverObject;
+import com.dwizzel.models.NotifObjectObserver;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.ProfileTracker;
+//import com.facebook.ProfileTracker;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -32,7 +32,7 @@ class FacebookLogin extends Observable {
     private static final String TAG = "TheKids.FacebookLogin";
 
     private CallbackManager mFacebookCallbackManager;
-    private ProfileTracker mProfileTracker;
+    //private ProfileTracker mProfileTracker;
     private Activity mActivity;
 
     /*
@@ -69,13 +69,13 @@ class FacebookLogin extends Observable {
 
         switch (type){
             case Const.notif.TYPE_NOTIF_LOGIN:
-                notifyObservers(new ObserverObject(type, token, mActivity));
+                notifyObservers(new NotifObjectObserver(type, token, mActivity));
                 break;
             case Const.notif.TYPE_NOTIF_PROFILE:
-                notifyObservers(new ObserverObject(type, token, mActivity));
+                notifyObservers(new NotifObjectObserver(type, token, mActivity));
                 break;
             default:
-                notifyObservers(new ObserverObject(type, token, mActivity));
+                notifyObservers(new NotifObjectObserver(type, token, mActivity));
                 break;
         }
 
@@ -152,8 +152,8 @@ class FacebookLogin extends Observable {
                         Log.w(TAG, "mFacebookCallbackManager.onCancel");
                     }
                     @Override
-                    public void onError(FacebookException exception) {
-                        Log.w(TAG, "mFacebookCallbackManager.onError");
+                    public void onError(FacebookException e) {
+                        Log.w(TAG, "mFacebookCallbackManager.execption:", e);
                     }
 
                 });

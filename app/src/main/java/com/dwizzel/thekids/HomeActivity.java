@@ -4,12 +4,16 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.dwizzel.utils.Auth;
+import com.dwizzel.utils.FirestoreData;
 
 public class HomeActivity extends BaseActivity {
+
+    private static final String TAG = "TheKids.HomeActivity";
 
     @Override
     protected void startMainActivity(){
@@ -17,10 +21,18 @@ public class HomeActivity extends BaseActivity {
         setTitle(R.string.main_title);
         //la action bar
         createActionBar();
-
-
+        //check the user infos if some
+        checkUserInfos();
     }
 
+    private void checkUserInfos(){
+        FirestoreData firestoreData = FirestoreData.getInstance();
+        try {
+            firestoreData.getUserinfos();
+        }catch (Exception e){
+            Log.w(TAG, "checkUserInfos.exception: ", e);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

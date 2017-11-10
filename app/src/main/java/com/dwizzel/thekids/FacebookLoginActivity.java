@@ -25,33 +25,33 @@ import java.util.Observer;
 public class FacebookLoginActivity extends AppCompatActivity {
 
     private final static String TAG = "TheKids.FacebookLoginAc";
-    private Auth mAuth;
-    private Utils mUtils;
+    private static Auth sAuth;
+    private static Utils sUtils;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //to receive the result from the facebook callback
-        mAuth.facebookCallBackManager(requestCode, resultCode, data);
+        sAuth.facebookCallBackManager(requestCode, resultCode, data);
     }
 
     public void setInstance(){
-        mUtils = Utils.getInstance();
-        mAuth = Auth.getInstance();
+        sUtils = Utils.getInstance();
+        sAuth = Auth.getInstance();
         signInFacebookUser();
     }
 
 
     private void userWaitForFirebase(){
         //on enleve les boutons de sign in
-        mAuth.disableFacebookButton();
-        mUtils.showProgressDialog(FacebookLoginActivity.this);
+        sAuth.disableFacebookButton();
+        sUtils.showProgressDialog(FacebookLoginActivity.this);
 
     }
 
 
     private void userSignInFinished(){
-        mUtils.hideProgressDialog();
+        sUtils.hideProgressDialog();
         //on affiche qu'il est logue
         Auth auth = Auth.getInstance();
         Utils utils = Utils.getInstance();
@@ -72,11 +72,11 @@ public class FacebookLoginActivity extends AppCompatActivity {
         //on va faire un listener sur le resultat
         try {
             //
-            mAuth.initFacebookLogin(FacebookLoginActivity.this);
-            mAuth.deleteObservers();
-            mAuth.addObserver(new Observer() {
+            sAuth.initFacebookLogin(FacebookLoginActivity.this);
+            sAuth.deleteObservers();
+            sAuth.addObserver(new Observer() {
                 public void update(Observable obj, Object arg) {
-                    Log.w(TAG, "mAuth.update: " + arg);
+                    Log.w(TAG, "sAuth.update: " + arg);
                     switch ((int)arg){
                         case Const.notif.TYPE_NOTIF_LOADING:
                             userWaitForFirebase();

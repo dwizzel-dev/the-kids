@@ -8,6 +8,8 @@ import android.widget.Button;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private final static String TAG = "TheKids.LoginActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

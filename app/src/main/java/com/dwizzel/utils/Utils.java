@@ -24,6 +24,7 @@ public class Utils {
     private final static String TAG = "TheKids.Utils";
     private static Utils sInst = null;
     private ProgressDialog mProgressDialog;
+    private static int iCount = 0;
 
     private Utils() {
         // Required empty public constructor
@@ -33,6 +34,7 @@ public class Utils {
         if(sInst == null) {
             sInst = new Utils();
         }
+        Log.w(TAG, "count:" + iCount++);
         return sInst;
     }
 
@@ -46,7 +48,6 @@ public class Utils {
         Log.w(TAG, "checkConnectivity");
         boolean bConnected = false;
         if(context != null) {
-            // TODO: check ;es droits de verification de la connection
             if(hasPermission(context, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
                 try {
                     ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -56,6 +57,7 @@ public class Utils {
                     }
                 }catch(Exception e) {
                     //TODO: handle the errors
+                    Log.w(TAG, "checkConnectivity.exception: ", e);
                 }
             }
         }
@@ -69,6 +71,7 @@ public class Utils {
                 Toast.makeText(activity, msgId, Toast.LENGTH_SHORT).show();
             }catch(Exception e){
                 //TODO: handle the errors
+                Log.w(TAG, "showToastMsg[0].exception: ", e);
             }
         }
     }
@@ -80,6 +83,7 @@ public class Utils {
                 Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
             }catch(Exception e){
                 //TODO: handle the errors
+                Log.w(TAG, "showToastMsg[1].exception: ", e);
             }
         }
     }
