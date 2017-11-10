@@ -21,12 +21,25 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAuth = Auth.getInstance();
-        //start la activity principale de la class qui extends
+        checkIfLoguedIn();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkIfLoguedIn();
+    }
+
+    private void checkIfLoguedIn(){
+        if (mAuth == null) {
+            mAuth = Auth.getInstance();
+        }
         if(!mAuth.isSignedIn()) {
             //le login page
             Intent intent = new Intent(this, LoginActivity.class);
             //start activity de login car pas encore logue
+            //start activity and clear the backStack
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }else {
             startMainActivity();

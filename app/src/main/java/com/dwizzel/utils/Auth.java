@@ -25,28 +25,25 @@ import java.util.Observer;
 public class Auth extends Observable {
 
     private static final String TAG = "TheKids.Auth";
-    private static Auth sInst = null;
-    private FirebaseAuth mFirebaseAuth;
+    private static Auth sInst;
+    private static FirebaseAuth sFirebaseAuth;
     private FirebaseUser mFirebaseUser;
-    private Utils mUtils;
+    private static Utils sUtils;
     private FacebookLogin mFacebookLogin;
 
 
     private Auth() {
         // Required empty public constructor
-        if (mUtils == null) {
-            mUtils = Utils.getInstance();
-        }
-        // Required empty public constructor
-        if (mFirebaseAuth == null) {
-            mFirebaseAuth = FirebaseAuth.getInstance();
-        }
+
     }
 
     public static synchronized Auth getInstance() {
         if (sInst == null) {
             synchronized (Auth.class) {
                 sInst = new Auth();
+                sUtils = Utils.getInstance();
+                // Required empty public constructor
+                sFirebaseAuth = FirebaseAuth.getInstance();
             }
         }
         return sInst;
@@ -73,8 +70,8 @@ public class Auth extends Observable {
 
     public boolean isSignedIn() {
         //check via le firebase si on est logue ou pas
-        if (mFirebaseAuth != null) {
-            mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        if (sFirebaseAuth != null) {
+            mFirebaseUser = sFirebaseAuth.getCurrentUser();
             if (mFirebaseUser != null) {
                 Log.w(TAG, "isSignedIn: firebase");
                 return true;
@@ -92,12 +89,12 @@ public class Auth extends Observable {
             mFacebookLogin = new FacebookLogin();
             mFacebookLogin.logOut();
         }
-        if (mFirebaseAuth == null){
-            mFirebaseAuth = FirebaseAuth.getInstance();
+        if (sFirebaseAuth == null){
+            sFirebaseAuth = FirebaseAuth.getInstance();
         }
         try {
             mFacebookLogin.logOut();
-            mFirebaseAuth.signOut();
+            sFirebaseAuth.signOut();
             mFirebaseUser = null;
         } catch (Exception e) {
             //
@@ -112,19 +109,19 @@ public class Auth extends Observable {
 
         try {
             //on va checker si est connecte au net avant
-            boolean isConnected = mUtils.checkConnectivity(activity.getApplicationContext());
+            boolean isConnected = sUtils.checkConnectivity(activity.getApplicationContext());
             //avertir si pas connecte
             if (!isConnected) {
                 throw new Exception("no internet connection");
             } else {
-                return mFirebaseAuth.createUserWithEmailAndPassword(email, psw)
+                return sFirebaseAuth.createUserWithEmailAndPassword(email, psw)
                         .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 Log.w(TAG, "createUserWithEmailAndPassword.onComplete");
                                 if (task.isSuccessful()) {
                                     //on va chercher les infos du user
-                                    mFirebaseUser = mFirebaseAuth.getCurrentUser();
+                                    mFirebaseUser = sFirebaseAuth.getCurrentUser();
                                 } else {
                                     Log.w(TAG, "createUserWithEmailAndPassword: failure", task.getException());
                                 }
@@ -144,19 +141,19 @@ public class Auth extends Observable {
 
         try {
             //on va checker si est connecte au net avant
-            boolean isConnected = mUtils.checkConnectivity(activity.getApplicationContext());
+            boolean isConnected = sUtils.checkConnectivity(activity.getApplicationContext());
             //avertir si pas connecte
             if (!isConnected) {
                 throw new Exception("no internet connection");
             } else {
-                return mFirebaseAuth.signInWithEmailAndPassword(email, psw)
+                return sFirebaseAuth.signInWithEmailAndPassword(email, psw)
                         .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 Log.w(TAG, "signInWithEmailAndPassword.onComplete");
                                 if (task.isSuccessful()) {
                                     //on va chercher les infos du user
-                                    mFirebaseUser = mFirebaseAuth.getCurrentUser();
+                                    mFirebaseUser = sFirebaseAuth.getCurrentUser();
                                 } else {
                                     Log.w(TAG, "signInWithEmailAndPassword: failure", task.getException());
                                 }
@@ -174,7 +171,7 @@ public class Auth extends Observable {
 
         Log.w(TAG, "signInCredential");
 
-        mFirebaseAuth.signInWithCredential(FacebookAuthProvider.getCredential(accessToken.getToken()))
+        sFirebaseAuth.signInWithCredential(FacebookAuthProvider.getCredential(accessToken.getToken()))
                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
 
                     private void notifyParent(Object arg){
@@ -188,7 +185,7 @@ public class Auth extends Observable {
                         if (task.isSuccessful()){
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential: success");
-                            mFirebaseUser = mFirebaseAuth.getCurrentUser();
+                            mFirebaseUser = sFirebaseAuth.getCurrentUser();
                             notifyParent(Const.notif.TYPE_NOTIF_SIGNED);
 
                         } else {
@@ -205,7 +202,7 @@ public class Auth extends Observable {
 
         try {
             //on va checker si est connecte au net avant
-            boolean isConnected = mUtils.checkConnectivity(activity.getApplicationContext());
+            boolean isConnected = sUtils.checkConnectivity(activity.getApplicationContext());
             //avertir si pas connecte
             if (!isConnected) {
                 throw new Exception("no internet connection");

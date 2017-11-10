@@ -29,11 +29,9 @@ public class Utils {
         // Required empty public constructor
     }
 
-    public static synchronized Utils getInstance() {
+    public static Utils getInstance() {
         if(sInst == null) {
-            synchronized (Utils.class) {
-                sInst = new Utils();
-            }
+            sInst = new Utils();
         }
         return sInst;
     }

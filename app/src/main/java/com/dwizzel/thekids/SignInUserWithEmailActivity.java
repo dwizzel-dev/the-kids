@@ -114,7 +114,8 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
                 getResources().getString(R.string.toast_connected_as, loginName));
         //on va a activity principal
         Intent intent = new Intent(SignInUserWithEmailActivity.this, HomeActivity.class);
-        //start activity
+        //start activity and clear the backStack
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 
