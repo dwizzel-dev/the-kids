@@ -14,7 +14,7 @@ import com.dwizzel.utils.Utils;
  * Created by Dwizzel on 30/10/2017.
  */
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     private Auth mAuth;
 
@@ -23,24 +23,17 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mAuth = Auth.getInstance();
         //start la activity principale de la class qui extends
-        startMainActivity();
-    }
-
-    @Override
-    protected void onStart(){
-        super.onStart();
         if(!mAuth.isSignedIn()) {
             //le login page
             Intent intent = new Intent(this, LoginActivity.class);
             //start activity de login car pas encore logue
             startActivity(intent);
+        }else {
+            startMainActivity();
         }
-
     }
 
-    protected void startMainActivity() {
-        //will be overrided by other activities
-    }
+    protected abstract void startMainActivity();
 
     protected void signOutUser(){
         if(mAuth != null){

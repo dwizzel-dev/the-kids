@@ -11,13 +11,13 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     protected void startMainActivity(){
-        super.startMainActivity();
         setContentView(R.layout.activity_home);
         setTitle(R.string.main_title);
         //la action bar
         createActionBar();
 
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

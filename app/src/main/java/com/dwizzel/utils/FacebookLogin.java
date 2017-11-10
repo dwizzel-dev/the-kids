@@ -3,6 +3,7 @@ package com.dwizzel.utils;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
+import android.view.View;
 
 import com.dwizzel.thekids.ObserverObject;
 import com.facebook.AccessToken;
@@ -34,7 +35,7 @@ class FacebookLogin extends Observable {
     private ProfileTracker mProfileTracker;
     private Activity mActivity;
 
-
+    /*
     protected boolean isSignedIn(){
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         //
@@ -45,6 +46,7 @@ class FacebookLogin extends Observable {
         Log.w(TAG, "isSignedIn: false");
         return false;
     }
+    */
 
     protected void logOut(){
         Log.d(TAG, "logOut");
@@ -84,6 +86,8 @@ class FacebookLogin extends Observable {
         //on va setter le firebase
         notifyParent(Const.notif.TYPE_NOTIF_LOGIN, accessToken);
         /*
+        //vu que l'on est avec firebase c'est google qui va communiquer avec facebook
+        //pour connaitre le email
         //on cherche les infos du user
         Profile profile = Profile.getCurrentProfile();
         if(profile == null){
@@ -121,6 +125,11 @@ class FacebookLogin extends Observable {
         mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    protected void disableFacebookButton(){
+        LoginButton loginButton = mActivity.findViewById(R.id.facebook_button);
+        loginButton.setVisibility(View.INVISIBLE);
+    }
+
     protected void setFacebookLogin(Activity activity){
         Log.w(TAG, "setFacebookLogin");
         //
@@ -137,7 +146,6 @@ class FacebookLogin extends Observable {
                     public void onSuccess(LoginResult loginResult){
                         Log.w(TAG, "mFacebookCallbackManager.onSuccess");
                         handleFacebookResult(loginResult.getAccessToken());
-                        //notifyParent(Const.TYPE_NOTIF_LOGIN, loginResult.getAccessToken());
                     }
                     @Override
                     public void onCancel() {

@@ -267,4 +267,9 @@ public class Auth extends Observable {
         }
     }
 
+    public void disableFacebookButton(){
+        mFacebookLogin.disableFacebookButton();
+
+    }
+
 }

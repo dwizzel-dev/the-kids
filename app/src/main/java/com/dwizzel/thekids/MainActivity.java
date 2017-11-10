@@ -6,7 +6,6 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void startMainActivity(){
-        super.startMainActivity();
         setContentView(R.layout.activity_main);
         setTitle(R.string.main_title);
     }
