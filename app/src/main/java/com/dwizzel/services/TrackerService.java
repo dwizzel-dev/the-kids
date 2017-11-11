@@ -98,8 +98,10 @@ public class TrackerService extends Service{
                 public void run() {
                     try {
                         while (true) {
-                            Thread.sleep(5000);
+                            Thread.sleep(1000);
                             mTimer++;
+                            //mBinder.trackCounter();
+
                             Log.w(TAG, "run.counter[" + mTimer + "]: " + mLoguedIn);
                         }
                     }catch (InterruptedException ie){
@@ -114,32 +116,47 @@ public class TrackerService extends Service{
 
     // TESTING AIDL SERVICE WITH IPC call
     private final ITrackerService.Stub mBinder = new ITrackerService.Stub() {
+
+        private final static String TAG = "TheKids.ITrackerService";
+        private Thread mThCounter;
+        private ITrackerServiceCallback mCallback = null;
+
         public long getCounter(){
             return mTimer;
         }
         public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) {
             // Does nothing
         }
-        public void trackCounter(ITrackerServiceCallback callback) throws RemoteException{
-            callback.handleResponse(mTimer);
+        public void untrackCounter(final ITrackerServiceCallback callback){
+            mThCounter.interrupt();
+        }
+
+        public void trackCounter(final ITrackerServiceCallback callback) throws RemoteException{
+
+            mCallback = callback;
+
+            mThCounter = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while(true) {
+                            Thread.sleep(10000);
+                            try {
+                                mCallback.handleResponse(mTimer);
+                            } catch (RemoteException re) {
+                                Log.w(TAG, "run.handleResponse: ", re);
+                            }
+                        }
+                    }catch (InterruptedException ie){
+                        Log.w(TAG, "run.exception: ", ie);
+                    }
+                }
+            });
+            mThCounter.start();
         }
 
     };
 
-
-    // TESTING AIDL SERVICE WITH IPC call
-    /*
-    private final ITrackerService.Stub mBinder = new ITrackerService.Stub() {
-        public long getCounter(){
-            return mTimer;
-        }
-        public void trackCounter(ITrackerServiceCallback callback){
-            callback.handleResponse(mTimer);
-        }
-
-
-    };
-    */
 
 
 }

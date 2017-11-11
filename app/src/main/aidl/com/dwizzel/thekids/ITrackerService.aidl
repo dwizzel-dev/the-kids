@@ -19,5 +19,8 @@ interface ITrackerService {
     //constantly track the counter for each minutes
     oneway void trackCounter(ITrackerServiceCallback callback);
 
+    //constantly track the counter for each minutes
+    oneway void untrackCounter(ITrackerServiceCallback callback);
+
 
 }

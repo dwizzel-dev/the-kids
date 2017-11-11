@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -35,6 +36,13 @@ public abstract class BaseActivity extends AppCompatActivity {
             Log.w(TAGBASE, "onServiceConnected");
             mServiceBound = true;
             mTrackerService = ITrackerService.Stub.asInterface(service);
+            try {
+                mTrackerService.trackCounter(mCallback);
+            } catch (RemoteException re) {
+                Log.w(TAGBASE, "trackCounter.exception: ", re);
+            }
+
+
         }
 
         @Override
@@ -42,6 +50,12 @@ public abstract class BaseActivity extends AppCompatActivity {
             Log.w(TAGBASE, "onServiceDisconnected");
             mTrackerService = null;
             mServiceBound = false;
+        }
+    };
+
+    private ITrackerServiceCallback.Stub mCallback = new ITrackerServiceCallback.Stub() {
+        public void handleResponse(long counter){
+            Log.d(TAGBASE, String.format("thread counter: %d", counter));
         }
     };
 
@@ -86,6 +100,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         Log.w(TAGBASE, "onDestroy[0]");
         super.onDestroy();
         if(mTrackerService!= null){
+            try {
+                mTrackerService.untrackCounter(mCallback);
+            }catch(RemoteException re){
+                Log.w(TAGBASE, "onDestroy.mTrackerService.untrackCounter.exception: ", re);
+            }
             unbindService(mConnection);
             Log.w(TAGBASE, "onDestroy.unbindService");
         }
