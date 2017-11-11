@@ -29,7 +29,7 @@ public class Auth extends Observable {
     private static FirebaseAuth sFirebaseAuth;
     private static FirebaseUser sFirebaseUser;
     private static Utils sUtils;
-    private FacebookLogin sFacebookLogin;
+    private FacebookLogin mFacebookLogin;
     private static int iCount = 0;
 
 
@@ -60,10 +60,10 @@ public class Auth extends Observable {
             //si firebase user
             Log.w(TAG, "getUserLoginName: firebase");
             return sFirebaseUser.getEmail();
-        } else if (sFacebookLogin != null) {
+        } else if (mFacebookLogin != null) {
             //si facebook user
             Log.w(TAG, "getUserLoginName: facebook");
-            return sFacebookLogin.getUserLoginName();
+            return mFacebookLogin.getUserLoginName();
         }
         */
         return "...";
@@ -94,15 +94,15 @@ public class Auth extends Observable {
     public void signOut() {
         Log.w(TAG, "signOut");
 
-        if(sFacebookLogin == null){
-            sFacebookLogin = new FacebookLogin();
-            sFacebookLogin.logOut();
+        if(mFacebookLogin == null){
+            mFacebookLogin = new FacebookLogin();
+            mFacebookLogin.logOut();
         }
         if (sFirebaseAuth == null){
             sFirebaseAuth = FirebaseAuth.getInstance();
         }
         try {
-            sFacebookLogin.logOut();
+            mFacebookLogin.logOut();
             sFirebaseAuth.signOut();
             sFirebaseUser = null;
         } catch (Exception e) {
@@ -216,14 +216,14 @@ public class Auth extends Observable {
             if (!isConnected) {
                 throw new Exception("no internet connection");
             }else{
-                if (sFacebookLogin == null) {
-                    sFacebookLogin = new FacebookLogin();
+                if (mFacebookLogin == null) {
+                    mFacebookLogin = new FacebookLogin();
                 }
-                sFacebookLogin.setFacebookLogin(activity);
+                mFacebookLogin.setFacebookLogin(activity);
                 //on met un seul observer
-                sFacebookLogin.deleteObservers();
+                mFacebookLogin.deleteObservers();
                 //on creer un observer sur le login de facebook
-                sFacebookLogin.addObserver(new Observer() {
+                mFacebookLogin.addObserver(new Observer() {
 
                     private void notifyParent(Object arg){
                         Log.w(TAG, "notifyParent:" + arg);
@@ -233,7 +233,7 @@ public class Auth extends Observable {
 
                     // notifier le observer qui a besoin du nom pour afficher un Toast
                     public void update(Observable obj, Object arg) {
-                        Log.w(TAG, "sFacebookLogin.update:" + arg);
+                        Log.w(TAG, "mFacebookLogin.update:" + arg);
                         NotifObjectObserver observerObject = (NotifObjectObserver)arg;
                         if(observerObject != null) {
                             switch (observerObject.getType()) {
@@ -248,7 +248,7 @@ public class Auth extends Observable {
                                     }
                                     break;
                                 case Const.notif.TYPE_NOTIF_PROFILE:
-                                    Log.w(TAG, "sFacebookLogin.update: " + "TYPE_NOTIF_PROFILE");
+                                    Log.w(TAG, "mFacebookLogin.update: " + "TYPE_NOTIF_PROFILE");
                                     break;
                                 default:
                                     break;
@@ -268,13 +268,13 @@ public class Auth extends Observable {
     }
 
     public void facebookCallBackManager(int requestCode, int resultCode, Intent data){
-        if(sFacebookLogin != null) {
-            sFacebookLogin.facebookCallBackManager(requestCode, resultCode, data);
+        if(mFacebookLogin != null) {
+            mFacebookLogin.facebookCallBackManager(requestCode, resultCode, data);
         }
     }
 
     public void disableFacebookButton(){
-        sFacebookLogin.disableFacebookButton();
+        mFacebookLogin.disableFacebookButton();
 
     }
 

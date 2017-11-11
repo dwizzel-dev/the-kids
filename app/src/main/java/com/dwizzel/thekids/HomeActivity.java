@@ -4,9 +4,11 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.dwizzel.utils.Auth;
 import com.dwizzel.utils.FirestoreData;
@@ -16,13 +18,23 @@ public class HomeActivity extends BaseActivity {
     private static final String TAG = "TheKids.HomeActivity";
 
     @Override
-    protected void startMainActivity(){
+    protected void startMainActivity(boolean bFetchUserData){
         setContentView(R.layout.activity_home);
         setTitle(R.string.main_title);
-        //la action bar
+        setContent();
         createActionBar();
-        //check the user infos if some
-        checkUserInfos();
+        if(bFetchUserData) {
+            checkUserInfos();
+        }
+    }
+
+    private void setContent(){
+        TextView textView1 = findViewById(R.id.textViewHomeDescription1);
+        textView1.setText(Html.fromHtml(getResources().getString(R.string.home_description_1)));
+        TextView textView2 = findViewById(R.id.textViewHomeDescription2);
+        textView2.setText(Html.fromHtml(getResources().getString(R.string.home_description_2)));
+
+
     }
 
     private void checkUserInfos(){

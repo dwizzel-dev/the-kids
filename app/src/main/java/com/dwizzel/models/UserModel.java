@@ -9,7 +9,6 @@ public class UserModel {
     private String email;
     private String uid;
 
-
     public UserModel(){}
 
     public UserModel(String email, String uid) {
