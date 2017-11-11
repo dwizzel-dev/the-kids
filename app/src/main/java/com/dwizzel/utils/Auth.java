@@ -240,9 +240,11 @@ public class Auth extends Observable {
                                 case Const.notif.TYPE_NOTIF_LOGIN:
                                     //
                                     try {
+                                        //on a le ok alors on va mettre un loader
                                         notifyParent(Const.notif.TYPE_NOTIF_LOADING);
+                                        //on va se auth chez firebase
                                         signInCredential(observerObject.getActivity(), observerObject.getToken());
-                                        //on a le loader alors on va
+
                                     } catch (Exception e) {
 
                                     }

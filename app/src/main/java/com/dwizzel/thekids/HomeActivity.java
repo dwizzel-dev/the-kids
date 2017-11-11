@@ -1,16 +1,19 @@
 package com.dwizzel.thekids;
 
-import android.app.FragmentManager;
-import android.content.Intent;
+
 import android.os.Bundle;
+import android.os.DeadObjectException;
+import android.os.RemoteException;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
-import com.dwizzel.utils.Auth;
+import com.dwizzel.utils.Utils;
 import com.dwizzel.utils.FirestoreData;
 
 public class HomeActivity extends BaseActivity {
@@ -18,10 +21,17 @@ public class HomeActivity extends BaseActivity {
     private static final String TAG = "TheKids.HomeActivity";
 
     @Override
+    protected void onCreate(Bundle savedInstanceState){
+        Log.w(TAG, "onCreate");
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     protected void startMainActivity(boolean bFetchUserData){
         setContentView(R.layout.activity_home);
         setTitle(R.string.main_title);
         setContent();
+        setButton();
         createActionBar();
         if(bFetchUserData) {
             checkUserInfos();
@@ -35,6 +45,28 @@ public class HomeActivity extends BaseActivity {
         textView2.setText(Html.fromHtml(getResources().getString(R.string.home_description_2)));
 
 
+    }
+
+    private void setButton(){
+        Button buttWatchOverMe = findViewById(R.id.buttWatchOverSomeone);
+        //butt create
+        buttWatchOverMe.setOnClickListener(
+                new View.OnClickListener() {
+                    public void onClick(View v) {
+                        if(mTrackerService != null){
+                            try {
+                                long counter = mTrackerService.getCounter();
+                                sUtils.showToastMsg(HomeActivity.this, String.format("counter: %d", counter));
+                            }catch (DeadObjectException doe){
+                                Log.w(TAG, "mTrackerService.exception: ", doe);
+                            }catch (RemoteException re){
+                                Log.w(TAG, "mTrackerService.exception: ", re);
+                            }
+
+
+                        }
+                    }
+                });
     }
 
     private void checkUserInfos(){

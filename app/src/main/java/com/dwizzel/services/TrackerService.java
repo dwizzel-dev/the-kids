@@ -3,14 +3,18 @@ package com.dwizzel.services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.IBinder;
-import android.os.Process;
+import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.dwizzel.thekids.ITrackerService;
+import com.dwizzel.thekids.ITrackerServiceCallback;
+
+//import com.dwizzel.thekids.ITrackerService;
+//import com.dwizzel.thekids.ITrackerServiceCallback;
+
 
 
 /**
@@ -33,25 +37,6 @@ public class TrackerService extends Service{
     private static boolean mLoguedIn = false;
     private boolean mAllowRebind;
 
-    /*
-    //depends on the AndroidManifest.xml
-    //for local Binder when service run in the same process has the application
-
-    private TrackerBinder mBinder = new TrackerBinder();
-
-    public class TrackerBinder extends Binder {
-
-        TrackerBinder(){
-            Log.w(TAG, "TrackerBinder");
-        }
-
-        public void setLoguedStatus(boolean logued) {
-            Log.w(TAG, "TrackerBinder.setLoguedStatus: " + logued);
-            mLoguedIn = logued;
-        }
-    }
-    */
-
     @NonNull
     public static Intent getIntent(Context context) {
         Log.w(TAG, "getIntent");
@@ -62,11 +47,6 @@ public class TrackerService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.w(TAG, "onStartCommand");
-        /*
-        if(mTimer == 0) {
-            startTimer();
-        }
-        */
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -93,9 +73,7 @@ public class TrackerService extends Service{
         if(mTimer == 0) {
             startTimer();
         }
-
         super.onCreate();
-
     }
 
     @Override
@@ -120,12 +98,12 @@ public class TrackerService extends Service{
                 public void run() {
                     try {
                         while (true) {
-                            Thread.sleep(3000);
+                            Thread.sleep(5000);
                             mTimer++;
-                            Log.w(TAG, "Thread.counter[" + mTimer + "]: " + mLoguedIn);
+                            Log.w(TAG, "run.counter[" + mTimer + "]: " + mLoguedIn);
                         }
                     }catch (InterruptedException ie){
-                        Log.w(TAG, "Thread.run.exception: ", ie);
+                        Log.w(TAG, "run.exception: ", ie);
                     }
                 }
             });
@@ -133,18 +111,35 @@ public class TrackerService extends Service{
         }
     }
 
-    // TESTING AIDL
 
+    // TESTING AIDL SERVICE WITH IPC call
     private final ITrackerService.Stub mBinder = new ITrackerService.Stub() {
-        public int getPid(){
-            return Process.myPid();
+        public long getCounter(){
+            return mTimer;
         }
-        public void basicTypes(int anInt, long aLong, boolean aBoolean,
-                               float aFloat, double aDouble, String aString) {
+        public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) {
             // Does nothing
         }
+        public void trackCounter(ITrackerServiceCallback callback) throws RemoteException{
+            callback.handleResponse(mTimer);
+        }
+
     };
 
+
+    // TESTING AIDL SERVICE WITH IPC call
+    /*
+    private final ITrackerService.Stub mBinder = new ITrackerService.Stub() {
+        public long getCounter(){
+            return mTimer;
+        }
+        public void trackCounter(ITrackerServiceCallback callback){
+            callback.handleResponse(mTimer);
+        }
+
+
+    };
+    */
 
 
 }

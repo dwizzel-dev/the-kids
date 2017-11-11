@@ -44,7 +44,7 @@ public class FacebookLoginActivity extends AppCompatActivity {
 
     private void userWaitForFirebase(){
         //on enleve les boutons de sign in
-        sAuth.disableFacebookButton();
+        //sAuth.disableFacebookButton();
         sUtils.showProgressDialog(FacebookLoginActivity.this);
 
     }

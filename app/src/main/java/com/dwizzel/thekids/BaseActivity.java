@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -20,57 +21,54 @@ import com.dwizzel.utils.Utils;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    private static final String TAG2 = "TheKids.BaseActivity";
+    private static final String TAGBASE = "TheKids.BaseActivity";
     private static Auth sAuth;
+    protected static Utils sUtils;
     private static boolean bFetchUserData = true;
     boolean mServiceBound;
-    //private TrackerService.TrackerBinder mBinder;
 
-    ITrackerService mTrackerService = null;
+    protected ITrackerService mTrackerService = null;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.w(TAG2, "onServiceConnected");
+            Log.w(TAGBASE, "onServiceConnected");
             mServiceBound = true;
             mTrackerService = ITrackerService.Stub.asInterface(service);
-            /*
-            mBinder = (TrackerService.TrackerBinder) service;
-            //un fois connecte on set le service status
-            setServiceStatus(sAuth.isSignedIn());
-            */
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.w(TAG2, "onServiceDisconnected");
+            Log.w(TAGBASE, "onServiceDisconnected");
             mTrackerService = null;
             mServiceBound = false;
         }
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Log.w(TAG2, "onCreate");
-        super.onCreate(savedInstanceState);
-        /*
-        //start le service de base, sinon il va s'arreter des que l'apli est ferme
-        startService(TrackerService.getIntent(this));
-        //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
-        bindService(TrackerService.getIntent(this),
-                mConnection,
-                Context.BIND_AUTO_CREATE);
-        */
-        Intent intent = new Intent(this, TrackerService.class);
-        //intent.setAction(TrackerService.class.getName());
-        startService(intent);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        /*
-        bindService(TrackerService.getIntent(this),
-                mConnection,
-                Context.BIND_AUTO_CREATE);
-        */
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        Log.w(TAGBASE, "onPostCreate");
+        super.onPostCreate(savedInstanceState);
 
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Log.w(TAGBASE, "onCreate");
+        super.onCreate(savedInstanceState);
+        //le minimum requis besoi partout
+        if (sAuth == null) {
+            sAuth = Auth.getInstance();
+        }
+        if (sUtils== null) {
+            sUtils = Utils.getInstance();
+        }
+        Intent intent = new Intent(this, TrackerService.class);
+        intent.setAction(TrackerService.class.getName());
+        //si on le start pas il va s'arreter avec l'application et ne sera pas reparti par le systeme
+        startService(intent);
+        //bind sur le sevice
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
 
@@ -78,41 +76,30 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        Log.w(TAG2, "onStart");
+        Log.w(TAGBASE, "onStart");
         super.onStart();
         checkIfLoguedIn();
     }
 
     @Override
     protected void onDestroy(){
-        Log.w(TAG2, "onDestroy[0]");
+        Log.w(TAGBASE, "onDestroy[0]");
         super.onDestroy();
         if(mTrackerService!= null){
             unbindService(mConnection);
-            Log.w(TAG2, "onDestroy.unbindService");
+            Log.w(TAGBASE, "onDestroy.unbindService");
         }
-        /*
-        //TODO: enlver pour garder le service vivant en prod
-        if(mBinder != null) {
-            unbindService(mConnection);
-            Log.w(TAG2, "onDestroy.unbindService");
-        }
-        Log.w(TAG2, "onDestroy[1]");
-        */
-
     }
 
     @Override
     protected void onStop() {
-        Log.w(TAG2, "onStop");
+        Log.w(TAGBASE, "onStop");
         super.onStop();
-
-
     }
 
     private void checkIfLoguedIn(){
         //TODO: trouver un moyen pour ne pas qu'il restart le checkUserInfos() du startMainActivity()
-        Log.w(TAG2, "checkIfLoguedIn");
+        Log.w(TAGBASE, "checkIfLoguedIn");
         if (sAuth == null) {
             sAuth = Auth.getInstance();
         }
@@ -150,7 +137,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void signOutUser(){
-        Log.w(TAG2, "signOutUser");
+        Log.w(TAGBASE, "signOutUser");
         if(sAuth != null){
             sAuth.signOut();
         }
@@ -163,5 +150,18 @@ public abstract class BaseActivity extends AppCompatActivity {
         //qui va checker si est logue ou pas
         recreate();
     }
+
+
+    /**
+     * This implementation is used to receive callbacks from the remote
+     * service.
+     */
+    /*
+    private ITrackerServiceCallback mCallback = new ITrackerServiceCallback.Stub() {
+        public void valueChanged(int value) {
+            mHandler.sendMessage(mHandler.obtainMessage(BUMP_MSG, value, 0));
+        }
+    };
+    */
 
 }
