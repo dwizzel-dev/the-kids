@@ -6,6 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorBackground">@color/white</item>
     </style>
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
@@ -19,8 +20,8 @@
     </style>
     <style name="AppTheme.H1" parent="@android:style/Widget.TextView">
         <item name="android:textSize">48dp</item>
-        <item name="android:paddingTop">18dp</item>
-        <item name="android:paddingBottom">18dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/h1</item>
         <item name="android:gravity">center</item>
@@ -35,16 +36,16 @@
     </style>
     <style name="AppTheme.P.error" parent="@android:style/Widget.TextView">
         <item name="android:textSize">10dp</item>
-        <item name="android:paddingTop">18dp</item>
-        <item name="android:paddingBottom">18dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/red</item>
         <item name="android:gravity">left</item>
     </style>
     <style name="AppTheme.copyright" parent="@android:style/Widget.TextView">
         <item name="android:textSize">10dp</item>
-        <item name="android:paddingTop">10dp</item>
-        <item name="android:paddingBottom">10dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/h1</item>
         <item name="android:gravity">center</item>
@@ -52,8 +53,8 @@
     <style name="AppTheme.ButtonFull" parent="@style/Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/button_full</item>
         <item name="android:textSize">12sp</item>
-        <item name="android:paddingRight">20dp</item>
-        <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingLeft">16dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/textButton</item>
         <item name="android:gravity">center</item>
@@ -63,8 +64,8 @@
     <style name="AppTheme.ButtonEmpty" parent="@style/Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/button_empty</item>
         <item name="android:textSize">12dp</item>
-        <item name="android:paddingRight">20dp</item>
-        <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingLeft">16dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/textButtonEmpty</item>
         <item name="android:gravity">center</item>
@@ -74,8 +75,8 @@
     <style name="AppTheme.ButtonFacebook" parent="@style/Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/button_facebook</item>
         <item name="android:textSize">12sp</item>
-        <item name="android:paddingRight">10dp</item>
-        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingLeft">16dp</item>
         <item name="android:paddingTop">10dp</item>
         <item name="android:paddingBottom">10dp</item>
         <item name="android:textStyle">normal</item>
