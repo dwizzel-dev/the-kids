@@ -64,8 +64,10 @@
     <string name="fb_login_protocol_scheme">fb135994336994028</string>
 
     <!-- HOMEPAGE -->
-    <string name="home_description_1"><![CDATA[<p><b>Watch over someone</b></p>The person will receive an sms message with a pincode asking her if she accept to be watch by you, after she entered the pincode in the application, you will receive a notification that this person accepted you has a watcher.</p>]]></string>
-    <string name="home_description_2"><![CDATA[<p><b>Let womeone watch over you</b></p>The person will receive an sms message with a pincode asking her if she accept watching over you, after she entered the pincode in the application, you will receive a notification that this person accepted to watch over you.</p>]]></string>
+    <string name="home_title_1">Watch over someone</string>
+    <string name="home_description_1">The person will receive an sms message with a pincode asking her if she accept to be watch by you, after she entered the pincode in the application, you will receive a notification that this person accepted you has a watcher.</string>
+    <string name="home_title_2">Watch over me</string>
+    <string name="home_description_2">The person will receive an sms message with a pincode asking her if she accept watching over you, after she entered the pincode in the application, you will receive a notification that this person accepted to watch over you.</string>
 
 
 

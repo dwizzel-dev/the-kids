@@ -30,7 +30,7 @@ public class HomeActivity extends BaseActivity {
     protected void startMainActivity(boolean bFetchUserData){
         setContentView(R.layout.activity_home);
         setTitle(R.string.main_title);
-        setContent();
+        //setContent();
         setButton();
         createActionBar();
         if(bFetchUserData) {
@@ -38,14 +38,14 @@ public class HomeActivity extends BaseActivity {
         }
     }
 
+    /*
     private void setContent(){
         TextView textView1 = findViewById(R.id.textViewHomeDescription1);
         textView1.setText(Html.fromHtml(getResources().getString(R.string.home_description_1)));
         TextView textView2 = findViewById(R.id.textViewHomeDescription2);
         textView2.setText(Html.fromHtml(getResources().getString(R.string.home_description_2)));
-
-
     }
+    */
 
     private void setButton(){
         Button buttWatchOverMe = findViewById(R.id.buttWatchOverSomeone);

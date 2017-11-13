@@ -6,7 +6,12 @@
     <color name="colorPrimary">#ff3c00</color>
     <color name="colorPrimaryDark">#ca3000</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorBackground">#ffffff</color>
+    <color name="colorTextBackground">#000000</color>
+    <color name="colorWindowBackground">#ffffff</color>
     <color name="h1">#ff3c00</color>
+    <color name="h2">#333333</color>
+    <color name="h3">#666666</color>
     <color name="p">#333333</color>
     <color name="textButton">#fff</color>
     <color name="bgButton">#ff3c00</color>

@@ -16,7 +16,9 @@
             style="@style/AppTheme.P"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:text="@string/create_user_with_email_description"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -26,7 +28,8 @@
             android:id="@+id/userPsw0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:ems="10"
             android:hint="@string/psw_hint"
             android:inputType="textPassword"
@@ -37,6 +40,7 @@
             android:id="@+id/userPsw1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:ems="10"
             android:hint="@string/psw_hint_2"
@@ -44,26 +48,28 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/userPsw0" />
 
-        <Button
-            android:id="@+id/buttRegister"
-            style="@style/AppTheme.ButtonFull"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/butt_register"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/userPsw1" />
-
         <TextView
             android:id="@+id/errMsg"
             style="@style/AppTheme.P.error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttRegister" />
+            app:layout_constraintTop_toBottomOf="@+id/userPsw1" />
+
+        <Button
+            android:id="@+id/buttRegister"
+            style="@style/AppTheme.ButtonFull"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/butt_register"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/errMsg" />
+
+
 
 
     </android.support.constraint.ConstraintLayout>

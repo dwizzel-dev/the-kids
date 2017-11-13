@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="butt_login_layout_margin">200dp</dimen>
+
+    <dimen name="butt_big_button_margin">100dp</dimen>
+
+    <dimen name="image_login_layout_margin">16dp</dimen>
+
+
+
+</resources>
