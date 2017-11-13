@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <integer name="layout_orientation">0</integer>
+
+    <integer name="layout_weightSum">100</integer>
+    <integer name="layout_weight">50</integer>
+
+</resources>

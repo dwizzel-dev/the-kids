@@ -8,5 +8,18 @@
     <dimen name="image_login_layout_margin">16dp</dimen>
 
 
+    <dimen name="layout_reponsive_margin_first_start">16dp</dimen>
+    <dimen name="layout_reponsive_margin_first_end">8dp</dimen>
+    <dimen name="layout_reponsive_margin_middle_start">8dp</dimen>
+    <dimen name="layout_reponsive_margin_middle_end">8dp</dimen>
+    <dimen name="layout_reponsive_margin_last_start">8dp</dimen>
+    <dimen name="layout_reponsive_margin_last_end">16dp</dimen>
+
+    <dimen name="layout_reponsive_margin_first_top">8dp</dimen>
+    <dimen name="layout_reponsive_margin_middle_top">8dp</dimen>
+    <dimen name="layout_reponsive_margin_last_top">8dp</dimen>
+
+
+
 
 </resources>
