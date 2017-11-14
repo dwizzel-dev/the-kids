@@ -24,7 +24,6 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
     private static final String TAG = "TheKids.SignInUserWithEmailActivity";
     private String email;
     private String psw;
-    private Utils mUtils;
     private Auth mAuth;
 
     public void setEmail(String email) {
@@ -38,7 +37,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        mUtils.hideProgressDialog();
+        Utils.getInstance().hideProgressDialog();
     }
 
     @Override
@@ -49,8 +48,6 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
 
         //firebase
         mAuth = Auth.getInstance();
-        //utilitaires de base pour messages et autres
-        mUtils = Utils.getInstance();
 
         //butt create
         final Button buttSignIn = findViewById(R.id.buttSignIn);
@@ -70,14 +67,14 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
 
     private int setEmailAndPsw(String email, String[] psw){
         //check le email
-        int err = mUtils.isValidEmail(email);
+        int err = Utils.getInstance().isValidEmail(email);
         if(err != 0){
             return err;
         }
         //le setter du email
         setEmail(email);
         //on check le psw
-        err = mUtils.isValidPsw(psw);
+        err = Utils.getInstance().isValidPsw(psw);
         if(err != 0){
             return err;
         }
@@ -100,7 +97,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
     private void userSignInFinished(){
         //on affiche qu'il est logue
         String loginName = mAuth.getUserLoginName();
-        mUtils.showToastMsg(SignInUserWithEmailActivity.this,
+        Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
                 getResources().getString(R.string.toast_connected_as, loginName));
         //on va a activity principal
         Intent intent = new Intent(SignInUserWithEmailActivity.this, HomeActivity.class);
@@ -110,8 +107,6 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
     }
 
     private void signInUser() {
-
-
         //on va faire un listener sur le resultat
         try {
             displayErrMsg(0);
@@ -122,7 +117,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task){
                             Log.w(TAG, "SIGNIN::onComplete[001]");
                             //on hide le loader
-                            mUtils.hideProgressDialog();
+                            Utils.getInstance().hideProgressDialog();
                             //handling errors
                             if (!task.isSuccessful()) {
                                 try {
@@ -138,16 +133,15 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
                                 //pas erreur alors on continue
                                 userSignInFinished();
                             }
-
                         }
                     });
             //pas exception de conn alors on show le loader
-            mUtils.showProgressDialog(SignInUserWithEmailActivity.this);
+            Utils.getInstance().showProgressDialog(SignInUserWithEmailActivity.this);
 
         }catch (Exception e) {
             Log.w(TAG, e.getMessage());
             //un prob de pas de connection
-            mUtils.showToastMsg(SignInUserWithEmailActivity.this, R.string.err_no_connectivity);
+            Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this, R.string.err_no_connectivity);
         }
 
     }
