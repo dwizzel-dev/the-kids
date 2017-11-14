@@ -1,9 +1,6 @@
 package com.dwizzel.thekids;
 
-
 import android.os.Bundle;
-import android.os.DeadObjectException;
-import android.os.RemoteException;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -11,8 +8,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-
 import com.dwizzel.utils.FirestoreData;
+import com.dwizzel.utils.Utils;
 
 public class HomeActivity extends BaseActivity {
 
@@ -31,25 +28,20 @@ public class HomeActivity extends BaseActivity {
     }
 
     @Override
-    protected void startMainActivity(boolean bFetchUserData){
+    protected void startActivity(boolean b){
+        Log.w(TAG, "startActivity: " + b);
+        super.startActivity(b);
         setContentView(R.layout.activity_home);
         setTitle(R.string.main_title);
-        //setContent();
         setButton();
         createActionBar();
-        if(bFetchUserData) {
-            checkUserInfos();
+        if(b) {
+            //si on a pas encore les infos de l'usager
+            //genre tout de suite apres un login
+            //TODO: refaire ce bout la avec le service
+            //checkUserInfos();
         }
     }
-
-    /*
-    private void setContent(){
-        TextView textView1 = findViewById(R.id.textViewHomeDescription1);
-        textView1.setText(Html.fromHtml(getResources().getString(R.string.home_description_1)));
-        TextView textView2 = findViewById(R.id.textViewHomeDescription2);
-        textView2.setText(Html.fromHtml(getResources().getString(R.string.home_description_2)));
-    }
-    */
 
     private void setButton(){
         Button buttWatchOverMe = findViewById(R.id.buttWatchOverSomeone);
@@ -57,22 +49,10 @@ public class HomeActivity extends BaseActivity {
         buttWatchOverMe.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
-                        if(mTrackerBinder != null) {
-                            long counter = mTrackerBinder.getCounter();
-                            sUtils.showToastMsg(HomeActivity.this, String.format("counter: %d", counter));
+                        if(getTrackerBinder() != null) {
+                            Utils.getInstance().showToastMsg(HomeActivity.this,
+                                    String.format("counter: %d", getTrackerBinder().getCounter()));
                         }
-                        //avec AIDL
-                        /*
-                        if(mTrackerService != null){
-                            try {
-                                long counter = mTrackerService.getCounter();
-                            }catch (DeadObjectException doe){
-                                Log.w(TAG, "mTrackerService.exception: ", doe);
-                            }catch (RemoteException re){
-                                Log.w(TAG, "mTrackerService.exception: ", re);
-                            }
-                        }
-                        */
                     }
                 });
     }
@@ -96,10 +76,7 @@ public class HomeActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        switch (id){
+        switch (item.getItemId()){
             case R.id.menu_action_settings:
                 break;
             case R.id.menu_action_about:
@@ -110,14 +87,12 @@ public class HomeActivity extends BaseActivity {
             default:
                 break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     //creer la top tool bar
     private void createActionBar(){
-        //
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         //set the title
         toolbar.setTitle(R.string.app_name);
         //set has the action bar

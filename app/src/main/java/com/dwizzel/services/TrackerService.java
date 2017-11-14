@@ -9,6 +9,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.dwizzel.auth.AuthService;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
+
 /**
  * Created by Dwizzel on 10/11/2017.
  * https://developer.android.com/guide/components/services.html
@@ -30,7 +37,7 @@ public class TrackerService extends Service{
     private Thread mThTimer;
     private static long mTimer = 0;
 
-    private com.dwizzel.auth.Service mServiceAuth;
+    private AuthService mAuthService;
 
     @NonNull
     public static Intent getIntent(Context context) {
@@ -62,11 +69,10 @@ public class TrackerService extends Service{
 
     @Override
     public void onCreate(){
-        super.onCreate();
         Log.w(TAG, "onCreate");
+        super.onCreate();
         try {
-            mServiceAuth = new com.dwizzel.auth.Service(getApplicationContext());
-            //le timer for testing callBack alive
+            mAuthService = new AuthService(getApplicationContext());
             startTimer();
         }catch(Exception e){
             Log.w(TAG, "onCreate.exception: ", e);
@@ -91,6 +97,12 @@ public class TrackerService extends Service{
         Log.w(TAG, "onRebind: " + intent);
     }
 
+    private String getTimer(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return simpleDateFormat.format(new Date(mTimer*1000));
+    }
+
     private void startTimer() {
         Log.w(TAG, "startTimer");
         if(mThTimer == null) {
@@ -105,9 +117,11 @@ public class TrackerService extends Service{
                             while (true) {
                                 Thread.sleep(1000);
                                 mTimer++;
-                                //Log.w(TAG, "run.counter[" + mTimer + "sec][" +
-                                // mServiceAuth.isSignedIn() + "] -> " +
-                                // mServiceAuth.getUserLoginName());
+                                /*
+                                Log.w(TAG, String.format("run.counter[%s] -> %s",
+                                        getTimer(),
+                                        mAuthService.getUserLoginName()));
+                                       */
                             }
                         } catch (InterruptedException ie) {
                             Log.w(TAG, "run.InterruptedException");
@@ -136,6 +150,14 @@ public class TrackerService extends Service{
         public long getCounter() {
             Log.w(TAG, "TrackerBinder.getCounter");
             return mTimer;
+        }
+
+        public boolean isSignedIn(){
+            return mAuthService.isSignedIn();
+        }
+
+        public void signOut(){
+            mAuthService.signOut();
         }
 
         public void registerCallback(ITrackerBinderCallback callback){
@@ -173,7 +195,7 @@ public class TrackerService extends Service{
                         try {
                             while (true) {
                                 //callback every 10 seconds
-                                Thread.sleep(5000);
+                                Thread.sleep(10000);
                                 if(mBinderCallback != null) {
                                     //on envoi le callback
                                     mBinderCallback.handleResponse(mTimer);

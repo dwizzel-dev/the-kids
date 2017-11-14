@@ -4,28 +4,31 @@ package com.dwizzel.auth;
  * Created by Dwizzel on 13/11/2017.
  */
 
+import android.app.Service;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Binder;
 import android.util.Log;
 
+import com.dwizzel.services.ITrackerBinder;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import java.util.Observable;
 
-public class Service extends Observable{
+public class AuthService {
 
-    private static final String TAG = "TheKids.Service";
+    private static final String TAG = "TheKids.AuthService";
     private FirebaseAuth mFirebaseAuth;
     private static int count = 0;
     private Context context;
 
-    public Service(Context context) throws Exception {
+    public AuthService(Context context) throws Exception {
         Log.w(TAG, "count:" + count++);
         this.context = context;
         try {
@@ -63,7 +66,18 @@ public class Service extends Observable{
         return false;
     }
 
+    public void getUserData(){
+        //TODO: get data from FirestoreDatabse
+    }
+
+    private boolean hasUserData(){
+        Log.w(TAG, "hasUserData");
+        //TODO: if we have the infos from the FirestoreDatabse
+        return false;
+    }
+
     public boolean isSignedIn(){
+        Log.w(TAG, "isSignedIn");
         //check via le firebase si on est logue ou pas
         try{
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
@@ -77,7 +91,11 @@ public class Service extends Observable{
     }
 
     public void signOut() {
+        Log.w(TAG, "signOut");
         try {
+            //le facebook
+            LoginManager.getInstance().logOut();
+            //le firebase
             mFirebaseAuth.signOut();
         } catch (Exception e) {
             Log.w(TAG, "signOut.exception: ", e);
@@ -85,6 +103,7 @@ public class Service extends Observable{
     }
 
     public String getUserLoginName() {
+        Log.w(TAG, "getUserLoginName");
         try {
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
             if (firebaseUser != null) {
@@ -97,6 +116,7 @@ public class Service extends Observable{
     }
 
     public String getUserID(){
+        Log.w(TAG, "getUserID");
         try {
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
             if (firebaseUser != null) {
@@ -147,7 +167,6 @@ public class Service extends Observable{
             }
         }
     }
-
 
 }
 

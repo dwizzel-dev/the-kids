@@ -30,4 +30,11 @@ public final class Const {
 
     }
 
+    public static final class error {
+
+        public static final int ERROR_INVALID_PASSWORD = 0x00000201;
+        public static final int ERROR_INVALID_CREDENTIALS = 0x00000202;
+
+    }
+
 }

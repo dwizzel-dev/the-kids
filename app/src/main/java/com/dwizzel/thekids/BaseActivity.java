@@ -11,10 +11,13 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.*;
 
-import com.dwizzel.utils.Auth;
 import com.dwizzel.utils.Utils;
+
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by Dwizzel on 30/10/2017.
@@ -23,29 +26,38 @@ import com.dwizzel.utils.Utils;
 public abstract class BaseActivity extends AppCompatActivity {
 
     private static final String TAGBASE = "TheKids.BaseActivity";
-    private static Auth sAuth;
-    protected static Utils sUtils;
-    private static boolean bFetchUserData = true;
-    boolean mServiceBound;
+    private boolean bFetchUserData = true;
+    private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.w(TAGBASE, "onServiceConnected");
-            mServiceBound = true;
-
             mTrackerBinder = (TrackerService.TrackerBinder)service;
             mTrackerBinder.registerCallback(mServiceCallback);
+            mServiceBoundObservable.set(true);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.w(TAGBASE, "onServiceDisconnected");
-            mServiceBound = false;
+            mServiceBoundObservable.set(false);
             mTrackerBinder = null;
         }
     };
+
+    public TrackerService.TrackerBinder getTrackerBinder(){
+        return mTrackerBinder;
+    }
+
+    private void bindToAuthService(){
+        //start le service de base, sinon il va s'arreter des que l'apli est ferme
+        Intent intent = TrackerService.getIntent(this);
+        startService(intent);
+        //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         public void handleResponse(long counter){
@@ -64,35 +76,53 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.w(TAGBASE, "onCreate");
         super.onCreate(savedInstanceState);
-        //le minimum requis besoi partout
-        if (sAuth == null) {
-            sAuth = Auth.getInstance();
-        }
-        if (sUtils== null) {
-            sUtils = Utils.getInstance();
-        }
-        //start le service de base, sinon il va s'arreter des que l'apli est ferme
-        Intent intent = TrackerService.getIntent(this);
-        startService(intent);
-        //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        bindToAuthService();
     }
 
     @Override
     protected void onStart() {
         Log.w(TAGBASE, "onStart");
         super.onStart();
-        checkIfLoguedIn();
+        /*
+        le bound n'est peut-etre pas fait encore, ca depend si est caller apres le onCreate
+        on si c'est juste un retour de focus de la fenetre qui ne passe pas par onCreate
+        alors on va mettre un observer sur la variable mServiceBound
+        si elle est a true alors on verifiera si est logue, sinon on attend
+        qu'elle le soit
+        */
+        if (mServiceBoundObservable.get()) {
+            checkIfSigneddIn();
+        } else {
+            Log.w(TAGBASE, "onStart: service not bound yet");
+            //on va mettre un observer dessus pour caller la method une fois connecte
+            mServiceBoundObservable.addObserver(new Observer() {
+                @Override
+                public void update(Observable observable, Object o) {
+                    Log.w(TAGBASE, "onStart.mServiceBoundObservable.update: " + o);
+                    //plus besoin d'etre observe
+                    observable.deleteObserver(this);
+                    //si ok on check
+                    if((boolean)o){
+                        checkIfSigneddIn();
+                    }
+
+                }
+            });
+        }
+
     }
 
     @Override
     protected void onDestroy(){
         Log.w(TAGBASE, "onDestroy");
         super.onDestroy();
+        //reset
+        mServiceCallback = null;
+        mServiceBoundObservable.set(false);
         //clear le binder
         if(mTrackerBinder != null) {
             unbindService(mConnection);
-            mServiceCallback = null;
+            mConnection = null;
         }
     }
 
@@ -102,43 +132,44 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    private void checkIfLoguedIn(){
+    protected void startActivity(boolean b){
+        Log.w(TAGBASE, "startActivity: " + b);
+    }
+
+    private void checkIfSigneddIn(){
+        Log.w(TAGBASE, "checkIfSigneddIn");
+
         //TODO: trouver un moyen pour ne pas qu'il restart le checkUserInfos() du startMainActivity()
-        Log.w(TAGBASE, "checkIfLoguedIn");
-        if (sAuth == null) {
-            sAuth = Auth.getInstance();
-        }
-        if(!sAuth.isSignedIn()) {
-            //on dit au service que l'on est pas signe
-            bFetchUserData = true;
-            //le login page
-            Intent intent = new Intent(this, LoginActivity.class);
-            //start activity de login car pas encore logue, clear le backStack
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        }else {
-            //sinon repart toujours l'acitivity
-            startMainActivity(bFetchUserData);
-            if(bFetchUserData) {
-                bFetchUserData = false;
+
+        if( mTrackerBinder != null){
+            if(!mTrackerBinder.isSignedIn()){
+                //le login page
+                Intent intent = new Intent(this, LoginActivity.class);
+                //start activity de login car pas encore logue, clear le backStack aussi
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+
+            }else{
+                //sinon repart toujours l'activity de la classe qui extends BaseActivity
+                //si on est la c'est quand on redonne le focus a l'application
+                startActivity(bFetchUserData);
+                if(bFetchUserData) {
+                    //pour ne pas aller rechercher les infos de firestore encore une fois
+                    bFetchUserData = false;
+                }
             }
         }
     }
 
-    protected abstract void startMainActivity(boolean isChecked);
-
     protected void signOutUser(){
         Log.w(TAGBASE, "signOutUser");
-        if(sAuth != null){
-            sAuth.signOut();
-        }
-        Utils utils = Utils.getInstance();
-        utils.showToastMsg(this, R.string.toast_signed_out);
-        //on reload l'activity dans laquelle il est, qui check si est logue ou pas
+        //on avretit le service que l'on sign out
+        mTrackerBinder.signOut();
+        //show le msg
+        Utils.getInstance().showToastMsg(this, R.string.toast_signed_out);
+        //on reload l'activity dans laquelle il est, qui check si va checker si logue
         recreate();
     }
-
-
 
 }

@@ -12,4 +12,8 @@ public interface ITrackerBinder {
 
     void unregisterCallback();
 
+    boolean isSignedIn();
+
+    void signOut();
+
 }
