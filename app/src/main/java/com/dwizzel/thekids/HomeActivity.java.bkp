@@ -51,22 +51,18 @@ public class HomeActivity extends BaseActivity {
         buttWatchOverMe.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
-                        if(mTrackerBinder != null) {
-                            long counter = mTrackerBinder.getCounter();
-                            sUtils.showToastMsg(HomeActivity.this, String.format("counter: %d", counter));
-                        }
-                        //avec AIDL
-                        /*
                         if(mTrackerService != null){
                             try {
                                 long counter = mTrackerService.getCounter();
+                                sUtils.showToastMsg(HomeActivity.this, String.format("counter: %d", counter));
                             }catch (DeadObjectException doe){
                                 Log.w(TAG, "mTrackerService.exception: ", doe);
                             }catch (RemoteException re){
                                 Log.w(TAG, "mTrackerService.exception: ", re);
                             }
+
+
                         }
-                        */
                     }
                 });
     }

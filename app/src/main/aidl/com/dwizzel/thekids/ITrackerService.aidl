@@ -10,17 +10,19 @@ interface ITrackerService {
      * Demonstrates some basic types that you can use as parameters
      * and return values in AIDL.
      */
-    void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
-            double aDouble, String aString);
-
     //return the counter number for testing thread looping
     long getCounter();
+
+    //si est logue ou pas
+    boolean isSignedIn();
 
     //constantly track the counter for each minutes
     oneway void trackCounter(ITrackerServiceCallback callback);
 
-    //constantly track the counter for each minutes
-    oneway void untrackCounter(ITrackerServiceCallback callback);
+    //stop tracking the counter
+    oneway void untrackCounter();
 
+    //sign in avec email et psw
+    oneway void signInUser(ITrackerServiceCallback callback, String email, String psw);
 
 }

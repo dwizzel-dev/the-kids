@@ -3,20 +3,17 @@ package com.dwizzel.services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-/*
 import com.dwizzel.thekids.ITrackerService;
 import com.dwizzel.thekids.ITrackerServiceCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
-*/
 
 /**
  * Created by Dwizzel on 10/11/2017.
@@ -38,6 +35,7 @@ public class TrackerService extends Service{
     private final static String TAG = "TheKids.Tracker";
     private Thread mThTimer;
     private static long mTimer = 0;
+    private Intent mIntent;
 
     private com.dwizzel.auth.Service mServiceAuth;
 
@@ -57,6 +55,7 @@ public class TrackerService extends Service{
     @Override
     public IBinder onBind(Intent intent) {
         Log.w(TAG, "onBind");
+        mIntent = intent;
         return mBinder;
     }
 
@@ -86,8 +85,11 @@ public class TrackerService extends Service{
     public boolean onUnbind(Intent intent) {
         Log.w(TAG, "onUnbind");
         //si le mem intent alors on le reset
+        if(this.mIntent.equals(intent)){
+            Log.w(TAG, "onUnbind.EQUALS");
+            this.mIntent = null;
+        }
         // All clients have unbound with unbindService()
-        ((TrackerService.TrackerBinder) mBinder).stopTrackingCounter();
         return true; //or false haha!
     }
 
@@ -112,7 +114,7 @@ public class TrackerService extends Service{
                             while (true) {
                                 Thread.sleep(1000);
                                 mTimer++;
-                                Log.w(TAG, "run.counter[" + mTimer + " seconds][" + mServiceAuth.isSignedIn() + "] -> " + mServiceAuth.getUserLoginName());
+                                Log.w(TAG, "run.counter[" + mTimer + " seconds]: " + mServiceAuth.isSignedIn());
                             }
                         } catch (InterruptedException ie) {
                             Log.w(TAG, "run.InterruptedException: ", ie);
@@ -128,66 +130,6 @@ public class TrackerService extends Service{
         }
     }
 
-
-    //sans le AIDL
-    //TODO: pas oublier de faire rouler dans le meme process
-    private final IBinder mBinder = new TrackerBinder();
-
-    public class TrackerBinder extends Binder {
-
-        private Thread mThCounter;
-
-        public TrackerService getService(){
-            return TrackerService.this;
-        }
-
-        public long getCounter() {
-            return mTimer;
-        }
-
-        public void stopTrackingCounter(){
-            if(mThCounter != null) {
-                mThCounter.interrupt();
-                mThCounter = null;
-            }
-        }
-
-        //TODO: stop the counter when the callback is not there anymore
-        public void trackCounter(final TrackerServiceCallback callback){
-            try {
-                mThCounter = new Thread(new Runnable() {
-
-                    private final static String TAG = "mThCounter";
-
-                    @Override
-                    public void run() {
-                        try {
-                            while (true) {
-                                //callback every 10 seconds
-                                Thread.sleep(5000);
-                                try {
-                                    callback.handleResponse(mTimer);
-                                } catch (Exception e) {
-                                    Log.w(TAG, "run.Exception: ", e);
-                                }finally {
-                                    //Thread.currentThread().interrupt();
-                                }
-                            }
-                        } catch (InterruptedException ie) {
-                            Log.w(TAG, "run.InterruptedException: ", ie);
-                        }
-                    }
-                });
-                mThCounter.start();
-            }catch (Exception e){
-                Log.w(TAG, "trackCounter.Exception: ", e);
-            }
-        }
-
-    }
-
-    /*
-    //avec le AIDL
     private final ITrackerService.Stub mBinder = new ITrackerService.Stub() {
 
         private final static String TAG = "TheKids.ITrackerService";
@@ -245,6 +187,5 @@ public class TrackerService extends Service{
         }
 
     };
-    */
 
 }

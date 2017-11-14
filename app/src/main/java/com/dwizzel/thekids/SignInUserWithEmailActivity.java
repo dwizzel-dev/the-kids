@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 
 public class SignInUserWithEmailActivity extends AppCompatActivity {
 
-    private static final String TAG = "THEKIDS::";
+    private static final String TAG = "TheKids.SignInUserWithEmailActivity";
     private String email;
     private String psw;
     private Utils mUtils;
@@ -33,14 +33,6 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
 
     public void setPsw(String psw) {
         this.psw = psw;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPsw() {
-        return psw;
     }
 
     @Override
@@ -91,10 +83,8 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         }
         //le setter du password
         setPsw(psw[0]);
-
         //pas d'erreur alors on va faire le sign in avec firebase
         signInUser();
-
         return 0;
     }
 

@@ -69,20 +69,21 @@
             android:parentActivityName=".SignInUserActivity"></activity>
 
         <!-- TODO: va falloir checker ca plus profondement pour la securite -->
+        <!-- avec AIDL
         <service
             android:enabled="true"
             android:exported="false"
-            android:process=":com.dwizzel.thekids.service"
+            android:process="com.dwizzel.thekids.service"
             android:label="The Kids Service"
             android:name="com.dwizzel.services.TrackerService"
             android:permission="com.dwizzel.permission.SERVICE"
             />
-        <!--
+        -->
         <service
             android:name="com.dwizzel.services.TrackerService"
             android:exported="false"
             />
-        -->
+
         <!--android:process=":remote"-->
 
 

@@ -114,7 +114,6 @@ public class Utils {
         return 0;
     }
 
-
     public void showProgressDialog(Context context) {
         Log.w(TAG, "showProgressDialog");
         if (mProgressDialog == null) {

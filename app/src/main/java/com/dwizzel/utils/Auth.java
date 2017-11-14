@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.dwizzel.Const;
-import com.dwizzel.models.NotifObjectObserver;
+import com.dwizzel.models.CommunicationObject.NotifObjectObserver;
 import com.facebook.AccessToken;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -31,7 +31,6 @@ public class Auth extends Observable {
     private static Utils sUtils;
     private FacebookLogin mFacebookLogin;
     private static int iCount = 0;
-
 
     private Auth() {
         // Required empty public constructor
@@ -55,17 +54,6 @@ public class Auth extends Observable {
         if (sFirebaseUser != null) {
             return sFirebaseUser.getEmail();
         }
-        /*
-        if (sFirebaseUser != null) {
-            //si firebase user
-            Log.w(TAG, "getUserLoginName: firebase");
-            return sFirebaseUser.getEmail();
-        } else if (mFacebookLogin != null) {
-            //si facebook user
-            Log.w(TAG, "getUserLoginName: facebook");
-            return mFacebookLogin.getUserLoginName();
-        }
-        */
         return "...";
     }
 
@@ -75,7 +63,6 @@ public class Auth extends Observable {
         }
         throw new Exception("no uid");
     }
-
 
     public boolean isSignedIn() {
         //check via le firebase si on est logue ou pas
@@ -273,11 +260,6 @@ public class Auth extends Observable {
         if(mFacebookLogin != null) {
             mFacebookLogin.facebookCallBackManager(requestCode, resultCode, data);
         }
-    }
-
-    public void disableFacebookButton(){
-        mFacebookLogin.disableFacebookButton();
-
     }
 
 }
