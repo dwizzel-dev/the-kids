@@ -4,17 +4,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
+
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.dwizzel.services.*;
 
-import com.dwizzel.services.TrackerService;
-import com.dwizzel.services.TrackerServiceCallback;
 import com.dwizzel.utils.Auth;
 import com.dwizzel.utils.Utils;
 
@@ -30,9 +28,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     private static boolean bFetchUserData = true;
     boolean mServiceBound;
     public TrackerService.TrackerBinder mTrackerBinder;
-    public TrackerService mTrackerService;
-
-    //protected ITrackerService mTrackerService;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -40,45 +35,23 @@ public abstract class BaseActivity extends AppCompatActivity {
             Log.w(TAGBASE, "onServiceConnected");
             mServiceBound = true;
 
-            mTrackerBinder = (TrackerService.TrackerBinder) service;
-            mTrackerService = mTrackerBinder.getService();
-            mTrackerBinder.trackCounter(mServiceCallback);
-
-            /*
-            // avec AIDL
-            mTrackerService = ITrackerService.Stub.asInterface(service);
-            try {
-                mTrackerService.trackCounter(mServiceCallback);
-                Log.w(TAGBASE, "mTrackerService.isSignedIn: " +  mTrackerService.isSignedIn());
-            } catch (RemoteException re) {
-                Log.w(TAGBASE, "trackCounter.exception: ", re);
-            }
-            */
+            mTrackerBinder = (TrackerService.TrackerBinder)service;
+            mTrackerBinder.registerCallback(mServiceCallback);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.w(TAGBASE, "onServiceDisconnected");
-            mTrackerService = null;
-            mTrackerBinder = null;
             mServiceBound = false;
+            mTrackerBinder = null;
         }
     };
 
-    private TrackerServiceCallback mServiceCallback = new TrackerServiceCallback() {
+    private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         public void handleResponse(long counter){
             Log.d(TAGBASE, String.format("thread counter: %d", counter));
         }
     };
-
-    /*
-    //avec AIDL
-    private ITrackerServiceCallback.Stub mServiceCallback = new ITrackerServiceCallback.Stub() {
-        public void handleResponse(long counter){
-            Log.d(TAGBASE, String.format("thread counter: %d", counter));
-        }
-    };
-    */
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
@@ -98,23 +71,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (sUtils== null) {
             sUtils = Utils.getInstance();
         }
-
-        //sans AIDL
         //start le service de base, sinon il va s'arreter des que l'apli est ferme
         Intent intent = TrackerService.getIntent(this);
         startService(intent);
         //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-
-        /*
-        // avec AIDL
-        Intent intent = new Intent(BaseActivity.this, TrackerService.class);
-        intent.setAction(TrackerService.class.getName());
-        //si on le start pas il va s'arreter avec l'application et ne sera pas reparti par le systeme
-        startService(intent);
-        //bind sur le sevice
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        */
     }
 
     @Override
@@ -126,28 +87,13 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy(){
-        Log.w(TAGBASE, "onDestroy[0]");
+        Log.w(TAGBASE, "onDestroy");
         super.onDestroy();
-
+        //clear le binder
         if(mTrackerBinder != null) {
             unbindService(mConnection);
             mServiceCallback = null;
-            Log.w(TAGBASE, "onDestroy.unbindService");
         }
-
-        /*
-        //avec AIDL
-        if(mTrackerService!= null){
-            try {
-                mServiceCallback = null;
-                mTrackerService.untrackCounter();
-            }catch(RemoteException re){
-                Log.w(TAGBASE, "onDestroy.mTrackerService.untrackCounter.exception: ", re);
-            }
-            unbindService(mConnection);
-            Log.w(TAGBASE, "onDestroy.unbindService");
-        }
-        */
     }
 
     @Override
@@ -167,8 +113,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             bFetchUserData = true;
             //le login page
             Intent intent = new Intent(this, LoginActivity.class);
-            //start activity de login car pas encore logue
-            //start activity and clear the backStack
+            //start activity de login car pas encore logue, clear le backStack
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -188,11 +133,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         if(sAuth != null){
             sAuth.signOut();
         }
-        //
         Utils utils = Utils.getInstance();
         utils.showToastMsg(this, R.string.toast_signed_out);
-        //on reload l'activity dans laquelle il est,
-        //qui va checker si est logue ou pas
+        //on reload l'activity dans laquelle il est, qui check si est logue ou pas
         recreate();
     }
 

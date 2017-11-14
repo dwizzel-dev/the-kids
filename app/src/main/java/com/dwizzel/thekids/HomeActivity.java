@@ -25,6 +25,12 @@ public class HomeActivity extends BaseActivity {
     }
 
     @Override
+    protected void onDestroy(){
+        Log.w(TAG, "onDestroy");
+        super.onDestroy();
+    }
+
+    @Override
     protected void startMainActivity(boolean bFetchUserData){
         setContentView(R.layout.activity_home);
         setTitle(R.string.main_title);
