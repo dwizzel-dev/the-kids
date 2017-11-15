@@ -1,6 +1,10 @@
 package com.dwizzel.thekids;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +14,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.dwizzel.Const;
+import com.dwizzel.models.CommunicationObject;
+import com.dwizzel.observers.BooleanObserver;
+import com.dwizzel.services.ITrackerBinderCallback;
+import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.Auth;
 import com.dwizzel.utils.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -18,13 +27,82 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 
-
 public class SignInUserWithEmailActivity extends AppCompatActivity {
 
     private static final String TAG = "TheKids.SignInUserWithEmailActivity";
     private String email;
     private String psw;
-    private Auth mAuth;
+    private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
+    public TrackerService.TrackerBinder mTrackerBinder;
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.w(TAG, "onServiceConnected");
+            mTrackerBinder = (TrackerService.TrackerBinder)service;
+            mTrackerBinder.registerCallback(mServiceCallback);
+            mServiceBoundObservable.set(true);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.w(TAG, "onServiceDisconnected");
+            mServiceBoundObservable.set(false);
+            mTrackerBinder = null;
+        }
+    };
+
+    public TrackerService.TrackerBinder getTrackerBinder(){
+        return mTrackerBinder;
+    }
+
+    private void bindToAuthService(){
+        if(!mServiceBoundObservable.get()) {
+            Intent intent = TrackerService.getIntent(this);
+            startService(intent);
+            //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
+
+        private static final String TAG = "TheKids.ITrackerBinder";
+
+        @Override
+        public void handleResponse(long counter){
+            //Log.d(TAG, String.format("thread counter: %d", counter));
+        }
+        @Override
+        public void onSignedIn(Object obj){
+            Log.d(TAG, "onSignedIn");
+            //on enleve le loader
+            Utils.getInstance().hideProgressDialog();
+            //check les erreurs et exception
+            int err = ((CommunicationObject.ServiceResponseObject)obj).getErr();
+            switch(err){
+                case Const.except.NO_CONNECTION:
+                    Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
+                            R.string.err_no_connectivity);
+                    break;
+                case Const.error.NO_ERROR:
+                    userIsSignedInRoutine();
+                    break;
+                case Const.error.ERROR_INVALID_PASSWORD:
+                    displayErrMsg(R.string.err_invalid_password);
+                    break;
+                case Const.error.ERROR_INVALID_CREDENTIALS:
+                    displayErrMsg(R.string.err_invalid_credential);
+                    break;
+                default:
+                    break;
+            }
+        }
+        @Override
+        public void onSignedOut(Object obj){
+            Log.d(TAG, "onSignedOut");
+        }
+    };
 
     public void setEmail(String email) {
         this.email = email;
@@ -41,14 +119,25 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy(){
+        Log.w(TAG, "onDestroy");
+        super.onDestroy();
+        //reset
+        mServiceCallback = null;
+        mServiceBoundObservable.set(false);
+        //clear le binder
+        if(mTrackerBinder != null) {
+            unbindService(mConnection);
+            mConnection = null;
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        bindToAuthService();
         setContentView(R.layout.activity_sign_in_user_with_email);
         setTitle(R.string.signin_with_email_title);
-
-        //firebase
-        mAuth = Auth.getInstance();
-
         //butt create
         final Button buttSignIn = findViewById(R.id.buttSignIn);
         buttSignIn.setOnClickListener(
@@ -94,58 +183,29 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         }
     }
 
-    private void userSignInFinished(){
+    private void userIsSignedInRoutine(){
         //on affiche qu'il est logue
-        String loginName = mAuth.getUserLoginName();
         Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
-                getResources().getString(R.string.toast_connected_as, loginName));
+                getResources().getString(R.string.toast_connected_as,
+                        mTrackerBinder.getUserLoginName()));
         //on va a activity principal
-        Intent intent = new Intent(SignInUserWithEmailActivity.this, HomeActivity.class);
+        Intent intent = new Intent(SignInUserWithEmailActivity.this,
+                HomeActivity.class);
         //start activity and clear the backStack
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 
     private void signInUser() {
         //on va faire un listener sur le resultat
-        try {
-            displayErrMsg(0);
-            //
-            mAuth.signInUser(SignInUserWithEmailActivity.this, email, psw)
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task){
-                            Log.w(TAG, "SIGNIN::onComplete[001]");
-                            //on hide le loader
-                            Utils.getInstance().hideProgressDialog();
-                            //handling errors
-                            if (!task.isSuccessful()) {
-                                try {
-                                    throw task.getException();
-                                }catch(FirebaseAuthInvalidCredentialsException invalidPsw) {
-                                    displayErrMsg(R.string.err_invalid_password);
-                                }catch(FirebaseAuthInvalidUserException invalidCredential) {
-                                    displayErrMsg(R.string.err_invalid_credential);
-                                }catch (Exception e){
-                                    Log.w(TAG, "SIGNIN::Exception");
-                                }
-                            } else {
-                                //pas erreur alors on continue
-                                userSignInFinished();
-                            }
-                        }
-                    });
-            //pas exception de conn alors on show le loader
-            Utils.getInstance().showProgressDialog(SignInUserWithEmailActivity.this);
-
-        }catch (Exception e) {
-            Log.w(TAG, e.getMessage());
-            //un prob de pas de connection
-            Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this, R.string.err_no_connectivity);
+        if (mTrackerBinder != null) {
+            //on met un loader
+            Utils.getInstance().showProgressDialog(this);
+            //on call le service
+            mTrackerBinder.signIn(email, psw);
         }
-
     }
-
-
 
 }

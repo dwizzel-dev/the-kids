@@ -2,19 +2,13 @@ package com.dwizzel.utils;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-
-import com.dwizzel.Const;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import com.dwizzel.models.UserModel;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Dwizzel on 09/11/2017.
@@ -29,10 +23,8 @@ public class FirestoreData {
     private final static String TAG = "TheKids.FirestoreData";
     private static FirestoreData sInst;
     private FirebaseFirestore mDb;
-    private static Auth sAuth;
 
     private FirestoreData() {
-        sAuth = Auth.getInstance();
         mDb = FirebaseFirestore.getInstance();
     }
 
@@ -43,45 +35,36 @@ public class FirestoreData {
         return sInst;
     }
 
-    public void createNewUser(){
-        try{
-            createUser();
-        }catch (Exception e){
-            Log.w(TAG, "createNewUser.Exception: ", e);
-        }
-    }
-
-    public void createUser() throws Exception{
-        Log.w(TAG, "createUser");
+    public void createUser(String username, String uid){
+        Log.w(TAG, String.format("createUser: %s | %s", username, uid));
         try{
             //use a models
-            UserModel user = new UserModel(sAuth.getUserLoginName(), sAuth.getUserID());
+            UserModel user = new UserModel(username, uid);
             //add the new user collection with his id
-            mDb.collection("users").document(sAuth.getUserID())
+            mDb.collection("users").document(uid)
                     .set(user)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
-                            Log.w(TAG, "addOnSuccessListener");
+                            Log.w(TAG, "createUser.addOnSuccessListener");
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "addOnFailureListener.Exception: ", e);
+                            Log.w(TAG, "createUser.addOnFailureListener.Exception: ", e);
                         }
                     });
         }catch (Exception e){
             Log.w(TAG, "createUser.Exception: ", e);
-            throw e;
         }
 
     }
 
-    public void getUserinfos() throws Exception{
-        Log.w(TAG, "getUserinfos");
+    public void getUserinfos(final String username, final String uid){
+        Log.w(TAG, String.format("getUserinfos: %s | %s", username, uid));
         try{
-            mDb.collection("users").document(sAuth.getUserID())
+            mDb.collection("users").document(uid)
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
@@ -95,16 +78,15 @@ public class FirestoreData {
                                 }else{
                                     Log.w(TAG, "no document, creating new user");
                                     //si on a rien alors on le creer
-                                    createNewUser();
+                                    createUser(username, uid);
                                 }
-
                             } else {
-                                Log.w(TAG, "onComplete.exception: ", task.getException());
+                                Log.w(TAG, "getUserinfos.onComplete.exception: ", task.getException());
                             }
                         }
                     });
         }catch (Exception e){
-            throw e;
+            Log.w(TAG, "getUserinfos.Exception: ", e);
         }
     }
 

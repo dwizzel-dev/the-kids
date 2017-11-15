@@ -8,13 +8,13 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.dwizzel.auth.AuthService;
+import com.facebook.AccessToken;
+import com.google.firebase.auth.AuthCredential;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-
 
 /**
  * Created by Dwizzel on 10/11/2017.
@@ -138,7 +138,11 @@ public class TrackerService extends Service{
     }
 
 
-    //sans le AIDL
+
+    //--------------------------------------------------------------------------------------------
+
+
+
     //TODO: pas oublier de faire rouler dans le meme process
     private final IBinder mBinder = new TrackerBinder();
 
@@ -147,29 +151,73 @@ public class TrackerService extends Service{
         private Thread mThCounter;
         private ITrackerBinderCallback mBinderCallback;
 
+        @Override
         public long getCounter() {
             Log.w(TAG, "TrackerBinder.getCounter");
             return mTimer;
         }
 
-        public boolean isSignedIn(){
-            return mAuthService.isSignedIn();
+        @Override
+        public String getUserLoginName() {
+            Log.w(TAG, "TrackerBinder.getUserLoginName");
+            return mAuthService.getUserLoginName();
         }
 
-        public void signOut(){
-            mAuthService.signOut();
+        @Override
+        public String getUserID() {
+            Log.w(TAG, "TrackerBinder.getUID");
+            return mAuthService.getUserID();
         }
 
+        @Override
         public void registerCallback(ITrackerBinderCallback callback){
             Log.w(TAG, "TrackerBinder.registerCallback");
             mBinderCallback = callback;
             trackCounter();
         }
 
+        @Override
         public void unregisterCallback(){
             Log.w(TAG, "TrackerBinder.unregisterCallback");
             untrackCounter();
             mBinderCallback = null;
+        }
+
+        @Override
+        public boolean isSignedIn(){
+            return mAuthService.isSignedIn();
+        }
+
+        @Override
+        public void signOut(){
+            mAuthService.signOut();
+        }
+
+        @Override
+        public void signIn(String email, String psw){
+            mAuthService.signInUser(this, email, psw);
+        }
+
+        @Override
+        public void signIn(AuthCredential authCredential){
+            mAuthService.signInUser(this, authCredential);
+        }
+
+        @Override
+        public void createUser(String email, String psw){
+            mAuthService.createUser(this, email, psw);
+        }
+
+        @Override
+        public void onSignedIn(Object obj){
+            //on tranmet la reponse object au caller
+            mBinderCallback.onSignedIn(obj);
+        }
+
+        @Override
+        public void onSignedOut(Object obj){
+            //on tranmet la reponse object au caller
+            mBinderCallback.onSignedOut(obj);
         }
 
         private void untrackCounter(){

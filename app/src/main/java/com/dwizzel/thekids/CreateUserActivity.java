@@ -26,11 +26,8 @@ public class CreateUserActivity extends FacebookLoginActivity {
                         startActivity(intent);
                     }
                 });
-
-        setInstance();
-
+        //
+        setFacebookLogin();
     }
-
-
 
 }

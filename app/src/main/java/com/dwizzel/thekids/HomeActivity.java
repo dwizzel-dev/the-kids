@@ -38,31 +38,7 @@ public class HomeActivity extends BaseActivity {
         if(b) {
             //si on a pas encore les infos de l'usager
             //genre tout de suite apres un login
-            //TODO: refaire ce bout la avec le service
-            //checkUserInfos();
-        }
-    }
-
-    private void setButton(){
-        Button buttWatchOverMe = findViewById(R.id.buttWatchOverSomeone);
-        //butt create
-        buttWatchOverMe.setOnClickListener(
-                new View.OnClickListener() {
-                    public void onClick(View v) {
-                        if(getTrackerBinder() != null) {
-                            Utils.getInstance().showToastMsg(HomeActivity.this,
-                                    String.format("counter: %d", getTrackerBinder().getCounter()));
-                        }
-                    }
-                });
-    }
-
-    private void checkUserInfos(){
-        FirestoreData firestoreData = FirestoreData.getInstance();
-        try {
-            firestoreData.getUserinfos();
-        }catch (Exception e){
-            Log.w(TAG, "checkUserInfos.exception: ", e);
+            checkUserInfos();
         }
     }
 
@@ -90,7 +66,29 @@ public class HomeActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //creer la top tool bar
+    private void setButton(){
+        Button buttWatchOverMe = findViewById(R.id.buttWatchOverSomeone);
+        //butt create
+        buttWatchOverMe.setOnClickListener(
+                new View.OnClickListener() {
+                    public void onClick(View v) {
+                        if(getTrackerBinder() != null) {
+                            Utils.getInstance().showToastMsg(HomeActivity.this,
+                                    String.format("counter: %d", getTrackerBinder().getCounter()));
+                        }
+                    }
+                });
+    }
+
+    private void checkUserInfos(){
+        FirestoreData firestoreData = FirestoreData.getInstance();
+        try {
+            firestoreData.getUserinfos(getUsername(), getUserId());
+        }catch (Exception e){
+            Log.w(TAG, "checkUserInfos.exception: ", e);
+        }
+    }
+
     private void createActionBar(){
         Toolbar toolbar = findViewById(R.id.toolbar);
         //set the title

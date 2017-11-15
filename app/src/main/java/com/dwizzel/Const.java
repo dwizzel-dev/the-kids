@@ -32,8 +32,21 @@ public final class Const {
 
     public static final class error {
 
-        public static final int ERROR_INVALID_PASSWORD = 0x00000201;
-        public static final int ERROR_INVALID_CREDENTIALS = 0x00000202;
+        public static final int NO_ERROR = 0;
+        public static final int ERROR_INVALID_PASSWORD = 0x00000203;
+        public static final int ERROR_INVALID_CREDENTIALS = 0x00000204;
+        public static final int ERROR_INVALID_EMAIL = 0x00000205;
+        public static final int ERROR_EMAIL_EXIST = 0x00000206;
+        public static final int ERROR_WEAK_PASSWORD = 0x00000207;
+
+    }
+
+    public static final class except {
+
+        public static final int GENERIC = 0x00000301;
+        public static final int NO_CONNECTION = 0x00000302;
+        public static final int NULL_POINTER = 0x00000303;
+
 
     }
 

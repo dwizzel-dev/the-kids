@@ -1,6 +1,10 @@
 package com.dwizzel.thekids;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.transition.Fade;
 import android.support.v4.app.Fragment;
@@ -13,6 +17,11 @@ import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.Gravity;
 
+import com.dwizzel.Const;
+import com.dwizzel.models.CommunicationObject;
+import com.dwizzel.observers.BooleanObserver;
+import com.dwizzel.services.ITrackerBinderCallback;
+import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.Auth;
 import com.dwizzel.utils.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -31,20 +40,89 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     private String psw = "";
     private Integer currFragmentNum;
     private FragmentManager mFragmentManager;
-    private Auth mAuth;
-    private Utils mUtils;
+    private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
+    public TrackerService.TrackerBinder mTrackerBinder;
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.w(TAG, "onServiceConnected");
+            mTrackerBinder = (TrackerService.TrackerBinder)service;
+            mTrackerBinder.registerCallback(mServiceCallback);
+            mServiceBoundObservable.set(true);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.w(TAG, "onServiceDisconnected");
+            mServiceBoundObservable.set(false);
+            mTrackerBinder = null;
+        }
+    };
+
+    public TrackerService.TrackerBinder getTrackerBinder(){
+        return mTrackerBinder;
+    }
+
+    private void bindToAuthService(){
+        if(!mServiceBoundObservable.get()) {
+            Intent intent = TrackerService.getIntent(this);
+            startService(intent);
+            //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
+
+        private static final String TAG = "TheKids.ITrackerBinder";
+
+        @Override
+        public void handleResponse(long counter){
+            //Log.d(TAG, String.format("thread counter: %d", counter));
+        }
+        @Override
+        public void onSignedIn(Object obj){
+            Log.d(TAG, "onSignedIn");
+            //on enleve le loader
+            Utils.getInstance().hideProgressDialog();
+            //check les erreurs et exception
+            int err = ((CommunicationObject.ServiceResponseObject)obj).getErr();
+            switch(err){
+                case Const.except.NO_CONNECTION:
+                    Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
+                            R.string.err_no_connectivity);
+                    break;
+                case Const.error.NO_ERROR:
+                    userIsCreatedRoutine();
+                    break;
+                case Const.error.ERROR_WEAK_PASSWORD:
+                    gotoFragmentAndShowErrors(0, R.string.psw_weak);
+                    break;
+                case Const.error.ERROR_EMAIL_EXIST:
+                    gotoFragmentAndShowErrors(0, R.string.email_in_use);
+                    break;
+                case Const.error.ERROR_INVALID_CREDENTIALS:
+                    gotoFragmentAndShowErrors(0, R.string.email_invalid);
+                    break;
+                default:
+                    break;
+            }
+        }
+        @Override
+        public void onSignedOut(Object obj){
+            Log.d(TAG, "onSignedOut");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        bindToAuthService();
         setContentView(R.layout.activity_create_user_with_email);
         setTitle(R.string.register_with_email_title);
         //fragment manager pour les anim transition
         mFragmentManager = getSupportFragmentManager();
-        //le auth de firebase
-        mAuth = Auth.getInstance();
-        //utilitaires de base pour messages et autres
-        mUtils = Utils.getInstance();
         //on va setter le premier fragment du email
         if (findViewById(R.id.fragment_container) != null) {
             //si on fait juste un restore pas beson dereloader
@@ -58,7 +136,21 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        mUtils.hideProgressDialog();
+        Utils.getInstance().hideProgressDialog();
+    }
+
+    @Override
+    protected void onDestroy(){
+        Log.w(TAG, "onDestroy");
+        super.onDestroy();
+        //reset
+        mServiceCallback = null;
+        mServiceBoundObservable.set(false);
+        //clear le binder
+        if(mTrackerBinder != null) {
+            unbindService(mConnection);
+            mConnection = null;
+        }
     }
 
     public String getPsw() {
@@ -85,7 +177,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
 
     protected int setEmailFromFragment(String email) {
         //set le email
-        int err = mUtils.isValidEmail(email);
+        int err = Utils.getInstance().isValidEmail(email);
         if(err != 0){
             return err;
             }
@@ -99,7 +191,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
 
     protected int setPswFromFragment(String[] psw) {
         //set le psw
-        int err = mUtils.isValidPsw(psw);
+        int err = Utils.getInstance().isValidPsw(psw);
         if(err != 0){
             return err;
             }
@@ -111,66 +203,33 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         return 0;
     }
 
-    private void userRegistrationFinished(){
+    private void userIsCreatedRoutine(){
         //on affiche qu'il est logue
-        String loginName = mAuth.getUserLoginName();
-        mUtils.showToastMsg(CreateUserWithEmailActivity.this,
-                getResources().getString(R.string.toast_connected_as, loginName));
+        Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
+                getResources().getString(R.string.toast_connected_as,
+                        mTrackerBinder.getUserLoginName()));
         //on va a activity principal
-        Intent intent = new Intent(CreateUserWithEmailActivity.this, HomeActivity.class);
+        Intent intent = new Intent(CreateUserWithEmailActivity.this,
+                HomeActivity.class);
         //start activity and clear the backStack
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 
     private void createUser() {
-
         //on va faire un listener sur le resultat
-        try {
-            mAuth.createUser(CreateUserWithEmailActivity.this, email, psw)
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            Log.w(TAG, "CREATE::onComplete[001]");
-                            //on hide le loader
-                            mUtils.hideProgressDialog();
-                            //handling errors
-                            if (!task.isSuccessful()) {
-                                try {
-                                    throw task.getException();
-                                } catch (FirebaseAuthUserCollisionException existEmail) {
-                                    //email exist
-                                    gotoFragmentAndShowErrors(0, R.string.email_in_use);
-                                }catch (FirebaseAuthWeakPasswordException weakPsw) {
-                                    //invalid email
-                                    gotoFragmentAndShowErrors(0, R.string.psw_weak);
-                                } catch (FirebaseAuthInvalidCredentialsException invalidEmail) {
-                                    //invalid email
-                                    gotoFragmentAndShowErrors(0, R.string.email_invalid);
-                                } catch (Exception e) {
-                                    //whatever else
-                                }
-                            } else {
-                                //pas erreur alors on continue
-                                userRegistrationFinished();
-                            }
-                        }
-                    });
-            //pas exception de conn alors on show le loader
-            mUtils.showProgressDialog(CreateUserWithEmailActivity.this);
-
-        }catch (Exception e) {
-            Log.w(TAG, e.getMessage());
-            //un prob de pas de connection
-            mUtils.showToastMsg(CreateUserWithEmailActivity.this, R.string.err_no_connectivity);
+        if (mTrackerBinder != null) {
+            //on met un loader
+            Utils.getInstance().showProgressDialog(this);
+            //on call le service
+            mTrackerBinder.createUser(email, psw);
         }
     }
 
-
     private void gotoFragment(int fragNum, Bundle bundle){
-
         //TODO; faire un meilleure gestion du addToBackStack()
-
         //si active on remove celui qui est visible
         if(currFragmentNum!= null){
             //les multiples transitions
@@ -180,14 +239,10 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
             //le fragment precedent
             Fragment prevFragment = mFragmentManager.findFragmentById(R.id.fragment_container);
             prevFragment.setExitTransition(transitionSet);
-
-
         }
 
         currFragmentNum = new Integer(fragNum);
-
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-
         Fragment fragment;
 
         switch(fragNum){
@@ -217,7 +272,6 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
                 //ft.addToBackStack(null);
                 break;
         }
-
-
     }
+
 }

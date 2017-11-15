@@ -18,7 +18,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 import java.util.Observable;
 import java.util.Observer;
 
@@ -143,7 +142,7 @@ public class Auth extends Observable {
                 throw new Exception("no internet connection");
             } else {
                 return sFirebaseAuth.signInWithEmailAndPassword(email, psw)
-                        .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
+                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 Log.w(TAG, "signInWithEmailAndPassword.onComplete");

@@ -26,12 +26,8 @@ public class SignInUserActivity extends FacebookLoginActivity{
                         startActivity(intent);
                     }
                 });
-
-        setInstance();
-
-
+        //
+        setFacebookLogin();
     }
-
-
 
 }

@@ -6,16 +6,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.*;
-
 import com.dwizzel.utils.Utils;
-
 import java.util.Observable;
 import java.util.Observer;
 
@@ -26,6 +22,8 @@ import java.util.Observer;
 public abstract class BaseActivity extends AppCompatActivity {
 
     private static final String TAGBASE = "TheKids.BaseActivity";
+    private String mUsername;
+    private String mUserId;
     private boolean bFetchUserData = true;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
@@ -53,16 +51,24 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private void bindToAuthService(){
         //start le service de base, sinon il va s'arreter des que l'apli est ferme
-        Intent intent = TrackerService.getIntent(this);
-        startService(intent);
-        //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        if(!mServiceBoundObservable.get()) {
+            Intent intent = TrackerService.getIntent(this);
+            startService(intent);
+            //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
+        private static final String TAG = "TheKids.ITrackerBinderCallback";
+        @Override
         public void handleResponse(long counter){
-            Log.d(TAGBASE, String.format("thread counter: %d", counter));
+            Log.d(TAG, String.format("thread counter: %d", counter));
         }
+        @Override
+        public void onSignedIn(Object obj){}
+        @Override
+        public void onSignedOut(Object obj){}
     };
 
     @Override
@@ -83,33 +89,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onStart() {
         Log.w(TAGBASE, "onStart");
         super.onStart();
-        /*
-        le bound n'est peut-etre pas fait encore, ca depend si est caller apres le onCreate
-        on si c'est juste un retour de focus de la fenetre qui ne passe pas par onCreate
-        alors on va mettre un observer sur la variable mServiceBound
-        si elle est a true alors on verifiera si est logue, sinon on attend
-        qu'elle le soit
-        */
-        if (mServiceBoundObservable.get()) {
-            checkIfSigneddIn();
-        } else {
-            Log.w(TAGBASE, "onStart: service not bound yet");
-            //on va mettre un observer dessus pour caller la method une fois connecte
-            mServiceBoundObservable.addObserver(new Observer() {
-                @Override
-                public void update(Observable observable, Object o) {
-                    Log.w(TAGBASE, "onStart.mServiceBoundObservable.update: " + o);
-                    //plus besoin d'etre observe
-                    observable.deleteObserver(this);
-                    //si ok on check
-                    if((boolean)o){
-                        checkIfSigneddIn();
-                    }
-
-                }
-            });
-        }
-
+        checkIfSignedIn();
     }
 
     @Override
@@ -132,16 +112,23 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    public String getUsername(){
+        return mUsername;
+    }
+
+    public String getUserId(){
+        return mUserId;
+    }
+
     protected void startActivity(boolean b){
         Log.w(TAGBASE, "startActivity: " + b);
     }
 
-    private void checkIfSigneddIn(){
-        Log.w(TAGBASE, "checkIfSigneddIn");
+    private void checkIfSignedIn(){
+        Log.w(TAGBASE, "checkIfSignedIn");
 
         //TODO: trouver un moyen pour ne pas qu'il restart le checkUserInfos() du startMainActivity()
-
-        if( mTrackerBinder != null){
+        if( mTrackerBinder != null && mServiceBoundObservable.get()){
             if(!mTrackerBinder.isSignedIn()){
                 //le login page
                 Intent intent = new Intent(this, LoginActivity.class);
@@ -151,6 +138,14 @@ public abstract class BaseActivity extends AppCompatActivity {
                 startActivity(intent);
 
             }else{
+                //si les infos sur l'usager ne sont setter, comme dans un retour de sign In
+                //car ceux qui extends cette class vont l'utiliser pour faire des call a firestoreDB
+                if(mUsername == null){
+                    mUsername = mTrackerBinder.getUserLoginName();
+                }
+                if(mUserId == null){
+                    mUserId = mTrackerBinder.getUserID();
+                }
                 //sinon repart toujours l'activity de la classe qui extends BaseActivity
                 //si on est la c'est quand on redonne le focus a l'application
                 startActivity(bFetchUserData);
@@ -159,6 +154,21 @@ public abstract class BaseActivity extends AppCompatActivity {
                     bFetchUserData = false;
                 }
             }
+        }else {
+            Log.w(TAGBASE, "checkIfSigneddIn: service not bound yet");
+            //on va mettre un observer dessus pour caller la method une fois connecte
+            mServiceBoundObservable.addObserver(new Observer() {
+                @Override
+                public void update(Observable observable, Object o) {
+                    Log.w(TAGBASE, "checkIfSigneddIn.mServiceBoundObservable.update: " + o);
+                    //plus besoin d'etre observe
+                    observable.deleteObserver(this);
+                    //si ok on check
+                    if((boolean)o){
+                        checkIfSignedIn();
+                    }
+                }
+            });
         }
     }
 

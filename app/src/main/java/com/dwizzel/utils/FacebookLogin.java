@@ -15,6 +15,7 @@ import com.facebook.login.widget.LoginButton;
 
 import com.dwizzel.thekids.R;
 import com.dwizzel.Const;
+import com.google.firebase.auth.FacebookAuthProvider;
 
 import java.util.Observable;
 
@@ -73,7 +74,8 @@ class FacebookLogin extends Observable {
                     @Override
                     public void onSuccess(LoginResult loginResult){
                         Log.w(TAG, "mFacebookCallbackManager.onSuccess");
-                        notifyParent(Const.notif.TYPE_NOTIF_LOGIN, loginResult.getAccessToken());
+                        //notifyParent(Const.notif.TYPE_NOTIF_LOGIN, FacebookAuthProvider.getCredential(loginResult.getAccessToken()));
+                        //notifyParent(Const.notif.TYPE_NOTIF_LOGIN, loginResult.getAccessToken());
                     }
                     @Override
                     public void onCancel() {

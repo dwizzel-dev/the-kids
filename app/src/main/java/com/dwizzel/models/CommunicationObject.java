@@ -39,20 +39,64 @@ public final class CommunicationObject{
     //pour les retour du service
     public static final class ServiceResponseObject extends Object {
 
-        private long id;
-        private int type;
-        private String msg;
         private Object args;
+        private int err = 0;
+        private String msg = "";
+
+        public ServiceResponseObject() {
+
+        }
+
+        public ServiceResponseObject(int err, String msg) {
+            this.err = err;
+            this.msg = msg;
+        }
+
+        public ServiceResponseObject(int err) {
+            this.err = err;
+        }
+
+        public ServiceResponseObject(Object obj) {
+            this.args = obj;
+        }
+
+        public ServiceResponseObject(Object obj, String msg) {
+            this.args = obj;
+            this.msg = msg;
+        }
+
+        public int getErr(){
+            return err;
+        }
+
+        public String getMsg(){
+            return msg;
+        }
+
+        public Object getArgs(){
+            return args;
+        }
 
     }
 
-    //pour les envois du service
-    public static final class ServiceRequestObject extends Object {
+    //pour les infos de base du user
+    public static final class UserObject extends Object {
 
-        private long id;
-        private int type;
-        private String msg;
-        private Object args;
+        private String username;
+        private String uid;
+
+        public UserObject(String username, String uid) {
+            this.username = username;
+            this.uid = uid;
+        }
+
+        public String getUsername(){
+            return username;
+        }
+
+        public Object getUserId(){
+            return uid;
+        }
 
     }
 

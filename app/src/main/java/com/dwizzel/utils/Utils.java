@@ -4,7 +4,6 @@ package com.dwizzel.utils;
  * Created by Dwizzel on 03/11/2017.
  */
 
-
 import com.dwizzel.thekids.R;
 
 import android.app.Activity;
