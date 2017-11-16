@@ -27,7 +27,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 
-public class AuthService {
+class AuthService {
 
     private static final String TAG = "TheKids.AuthService";
     private FirebaseAuth mFirebaseAuth;
@@ -35,7 +35,7 @@ public class AuthService {
     private static int count = 0;
     private Context context;
 
-    public AuthService(Context context, IBinder trackerBinder) throws Exception {
+    AuthService(Context context, IBinder trackerBinder) throws Exception {
         Log.w(TAG, "count:" + count++);
         this.context = context;
         try {
@@ -74,17 +74,7 @@ public class AuthService {
         return false;
     }
 
-    public void getUserData(){
-        //TODO: get data from FirestoreDatabse
-    }
-
-    private boolean hasUserData(){
-        Log.w(TAG, "hasUserData");
-        //TODO: if we have the infos from the FirestoreDatabse
-        return false;
-    }
-
-    public boolean isSignedIn(){
+    boolean isSignedIn(){
         Log.w(TAG, "isSignedIn");
         //check via le firebase si on est logue ou pas
         try{
@@ -98,7 +88,7 @@ public class AuthService {
         return false;
     }
 
-    public void signOut() {
+    void signOut() {
         Log.w(TAG, "signOut");
         try {
             //le facebook
@@ -110,7 +100,7 @@ public class AuthService {
         }
     }
 
-    public String getUserLoginName() {
+    String getUserLoginName() {
         Log.w(TAG, "getUserLoginName");
         try {
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
@@ -123,7 +113,7 @@ public class AuthService {
         return null;
     }
 
-    public String getUserID(){
+    String getUserID(){
         Log.w(TAG, "getUserID");
         try {
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
@@ -136,7 +126,7 @@ public class AuthService {
         return null;
     }
 
-    public void signInUser(String email, String psw){
+    void signInUser(String email, String psw){
         Log.w(TAG, String.format("signInUser: \"%s\" | \"%s\"", email, psw));
         //avertir si pas connecte
         if (checkConnectivity()) {
@@ -185,7 +175,7 @@ public class AuthService {
         }
     }
 
-    public void createUser(String email, String psw) {
+    void createUser(String email, String psw) {
         Log.w(TAG, String.format("createUser: \"%s\" | \"%s\"", email, psw));
         //avertir si pas connecte
         if (checkConnectivity()) {
@@ -237,7 +227,7 @@ public class AuthService {
         }
     }
 
-    public void signInUser(AuthCredential token){
+    void signInUser(AuthCredential token){
         Log.w(TAG, String.format("signInCredential: \"%s\"", token));
         try {
             mFirebaseAuth.signInWithCredential(token)

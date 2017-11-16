@@ -14,6 +14,9 @@ public class UserModel {
     private String email;
     private String uid;
     private @ServerTimestamp Date createTime;
+    private @ServerTimestamp Date updateTime;
+    private boolean active = true;
+    private String position;
 
     public UserModel(){}
 
@@ -32,6 +35,18 @@ public class UserModel {
 
     public Date getCreateTime() {
         return createTime;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public boolean getActive() {
+        return active;
+    }
+
+    public String getPosition() {
+        return position;
     }
 
 }

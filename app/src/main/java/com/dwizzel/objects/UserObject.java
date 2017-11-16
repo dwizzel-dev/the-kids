@@ -4,7 +4,7 @@ package com.dwizzel.objects;
  * Created by Dwizzel on 15/11/2017.
  */
 
-public final class UserObject extends Object {
+public final class UserObject{
 
     private String username;
     private String uid;

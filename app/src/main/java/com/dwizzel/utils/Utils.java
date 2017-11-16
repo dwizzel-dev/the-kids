@@ -38,7 +38,7 @@ public class Utils {
         return sInst;
     }
 
-    public static boolean hasPermission(Context context, String permission) {
+    private static boolean hasPermission(Context context, String permission) {
         Log.w(TAG, "hasPermission");
         int res = context.checkCallingOrSelfPermission(permission);
         return res == PackageManager.PERMISSION_GRANTED;

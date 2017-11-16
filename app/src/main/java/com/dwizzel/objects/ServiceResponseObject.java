@@ -5,7 +5,7 @@ package com.dwizzel.objects;
  */
 
 //pour les retour du service
-public final class ServiceResponseObject extends Object {
+public final class ServiceResponseObject{
 
     private Object args;
     private int err = 0;

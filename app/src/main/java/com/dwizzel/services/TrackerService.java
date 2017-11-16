@@ -199,7 +199,7 @@ public class TrackerService extends Service{
     private void getUserInfos(){
         Log.w(TAG, "getUserInfos");
        try {
-           mFirestoreData.getUserinfos(mUser);
+           mFirestoreData.getUserInfos(mUser);
         }catch (Exception e){
             Log.w(TAG, "getUserInfos.exception: ", e);
         }
@@ -246,8 +246,8 @@ public class TrackerService extends Service{
         // deactivateUser.addOnSuccessListener
         // mais on va le faire avec un script cote serveur si n'est pas actif depuix X temps
         // alors il le delete
+        // ou un trigger avec CloudFunction sur le firebaseAuthentification
         mAuthService.signOut();
-        //on reset
         mUser = null;
     }
 
@@ -335,8 +335,10 @@ public class TrackerService extends Service{
             mBinderCallback.onSignedIn(obj);
         }
 
+
         @Override
         public void onSignedOut(Object obj){
+            // va etre caller par firestoreData par le listener du deactivate
             Log.w(TAG, "TrackerBinder.onSignedOut");
             //on tranmet la reponse object au caller
             mBinderCallback.onSignedOut(obj);

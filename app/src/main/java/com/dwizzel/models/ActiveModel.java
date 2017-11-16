@@ -13,6 +13,7 @@ public class ActiveModel {
 
     private String position;
     private @ServerTimestamp Date createTime;
+    private @ServerTimestamp Date updateTime;
     private String uid;
 
     public ActiveModel(){}
@@ -32,6 +33,10 @@ public class ActiveModel {
 
     public Date getCreateTime() {
         return createTime;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
     }
 
 }

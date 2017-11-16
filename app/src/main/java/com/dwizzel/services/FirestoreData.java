@@ -9,8 +9,12 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.dwizzel.models.UserModel;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Dwizzel on 09/11/2017.
@@ -22,31 +26,48 @@ import com.dwizzel.models.UserModel;
  *  pour update des positons on va utiliser le realtime change avec un listener
  *  sur les documents avec FireStore
  *  https://firebase.google.com/docs/firestore/query-data/listen
+ *
+ *
+ *  TODO: on va faire des triggers avec le CloudFunction
+ *  - sur le signIn pour les mettre dans la collection "active"
+ *  - sur un signOut pour les enlever de la collection "active"
+ *
  */
 
-public class FirestoreData {
+class FirestoreData {
+
+    //name of database collection and fields
+    class DB{
+        class Users {
+            static final String collection = "users";
+            class Field {
+                static final String active = "active";
+                static final String updateTime = "updateTime";
+                static final String position = "";
+            }
+        }
+    }
 
     private final static String TAG = "TheKids.FirestoreData";
     private static FirestoreData sInst;
     private FirebaseFirestore mDb;
-    private static String sActiveUid;
 
     private FirestoreData() {
         mDb = FirebaseFirestore.getInstance();
     }
 
-    public static FirestoreData getInstance() {
+    static FirestoreData getInstance() {
         if (sInst == null) {
             sInst = new FirestoreData();
         }
         return sInst;
     }
 
-    public void createUser(UserModel user){
-        Log.w(TAG, String.format("createUser: %s | %s", user.getEmail(), user.getUid()));
+    private void setUserInfos(UserModel user){
+        Log.w(TAG, String.format("setUserInfos: %s | %s", user.getEmail(), user.getUid()));
         try{
             //add the new user collection with his id
-            mDb.collection("users").document(user.getUid())
+            mDb.collection(DB.Users.collection).document(user.getUid())
                     .set(user)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -66,52 +87,76 @@ public class FirestoreData {
 
     }
 
-    public void getUserinfos(final UserModel user){
-        Log.w(TAG, String.format("getUserinfos: %s | %s", user.getEmail(), user.getUid()));
+    private void updateUserInfos(UserModel user){
+        Log.w(TAG, String.format("updateUserInfos: %s", user.getUid()));
         try{
-            mDb.collection("users").document(user.getUid())
+            //https://firebase.google.com/docs/firestore/manage-data/add-data
+            //update juste le updateTime
+            mDb.collection(DB.Users.collection).document(user.getUid())
+                    .update(DB.Users.Field.updateTime, FieldValue.serverTimestamp())
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Log.w(TAG, "updateUserInfos.addOnSuccessListener");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "updateUserInfos.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+        }catch (Exception e){
+            Log.w(TAG, "updateUserInfos.Exception: ", e);
+        }
+
+    }
+
+    void getUserInfos(final UserModel user){
+        Log.w(TAG, String.format("getUserInfos: %s | %s", user.getEmail(), user.getUid()));
+        try{
+            mDb.collection(DB.Users.collection).document(user.getUid())
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            Log.w(TAG, "getUserinfos.onComplete");
+                            Log.w(TAG, "getUserInfos.onComplete");
                             if (task.isSuccessful()) {
                                 DocumentSnapshot document = task.getResult();
-                                Log.w(TAG, "getUserinfos.document: " +  document.exists());
+                                Log.w(TAG, "getUserInfos.document: " +  document.exists());
                                 if(document.exists()){
                                     Log.w(TAG, "DATA: " + document.getData());
+                                    //vu qu'il est deja creer on fait un updateTime
+                                    updateUserInfos(user);
                                 }else{
                                     Log.w(TAG, "no document, creating new user");
                                     // si on a rien alors on a un nouveau user
                                     // alors on l'enregistre dans la collection
                                     // "thekids-dab99 > users"
-                                    createUser(user);
+                                    setUserInfos(user);
                                 }
                             } else {
-                                Log.w(TAG, "getUserinfos.onComplete.exception: ", task.getException());
+                                Log.w(TAG, "getUserInfos.onComplete.exception: ", task.getException());
                             }
                         }
                     });
         }catch (Exception e){
-            Log.w(TAG, "getUserinfos.Exception: ", e);
+            Log.w(TAG, "getUserInfos.Exception: ", e);
         }
     }
 
-    public void activateUser(final String uid, String position){
+    void activateUser(final String uid, String position){
         Log.w(TAG, String.format("activateUser: %s | %s", uid, position));
         //get a timestamp for activity timer pending
         try{
-            //use a models
-            ActiveModel activeModel = new ActiveModel(uid, position);
             //add the new user collection with his id
-            mDb.collection("active").document(uid)
-                    .set(activeModel)
+            mDb.collection(DB.Users.collection).document(uid)
+                    .update(DB.Users.Field.active, true)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
                             //on set le dernier UID actif pour la verif au delete
-                            sActiveUid = uid;
-                            Log.w(TAG, "activateUser.addOnSuccessListener");
+                            Log.w(TAG, "activateUser.addOnSuccessListener: " + uid);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -127,19 +172,19 @@ public class FirestoreData {
     }
 
     //TODO: on risque d'avoir le retour du listener apres, car le Auth sera deja signOut
-    public void deactivateUser(String uid){
+    void deactivateUser(final String uid){
         Log.w(TAG, String.format("deactivateUser: %s", uid));
         //minor check
-        if(uid != null && !uid.equals("") && uid.equals(sActiveUid)) {
+        if(uid != null && !uid.equals("")) {
             //get a timestamp for activity timer pending
             try {
                 //add the new user collection with his id
-                mDb.collection("active").document(uid)
-                        .delete()
+                mDb.collection(DB.Users.collection).document(uid)
+                        .update(DB.Users.Field.active, false)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void avoid) {
-                                Log.w(TAG, "deactivateUser.addOnSuccessListener");
+                                Log.w(TAG, "deactivateUser.addOnSuccessListener: " + uid);
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
