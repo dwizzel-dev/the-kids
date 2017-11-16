@@ -6,24 +6,24 @@ import com.google.firebase.firestore.ServerTimestamp;
 import java.util.Date;
 
 /**
- * Created by Dwizzel on 10/11/2017.
+ * Created by Dwizzel on 15/11/2017.
  */
 
-public class UserModel {
+public class ActiveModel {
 
-    private String email;
-    private String uid;
+    private String position;
     private @ServerTimestamp Date createTime;
+    private String uid;
 
-    public UserModel(){}
+    public ActiveModel(){}
 
-    public UserModel(String email, String uid) {
-        this.email = email;
+    public ActiveModel(String uid, String position) {
         this.uid = uid;
+        this.position = position;
     }
 
-    public String getEmail() {
-        return email;
+    public String getPosition() {
+        return position;
     }
 
     public String getUid() {

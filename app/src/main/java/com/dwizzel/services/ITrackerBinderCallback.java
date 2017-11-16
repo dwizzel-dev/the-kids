@@ -1,7 +1,5 @@
 package com.dwizzel.services;
 
-import com.dwizzel.models.CommunicationObject;
-
 /**
  * Created by Dwizzel on 14/11/2017.
  */

@@ -24,7 +24,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     private static final String TAGBASE = "TheKids.BaseActivity";
     private String mUsername;
     private String mUserId;
-    private boolean bFetchUserData = true;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
 
@@ -96,12 +95,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onDestroy(){
         Log.w(TAGBASE, "onDestroy");
         super.onDestroy();
-        //reset
-        mServiceCallback = null;
-        mServiceBoundObservable.set(false);
         //clear le binder
         if(mTrackerBinder != null) {
             unbindService(mConnection);
+            //reset
+            mServiceCallback = null;
+            mServiceBoundObservable.set(false);
             mConnection = null;
         }
     }
@@ -120,8 +119,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         return mUserId;
     }
 
-    protected void startActivity(boolean b){
-        Log.w(TAGBASE, "startActivity: " + b);
+    protected void startActivity(){
+        Log.w(TAGBASE, "startActivity");
     }
 
     private void checkIfSignedIn(){
@@ -136,6 +135,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
+                finish();
 
             }else{
                 //si les infos sur l'usager ne sont setter, comme dans un retour de sign In
@@ -148,11 +148,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
                 //sinon repart toujours l'activity de la classe qui extends BaseActivity
                 //si on est la c'est quand on redonne le focus a l'application
-                startActivity(bFetchUserData);
-                if(bFetchUserData) {
-                    //pour ne pas aller rechercher les infos de firestore encore une fois
-                    bFetchUserData = false;
-                }
+                startActivity();
+
             }
         }else {
             Log.w(TAGBASE, "checkIfSigneddIn: service not bound yet");

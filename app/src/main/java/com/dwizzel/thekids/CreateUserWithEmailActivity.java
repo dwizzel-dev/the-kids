@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.transition.Fade;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,24 +17,15 @@ import android.util.Log;
 import android.view.Gravity;
 
 import com.dwizzel.Const;
-import com.dwizzel.models.CommunicationObject;
+import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
-import com.dwizzel.utils.Auth;
 import com.dwizzel.utils.Utils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-
-import com.google.firebase.auth.AuthResult;
-
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 public class CreateUserWithEmailActivity extends AppCompatActivity {
 
-    private static final String TAG = "THEKIDS::";
+    private static final String TAG = "TheKids.CreateUserWithEmailActivity";
     private String email = "";
     private String psw = "";
     private Integer currFragmentNum;
@@ -87,7 +77,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
             //on enleve le loader
             Utils.getInstance().hideProgressDialog();
             //check les erreurs et exception
-            int err = ((CommunicationObject.ServiceResponseObject)obj).getErr();
+            int err = ((ServiceResponseObject)obj).getErr();
             switch(err){
                 case Const.except.NO_CONNECTION:
                     Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
@@ -143,12 +133,12 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     protected void onDestroy(){
         Log.w(TAG, "onDestroy");
         super.onDestroy();
-        //reset
-        mServiceCallback = null;
-        mServiceBoundObservable.set(false);
         //clear le binder
         if(mTrackerBinder != null) {
             unbindService(mConnection);
+            //reset
+            mServiceCallback = null;
+            mServiceBoundObservable.set(false);
             mConnection = null;
         }
     }

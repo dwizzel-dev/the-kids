@@ -28,18 +28,13 @@ public class HomeActivity extends BaseActivity {
     }
 
     @Override
-    protected void startActivity(boolean b){
-        Log.w(TAG, "startActivity: " + b);
-        super.startActivity(b);
+    protected void startActivity(){
+        Log.w(TAG, "startActivity");
+        super.startActivity();
         setContentView(R.layout.activity_home);
         setTitle(R.string.main_title);
         setButton();
         createActionBar();
-        if(b) {
-            //si on a pas encore les infos de l'usager
-            //genre tout de suite apres un login
-            checkUserInfos();
-        }
     }
 
     @Override
@@ -78,15 +73,6 @@ public class HomeActivity extends BaseActivity {
                         }
                     }
                 });
-    }
-
-    private void checkUserInfos(){
-        FirestoreData firestoreData = FirestoreData.getInstance();
-        try {
-            firestoreData.getUserinfos(getUsername(), getUserId());
-        }catch (Exception e){
-            Log.w(TAG, "checkUserInfos.exception: ", e);
-        }
     }
 
     private void createActionBar(){

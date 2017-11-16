@@ -17,12 +17,11 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import com.dwizzel.Const;
-import com.dwizzel.models.CommunicationObject;
+import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.Utils;
-import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -87,7 +86,7 @@ public class FacebookLoginActivity extends AppCompatActivity {
             //on enleve le loader
             Utils.getInstance().hideProgressDialog();
             //check les erreurs et exception
-            int err = ((CommunicationObject.ServiceResponseObject)obj).getErr();
+            int err = ((ServiceResponseObject)obj).getErr();
             switch(err){
                 case Const.except.NO_CONNECTION:
                     Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
@@ -116,12 +115,12 @@ public class FacebookLoginActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        //reset
-        mServiceCallback = null;
-        mServiceBoundObservable.set(false);
-        //clear le binder
+       //clear le binder
         if(mTrackerBinder != null) {
             unbindService(mConnection);
+            //reset
+            mServiceCallback = null;
+            mServiceBoundObservable.set(false);
             mConnection = null;
         }
     }

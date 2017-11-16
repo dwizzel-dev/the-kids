@@ -24,8 +24,8 @@
     <string name="butt_signin_from_email">Sign up with email</string>
     <string name="butt_next">Next</string>
     <string name="butt_register">Register</string>
-    <string name="butt_watch_over_someone">Watch over someone</string>
-    <string name="butt_watch_over_me">Ask someone too watch over you</string>
+    <string name="butt_watch_over_someone">Watch Over Someone</string>
+    <string name="butt_watch_over_me">Watch Over Me</string>
 
     <!-- INPUT FIELD -->
     <string name="email_hint">Email</string>

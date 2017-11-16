@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import com.dwizzel.auth.AuthService;
+import com.dwizzel.utils.FirestoreData;
 import com.facebook.AccessToken;
 import com.google.firebase.auth.AuthCredential;
 
@@ -36,8 +37,10 @@ public class TrackerService extends Service{
     private final static String TAG = "TheKids.TrackerService";
     private Thread mThTimer;
     private static long mTimer = 0;
-
+    private Thread mThCounter;
+    private ITrackerBinderCallback mBinderCallback;
     private AuthService mAuthService;
+    private FirestoreData mFirestoreData;
 
     @NonNull
     public static Intent getIntent(Context context) {
@@ -47,7 +50,7 @@ public class TrackerService extends Service{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.w(TAG, "onStartCommand: " + intent);
+        Log.w(TAG, "onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -55,7 +58,7 @@ public class TrackerService extends Service{
     @Override
     public IBinder onBind(Intent intent) {
         Log.w(TAG, "onBind:" + intent);
-        return mBinder;
+        return mTackerBinder;
     }
 
     @Override
@@ -73,6 +76,7 @@ public class TrackerService extends Service{
         super.onCreate();
         try {
             mAuthService = new AuthService(getApplicationContext());
+            mFirestoreData = FirestoreData.getInstance();
             startTimer();
         }catch(Exception e){
             Log.w(TAG, "onCreate.exception: ", e);
@@ -84,11 +88,13 @@ public class TrackerService extends Service{
         Log.w(TAG, "onUnbind:" + intent);
         //si clear le callback
         try {
-            ((TrackerService.TrackerBinder) mBinder).unregisterCallback();
+            ((TrackerService.TrackerBinder) mTackerBinder).unregisterCallback();
         }catch (Exception e){
             Log.w(TAG, "onUnbind.Exception: ", e);
         }
-        //TODO: check the difference avec true ou false
+        //si a TRUE alors il va faire un rebind au lieu d'un bind
+        //donc il va reprendre ou il etait, si il avait deja fait un register de son callback
+        //il va le reutiliser, ce qui cause des doublons de callback
         return true;
     }
 
@@ -137,6 +143,79 @@ public class TrackerService extends Service{
         }
     }
 
+    private void untrackCounter(){
+        Log.w(TAG, "untrackCounter");
+        try{
+            if(mThCounter != null) {
+                mThCounter.interrupt();
+                mThCounter = null;
+            }
+        }catch (Exception e){
+            Log.w(TAG, "untrackCounter.Exception: ", e);
+        }
+    }
+
+    private void trackCounter(){
+        Log.w(TAG, "trackCounter");
+        try {
+            mThCounter = new Thread(new Runnable() {
+
+                private final static String TAG = "TheKids.mThCounter";
+
+                @Override
+                public void run() {
+                    try {
+                        while (true) {
+                            //callback every 10 seconds
+                            Thread.sleep(60000);
+                            if(mBinderCallback != null) {
+                                //on envoi le callback
+                                mBinderCallback.handleResponse(mTimer);
+                            } else {
+                                //on arrete le thread si no one to callback
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+                    } catch (InterruptedException ie) {
+                        Log.w(TAG, "run.InterruptedException");
+                    } catch (Exception e) {
+                        Log.w(TAG, "run.Exception: ", e);
+                    }
+
+                }
+            });
+            mThCounter.start();
+        }catch (Exception e){
+            Log.w(TAG, "trackCounter.Exception: ", e);
+        }
+    }
+
+    private void getUserInfos(){
+       try {
+           mFirestoreData.getUserinfos(mAuthService.getUserLoginName(), mAuthService.getUserID());
+        }catch (Exception e){
+            Log.w(TAG, "getUserInfos.exception: ", e);
+        }
+    }
+
+    private void activateUser(){
+        try {
+            mFirestoreData.activateUser(mAuthService.getUserID(), "here");
+        }catch (Exception e){
+            Log.w(TAG, "activateUser.exception: ", e);
+        }
+    }
+
+    private void deactivateUser(){
+        try {
+            mFirestoreData.deactivateUser(mAuthService.getUserID());
+        }catch (Exception e){
+            Log.w(TAG, "deactivateUser.exception: ", e);
+        }
+    }
+
+
+
 
 
     //--------------------------------------------------------------------------------------------
@@ -144,12 +223,9 @@ public class TrackerService extends Service{
 
 
     //TODO: pas oublier de faire rouler dans le meme process
-    private final IBinder mBinder = new TrackerBinder();
+    private final IBinder mTackerBinder = new TrackerBinder();
 
     public class TrackerBinder extends Binder implements ITrackerBinder {
-
-        private Thread mThCounter;
-        private ITrackerBinderCallback mBinderCallback;
 
         @Override
         public long getCounter() {
@@ -173,6 +249,12 @@ public class TrackerService extends Service{
         public void registerCallback(ITrackerBinderCallback callback){
             Log.w(TAG, "TrackerBinder.registerCallback");
             mBinderCallback = callback;
+            //si il fait un rebind() en faisant un back dans l'application
+            //il ne passera pas par unbind() alors il faut stoper le thread precedent
+            //avant de le repartir, sinon il y aura autant de thread que de call
+            //a registerCallback() sans unregisterCallback()
+            //tant que le callstack n'est pas cleare quand il passe d'une activity a l'autre
+            untrackCounter();
             trackCounter();
         }
 
@@ -185,86 +267,57 @@ public class TrackerService extends Service{
 
         @Override
         public boolean isSignedIn(){
+            Log.w(TAG, "TrackerBinder.isSignedIn");
             return mAuthService.isSignedIn();
         }
 
         @Override
         public void signOut(){
+            Log.w(TAG, "TrackerBinder.signOut");
+            //on enleve de la table actif avant
+            deactivateUser();
+            // et on enleve du service sino ne sera plus logue
             mAuthService.signOut();
         }
 
         @Override
         public void signIn(String email, String psw){
+            Log.w(TAG, "TrackerBinder.signIn[0]");
             mAuthService.signInUser(this, email, psw);
         }
 
         @Override
         public void signIn(AuthCredential authCredential){
+            Log.w(TAG, "TrackerBinder.signIn[1]");
             mAuthService.signInUser(this, authCredential);
         }
 
         @Override
         public void createUser(String email, String psw){
+            Log.w(TAG, "TrackerBinder.createUser");
             mAuthService.createUser(this, email, psw);
         }
 
         @Override
         public void onSignedIn(Object obj){
+            Log.w(TAG, "TrackerBinder.onSignedIn");
+            //on va chercher les infos du user ou on les creer
+            getUserInfos();
+            //on active le user dans la liste des users actifs
+            activateUser();
             //on tranmet la reponse object au caller
             mBinderCallback.onSignedIn(obj);
         }
 
         @Override
         public void onSignedOut(Object obj){
+            Log.w(TAG, "TrackerBinder.onSignedOut");
             //on tranmet la reponse object au caller
             mBinderCallback.onSignedOut(obj);
         }
 
-        private void untrackCounter(){
-            Log.w(TAG, "TrackerBinder.untrackCounter");
-            try{
-                mThCounter.interrupt();
-                mThCounter = null;
 
-            }catch (Exception e){
-                Log.w(TAG, "untrackCounter.Exception: ", e);
-            }
-        }
 
-        private void trackCounter(){
-            Log.w(TAG, "TrackerBinder.trackCounter");
-            try {
-                mThCounter = new Thread(new Runnable() {
-
-                    private final static String TAG = "TheKids.mThCounter";
-
-                    @Override
-                    public void run() {
-                        try {
-                            while (true) {
-                                //callback every 10 seconds
-                                Thread.sleep(10000);
-                                if(mBinderCallback != null) {
-                                    //on envoi le callback
-                                    mBinderCallback.handleResponse(mTimer);
-                                } else {
-                                    //on arrete le thread si no one to callback
-                                    Thread.currentThread().interrupt();
-                                }
-                            }
-                        } catch (InterruptedException ie) {
-                            Log.w(TAG, "run.InterruptedException");
-                        } catch (Exception e) {
-                            Log.w(TAG, "run.Exception: ", e);
-                        }
-
-                    }
-                });
-                mThCounter.start();
-            }catch (Exception e){
-                Log.w(TAG, "trackCounter.Exception: ", e);
-            }
-        }
 
     }
 }

@@ -11,7 +11,8 @@ import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.dwizzel.Const;
-import com.dwizzel.models.CommunicationObject;
+import com.dwizzel.objects.ServiceResponseObject;
+import com.dwizzel.objects.UserObject;
 import com.dwizzel.services.TrackerService;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -146,26 +147,19 @@ public class AuthService {
                                     try {
                                         throw task.getException();
                                     } catch (FirebaseAuthInvalidCredentialsException invalidPsw) {
-                                        binder.onSignedIn(new CommunicationObject
-                                                .ServiceResponseObject(Const.error.ERROR_INVALID_PASSWORD));
+                                        binder.onSignedIn(new ServiceResponseObject(Const.error.ERROR_INVALID_PASSWORD));
                                     } catch (FirebaseAuthInvalidUserException invalidCredential) {
-                                        binder.onSignedIn(new CommunicationObject
-                                                .ServiceResponseObject(Const.error.ERROR_INVALID_CREDENTIALS));
+                                        binder.onSignedIn(new ServiceResponseObject(Const.error.ERROR_INVALID_CREDENTIALS));
                                     } catch (NullPointerException npe) {
-                                        binder.onSignedIn(new CommunicationObject
-                                                .ServiceResponseObject(Const.except.NULL_POINTER));
+                                        binder.onSignedIn(new ServiceResponseObject(Const.except.NULL_POINTER));
                                     } catch (Exception e) {
-                                        binder.onSignedIn(new CommunicationObject
-                                                .ServiceResponseObject(Const.except.GENERIC));
+                                        binder.onSignedIn(new ServiceResponseObject(Const.except.GENERIC));
                                     }
                                 } else {
                                     try {
                                         //pas erreur alors on continue
                                         binder.onSignedIn(
-                                                new CommunicationObject.ServiceResponseObject(
-                                                        new CommunicationObject.UserObject(
-                                                                getUserLoginName(), getUserID())
-                                                ));
+                                                new ServiceResponseObject(new UserObject(getUserLoginName(), getUserID())));
                                     }catch(NullPointerException npe){
                                         Log.w(TAG, "signInUser.onComplete.NullPointerException: ", npe);
                                     }
@@ -177,8 +171,7 @@ public class AuthService {
             }
         }else{
             try {
-                binder.onSignedIn(new CommunicationObject
-                        .ServiceResponseObject(Const.except.NO_CONNECTION));
+                binder.onSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
             }catch (NullPointerException npe){
                 Log.w(TAG, "signInUser.NullPointerException: ", npe);
             }
@@ -198,29 +191,21 @@ public class AuthService {
                                     try {
                                         throw task.getException();
                                     } catch (FirebaseAuthUserCollisionException existEmail) {
-                                        binder.onSignedIn(new CommunicationObject
-                                                .ServiceResponseObject(Const.error.ERROR_EMAIL_EXIST));
+                                        binder.onSignedIn(new ServiceResponseObject(Const.error.ERROR_EMAIL_EXIST));
                                     }catch (FirebaseAuthWeakPasswordException weakPsw) {
-                                        binder.onSignedIn(new CommunicationObject
-                                                .ServiceResponseObject(Const.error.ERROR_WEAK_PASSWORD));
+                                        binder.onSignedIn(new ServiceResponseObject(Const.error.ERROR_WEAK_PASSWORD));
                                     } catch (FirebaseAuthInvalidCredentialsException invalidEmail) {
-                                        binder.onSignedIn(new CommunicationObject
-                                                .ServiceResponseObject(Const.error.ERROR_INVALID_EMAIL));
+                                        binder.onSignedIn(new ServiceResponseObject(Const.error.ERROR_INVALID_EMAIL));
                                     } catch (NullPointerException npe) {
-                                        binder.onSignedIn(new CommunicationObject
-                                                .ServiceResponseObject(Const.except.NULL_POINTER));
+                                        binder.onSignedIn(new ServiceResponseObject(Const.except.NULL_POINTER));
                                     } catch (Exception e) {
-                                        binder.onSignedIn(new CommunicationObject
-                                                .ServiceResponseObject(Const.except.GENERIC));
+                                        binder.onSignedIn(new ServiceResponseObject(Const.except.GENERIC));
                                     }
                                 } else {
                                     try {
                                         //pas erreur alors on continue
                                         binder.onSignedIn(
-                                                new CommunicationObject.ServiceResponseObject(
-                                                        new CommunicationObject.UserObject(
-                                                                getUserLoginName(), getUserID())
-                                                ));
+                                                new ServiceResponseObject(new UserObject(getUserLoginName(), getUserID())));
                                     }catch(NullPointerException npe){
                                         Log.w(TAG, "createUser.onComplete.NullPointerException: ", npe);
                                     }
@@ -232,8 +217,7 @@ public class AuthService {
             }
         }else{
             try {
-                binder.onSignedIn(new CommunicationObject
-                        .ServiceResponseObject(Const.except.NO_CONNECTION));
+                binder.onSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
             }catch (NullPointerException npe){
                 Log.w(TAG, "createUser.NullPointerException: ", npe);
             }
@@ -251,20 +235,15 @@ public class AuthService {
                                 try {
                                     throw task.getException();
                                 } catch (NullPointerException npe) {
-                                    binder.onSignedIn(new CommunicationObject
-                                            .ServiceResponseObject(Const.except.NULL_POINTER));
+                                    binder.onSignedIn(new ServiceResponseObject(Const.except.NULL_POINTER));
                                 } catch (Exception e) {
-                                    binder.onSignedIn(new CommunicationObject
-                                            .ServiceResponseObject(Const.except.GENERIC));
+                                    binder.onSignedIn(new ServiceResponseObject(Const.except.GENERIC));
                                 }
                             } else {
                                 try {
                                     //pas erreur alors on continue
                                     binder.onSignedIn(
-                                            new CommunicationObject.ServiceResponseObject(
-                                                    new CommunicationObject.UserObject(
-                                                            getUserLoginName(), getUserID())
-                                            ));
+                                            new ServiceResponseObject(new UserObject(getUserLoginName(), getUserID())));
                                 }catch(NullPointerException npe){
                                     Log.w(TAG, "signInCredential.onComplete.NullPointerException: ", npe);
                                 }
