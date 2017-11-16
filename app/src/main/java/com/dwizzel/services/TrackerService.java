@@ -38,11 +38,12 @@ public class TrackerService extends Service{
 
     private final static String TAG = "TheKids.TrackerService";
     private Thread mThTimer;
-    private static long mTimer = 0;
+    private long mTimer = 0;
+    private int mKeepAliveSignal = 60; //seconds
     private Thread mThCounter;
     private ITrackerBinderCallback mBinderCallback;
     private AuthService mAuthService;
-    private FirestoreData mFirestoreData;
+    private FirestoreService mFirestoreService;
     private UserModel mUser;
 
     @NonNull
@@ -79,7 +80,7 @@ public class TrackerService extends Service{
         super.onCreate();
         try {
             mAuthService = new AuthService(getApplicationContext(), mTrackerBinder);
-            mFirestoreData = FirestoreData.getInstance();
+            mFirestoreService = FirestoreService.getInstance();
             //start running time elapsed
             startRunningTime();
             //check pour user infos si etait connecte
@@ -127,13 +128,13 @@ public class TrackerService extends Service{
                     public void run() {
                         try {
                             while (true) {
+                                //pause au seconde
                                 Thread.sleep(1000);
                                 mTimer++;
-                                /*
-                                Log.w(TAG, String.format("run.counter[%s] -> %s",
-                                        getTimer(),
-                                        mAuthService.getUserLoginName()));
-                                       */
+                                //keepAlive au minute
+                                if(mTimer%mKeepAliveSignal == 0){
+                                    keepActive();
+                                }
                             }
                         } catch (InterruptedException ie) {
                             Log.w(TAG, "run.InterruptedException");
@@ -199,7 +200,7 @@ public class TrackerService extends Service{
     private void getUserInfos(){
         Log.w(TAG, "getUserInfos");
        try {
-           mFirestoreData.getUserInfos(mUser);
+           mFirestoreService.getUserInfos(mUser);
         }catch (Exception e){
             Log.w(TAG, "getUserInfos.exception: ", e);
         }
@@ -208,7 +209,7 @@ public class TrackerService extends Service{
     private void activateUser(){
         Log.w(TAG, "activateUser");
         try {
-            mFirestoreData.activateUser(mUser.getUid(), "here");
+            mFirestoreService.activateUser(mUser.getUid(), null);
         }catch (Exception e){
             Log.w(TAG, "activateUser.exception: ", e);
         }
@@ -217,7 +218,7 @@ public class TrackerService extends Service{
     private void deactivateUser(){
         Log.w(TAG, "deactivateUser");
         try {
-            mFirestoreData.deactivateUser(mUser.getUid());
+            mFirestoreService.deactivateUser(mUser.getUid());
         }catch (Exception e){
             Log.w(TAG, "deactivateUser.exception: ", e);
         }
@@ -251,6 +252,20 @@ public class TrackerService extends Service{
         mUser = null;
     }
 
+    private void keepActive(){
+        Log.w(TAG, "keepActive");
+        //TODO: cronjob sur le serveur pour changer le active state en cas de trop long
+        // garde le user active dans la DB, sinon sera reseter par le cronjob du serveur
+        // si le updateTime est trop long de 5 minutes
+        if(mAuthService.isSignedIn()){
+            try {
+                mFirestoreService.updateUserInfos(mUser);
+            }catch (Exception e){
+                Log.w(TAG, "activateUser.exception: ", e);
+            }
+        }
+
+    }
 
 
 

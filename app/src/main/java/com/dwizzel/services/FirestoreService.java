@@ -3,7 +3,6 @@ package com.dwizzel.services;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.dwizzel.models.ActiveModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -12,9 +11,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.dwizzel.models.UserModel;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Dwizzel on 09/11/2017.
@@ -34,7 +30,7 @@ import java.util.Map;
  *
  */
 
-class FirestoreData {
+class FirestoreService {
 
     //name of database collection and fields
     class DB{
@@ -43,22 +39,22 @@ class FirestoreData {
             class Field {
                 static final String active = "active";
                 static final String updateTime = "updateTime";
-                static final String position = "";
+                static final String position = "position";
             }
         }
     }
 
     private final static String TAG = "TheKids.FirestoreData";
-    private static FirestoreData sInst;
+    private static FirestoreService sInst;
     private FirebaseFirestore mDb;
 
-    private FirestoreData() {
+    private FirestoreService() {
         mDb = FirebaseFirestore.getInstance();
     }
 
-    static FirestoreData getInstance() {
+    static FirestoreService getInstance() {
         if (sInst == null) {
-            sInst = new FirestoreData();
+            sInst = new FirestoreService();
         }
         return sInst;
     }
@@ -87,13 +83,16 @@ class FirestoreData {
 
     }
 
-    private void updateUserInfos(UserModel user){
+    void updateUserInfos(UserModel user){
         Log.w(TAG, String.format("updateUserInfos: %s", user.getUid()));
         try{
             //https://firebase.google.com/docs/firestore/manage-data/add-data
             //update juste le updateTime
             mDb.collection(DB.Users.collection).document(user.getUid())
-                    .update(DB.Users.Field.updateTime, FieldValue.serverTimestamp())
+                    .update(
+                            DB.Users.Field.updateTime, FieldValue.serverTimestamp(),
+                            DB.Users.Field.position, user.getPosition()
+                    )
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
@@ -171,8 +170,8 @@ class FirestoreData {
 
     }
 
-    //TODO: on risque d'avoir le retour du listener apres, car le Auth sera deja signOut
     void deactivateUser(final String uid){
+        //TODO: on risque d'avoir le retour du listener apres, car le Auth sera deja signOut
         Log.w(TAG, String.format("deactivateUser: %s", uid));
         //minor check
         if(uid != null && !uid.equals("")) {
@@ -200,5 +199,6 @@ class FirestoreData {
             Log.w(TAG, "deactivateUser.Exception: ++ UID is empty ++");
         }
     }
+
 
 }
