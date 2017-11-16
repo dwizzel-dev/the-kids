@@ -10,10 +10,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.dwizzel.Const;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
+import com.dwizzel.utils.Tracer;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -29,53 +29,54 @@ import com.google.firebase.auth.FirebaseUser;
 
 class AuthService {
 
-    private static final String TAG = "TheKids.AuthService";
+    private static final String TAG = "AuthService";
     private FirebaseAuth mFirebaseAuth;
     private TrackerService.TrackerBinder mTrackerBinder;
     private static int count = 0;
-    private Context context;
+    private final Context mContext;
 
     AuthService(Context context, IBinder trackerBinder) throws Exception {
-        Log.w(TAG, "count:" + count++);
-        this.context = context;
+        Tracer.log(TAG, "count:" + count++);
+        mContext = context;
         try {
-            FirebaseApp.initializeApp(this.context );
+            FirebaseApp.initializeApp(this.mContext);
             mFirebaseAuth = FirebaseAuth.getInstance();
             mTrackerBinder = (TrackerService.TrackerBinder) trackerBinder;
         }catch (Exception e){
-            Log.w(TAG, "exception:", e);
+            Tracer.log(TAG, "exception:", e);
             throw new Exception(e);
         }
     }
 
     private boolean checkConnectivity(){
-        Log.w(TAG, "checkConnectivity");
-        if(context != null) {
-            if(hasPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
+        Tracer.log(TAG, "checkConnectivity");
+        if(mContext != null) {
+            if(hasPermission()) {
                 try {
-                    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
                     if (cm != null) {
                         NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
                         return (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting());
                     }
                 }catch(Exception e) {
-                    Log.w(TAG, "checkConnectivity.exception: ", e);
+                    Tracer.log(TAG, "checkConnectivity.Exception: ", e);
                 }
             }
         }
         return false;
     }
 
-    private boolean hasPermission(String permission) {
-        Log.w(TAG, "hasPermission");
-        if(context != null) {
-            return (context.checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
+    private boolean hasPermission() {
+        Tracer.log(TAG, "hasPermission");
+        if(mContext != null) {
+            return (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED);
         }
         return false;
     }
 
     boolean isSignedIn(){
-        Log.w(TAG, "isSignedIn");
+        Tracer.log(TAG, "isSignedIn");
         //check via le firebase si on est logue ou pas
         try{
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
@@ -83,51 +84,51 @@ class AuthService {
                 return true;
             }
         }catch (Exception e) {
-            Log.w(TAG, "isSignedIn.exception: ", e);
+            Tracer.log(TAG, "isSignedIn.exception: ", e);
         }
         return false;
     }
 
     void signOut() {
-        Log.w(TAG, "signOut");
+        Tracer.log(TAG, "signOut");
         try {
             //le facebook
             LoginManager.getInstance().logOut();
             //le firebase
             mFirebaseAuth.signOut();
         } catch (Exception e) {
-            Log.w(TAG, "signOut.exception: ", e);
+            Tracer.log(TAG, "signOut.exception: ", e);
         }
     }
 
     String getUserLoginName() {
-        Log.w(TAG, "getUserLoginName");
+        Tracer.log(TAG, "getUserLoginName");
         try {
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
             if (firebaseUser != null) {
                 return firebaseUser.getEmail();
             }
         }catch (Exception e) {
-            Log.w(TAG, "getUserLoginName.exception: ", e);
+            Tracer.log(TAG, "getUserLoginName.exception: ", e);
         }
         return null;
     }
 
     String getUserID(){
-        Log.w(TAG, "getUserID");
+        Tracer.log(TAG, "getUserID");
         try {
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
             if (firebaseUser != null) {
                 return firebaseUser.getUid();
             }
         }catch (Exception e) {
-            Log.w(TAG, "getUserID.exception: ", e);
+            Tracer.log(TAG, "getUserID.exception: ", e);
         }
         return null;
     }
 
     void signInUser(String email, String psw){
-        Log.w(TAG, String.format("signInUser: \"%s\" | \"%s\"", email, psw));
+        Tracer.log(TAG, String.format("signInUser: \"%s\" | \"%s\"", email, psw));
         //avertir si pas connecte
         if (checkConnectivity()) {
             try {
@@ -158,25 +159,25 @@ class AuthService {
                                                 new ServiceResponseObject(
                                                         new UserObject(getUserLoginName(), getUserID())));
                                     }catch(NullPointerException npe){
-                                        Log.w(TAG, "signInUser.onComplete.NullPointerException: ", npe);
+                                        Tracer.log(TAG, "signInUser.onComplete.NullPointerException: ", npe);
                                     }
                                 }
                             }
                         });
             }catch(Exception e){
-                Log.w(TAG, "signInUser.Exception: ", e);
+                Tracer.log(TAG, "signInUser.Exception: ", e);
             }
         }else{
             try {
                 mTrackerBinder.onSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
             }catch (NullPointerException npe){
-                Log.w(TAG, "signInUser.NullPointerException: ", npe);
+                Tracer.log(TAG, "signInUser.NullPointerException: ", npe);
             }
         }
     }
 
     void createUser(String email, String psw) {
-        Log.w(TAG, String.format("createUser: \"%s\" | \"%s\"", email, psw));
+        Tracer.log(TAG, String.format("createUser: \"%s\" | \"%s\"", email, psw));
         //avertir si pas connecte
         if (checkConnectivity()) {
             try {
@@ -210,25 +211,25 @@ class AuthService {
                                                 new ServiceResponseObject(
                                                         new UserObject(getUserLoginName(), getUserID())));
                                     }catch(NullPointerException npe){
-                                        Log.w(TAG, "createUser.onComplete.NullPointerException: ", npe);
+                                        Tracer.log(TAG, "createUser.onComplete.NullPointerException: ", npe);
                                     }
                                 }
                             }
                         });
             }catch(Exception e){
-                Log.w(TAG, "createUser.Exception: ", e);
+                Tracer.log(TAG, "createUser.Exception: ", e);
             }
         }else{
             try {
                 mTrackerBinder.onSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
             }catch (NullPointerException npe){
-                Log.w(TAG, "createUser.NullPointerException: ", npe);
+                Tracer.log(TAG, "createUser.NullPointerException: ", npe);
             }
         }
     }
 
     void signInUser(AuthCredential token){
-        Log.w(TAG, String.format("signInCredential: \"%s\"", token));
+        Tracer.log(TAG, String.format("signInCredential: \"%s\"", token));
         try {
             mFirebaseAuth.signInWithCredential(token)
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -251,13 +252,13 @@ class AuthService {
                                             new ServiceResponseObject(
                                                     new UserObject(getUserLoginName(), getUserID())));
                                 }catch(NullPointerException npe){
-                                    Log.w(TAG, "signInCredential.onComplete.NullPointerException: ", npe);
+                                    Tracer.log(TAG, "signInCredential.onComplete.NullPointerException: ", npe);
                                 }
                             }
                         }
                     });
         }catch(Exception e){
-            Log.w(TAG, "signInCredential.Exception: ", e);
+            Tracer.log(TAG, "signInCredential.Exception: ", e);
         }
     }
 

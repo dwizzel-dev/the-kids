@@ -14,7 +14,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION " />
     <uses-permission android:name="com.dwizzel.permission.SERVICE" />
+
 
 
     <application
@@ -81,6 +84,10 @@
         -->
         <service
             android:name="com.dwizzel.services.TrackerService"
+            android:exported="false"
+            />
+        <service
+            android:name="com.dwizzel.services.GpsService"
             android:exported="false"
             />
 

@@ -7,11 +7,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
-
 import com.dwizzel.models.UserModel;
+import com.dwizzel.utils.Tracer;
 import com.google.firebase.auth.AuthCredential;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -36,7 +34,7 @@ import java.util.TimeZone;
 
 public class TrackerService extends Service{
 
-    private final static String TAG = "TheKids.TrackerService";
+    private final static String TAG = "TrackerService";
     private Thread mThTimer;
     private long mTimer = 0;
     private int mKeepAliveSignal = 60; //seconds
@@ -48,26 +46,26 @@ public class TrackerService extends Service{
 
     @NonNull
     public static Intent getIntent(Context context) {
-        Log.w(TAG, "getIntent");
+        Tracer.log(TAG, "getIntent");
         return new Intent(context, TrackerService.class);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.w(TAG, "onStartCommand");
+        Tracer.log(TAG, "onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.w(TAG, "onBind:" + intent);
+        Tracer.log(TAG, "onBind:" + intent);
         return mTrackerBinder;
     }
 
     @Override
     public void onDestroy(){
-        Log.w(TAG, "onDestroy");
+        Tracer.log(TAG, "onDestroy");
         super.onDestroy();
         if(mThTimer != null){
             mThTimer.interrupt();
@@ -76,7 +74,7 @@ public class TrackerService extends Service{
 
     @Override
     public void onCreate(){
-        Log.w(TAG, "onCreate");
+        Tracer.log(TAG, "onCreate");
         super.onCreate();
         try {
             mAuthService = new AuthService(getApplicationContext(), mTrackerBinder);
@@ -86,18 +84,18 @@ public class TrackerService extends Service{
             //check pour user infos si etait connecte
             setUser();
         }catch(Exception e){
-            Log.w(TAG, "onCreate.exception: ", e);
+            Tracer.log(TAG, "onCreate.exception", e);
         }
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.w(TAG, "onUnbind:" + intent);
+        Tracer.log(TAG, "onUnbind:" + intent);
         //si clear le callback
         try {
             ((TrackerService.TrackerBinder) mTrackerBinder).unregisterCallback();
         }catch (Exception e){
-            Log.w(TAG, "onUnbind.Exception: ", e);
+            Tracer.log(TAG, "onUnbind.Exception: ", e);
         }
         //si a TRUE alors il va faire un rebind au lieu d'un bind
         //donc il va reprendre ou il etait, si il avait deja fait un register de son callback
@@ -107,7 +105,7 @@ public class TrackerService extends Service{
 
     @Override
     public void onRebind(Intent intent) {
-        Log.w(TAG, "onRebind: " + intent);
+        Tracer.log(TAG, "onRebind: " + intent);
     }
 
     private String getTimer(){
@@ -117,12 +115,12 @@ public class TrackerService extends Service{
     }
 
     private void startRunningTime() {
-        Log.w(TAG, "startRunningTime");
+        Tracer.log(TAG, "startRunningTime");
         if(mThTimer == null) {
             try {
                 mThTimer = new Thread(new Runnable() {
 
-                    private final static String TAG = "TheKids.mThTimer";
+                    private final static String TAG = "TrackerService.mThTimer";
 
                     @Override
                     public void run() {
@@ -135,45 +133,46 @@ public class TrackerService extends Service{
                                 if(mTimer%mKeepAliveSignal == 0){
                                     keepActive();
                                 }
+                                Tracer.tog("TIMER:", getTimer());
                             }
                         } catch (InterruptedException ie) {
-                            Log.w(TAG, "run.InterruptedException");
+                            Tracer.log(TAG, "run.InterruptedException");
                         } catch (Exception e){
-                            Log.w(TAG, "run.Exception: ", e);
+                            Tracer.log(TAG, "run.Exception: ", e);
                         }
                     }
                 });
                 mThTimer.start();
             }catch (Exception e){
-                Log.w(TAG, "startTimer.Exception: ", e);
+                Tracer.log(TAG, "startTimer.Exception: ", e);
             }
         }
     }
 
     private void untrackCounter(){
-        Log.w(TAG, "untrackCounter");
+        Tracer.log(TAG, "untrackCounter");
         try{
             if(mThCounter != null) {
                 mThCounter.interrupt();
                 mThCounter = null;
             }
         }catch (Exception e){
-            Log.w(TAG, "untrackCounter.Exception: ", e);
+            Tracer.log(TAG, "untrackCounter.Exception: ", e);
         }
     }
 
     private void trackCounter(){
-        Log.w(TAG, "trackCounter");
+        Tracer.log(TAG, "trackCounter");
         try {
             mThCounter = new Thread(new Runnable() {
 
-                private final static String TAG = "TheKids.mThCounter";
+                private final static String TAG = "TrackerService.mThCounter";
 
                 @Override
                 public void run() {
                     try {
                         while (true) {
-                            //callback every 10 seconds
+                            //callback le mBinderCallback every 60 seconds
                             Thread.sleep(60000);
                             if(mBinderCallback != null) {
                                 //on envoi le callback
@@ -184,48 +183,48 @@ public class TrackerService extends Service{
                             }
                         }
                     } catch (InterruptedException ie) {
-                        Log.w(TAG, "run.InterruptedException");
+                        Tracer.log(TAG, "run.InterruptedException");
                     } catch (Exception e) {
-                        Log.w(TAG, "run.Exception: ", e);
+                        Tracer.log(TAG, "run.Exception: ", e);
                     }
 
                 }
             });
             mThCounter.start();
         }catch (Exception e){
-            Log.w(TAG, "trackCounter.Exception: ", e);
+            Tracer.log(TAG, "trackCounter.Exception: ", e);
         }
     }
 
     private void getUserInfos(){
-        Log.w(TAG, "getUserInfos");
-       try {
+        Tracer.log(TAG, "getUserInfos");
+        try {
            mFirestoreService.getUserInfos(mUser);
         }catch (Exception e){
-            Log.w(TAG, "getUserInfos.exception: ", e);
+            Tracer.log(TAG, "getUserInfos.exception: ", e);
         }
     }
 
     private void activateUser(){
-        Log.w(TAG, "activateUser");
+        Tracer.log(TAG, "activateUser");
         try {
             mFirestoreService.activateUser(mUser.getUid(), null);
         }catch (Exception e){
-            Log.w(TAG, "activateUser.exception: ", e);
+            Tracer.log(TAG, "activateUser.exception: ", e);
         }
     }
 
     private void deactivateUser(){
-        Log.w(TAG, "deactivateUser");
+        Tracer.log(TAG, "deactivateUser");
         try {
             mFirestoreService.deactivateUser(mUser.getUid());
         }catch (Exception e){
-            Log.w(TAG, "deactivateUser.exception: ", e);
+            Tracer.log(TAG, "deactivateUser.exception: ", e);
         }
     }
 
     private void setUser(){
-        Log.w(TAG, "setUser");
+        Tracer.log(TAG, "setUser");
         //on va checker si est deja logue et on set les infos ou pas du UserModel
         if(mAuthService.isSignedIn()){
             //on creer le user de base
@@ -238,7 +237,7 @@ public class TrackerService extends Service{
     }
 
     private void resetUser(){
-        Log.w(TAG, "resetUser");
+        Tracer.log(TAG, "resetUser");
         // on enleve de la table actif avant
         deactivateUser();
         // et on enleve du service une fois que l'on sait qu'il est retire de la table active
@@ -253,7 +252,7 @@ public class TrackerService extends Service{
     }
 
     private void keepActive(){
-        Log.w(TAG, "keepActive");
+        Tracer.log(TAG, "keepActive");
         //TODO: cronjob sur le serveur pour changer le active state en cas de trop long
         // garde le user active dans la DB, sinon sera reseter par le cronjob du serveur
         // si le updateTime est trop long de 5 minutes
@@ -261,7 +260,7 @@ public class TrackerService extends Service{
             try {
                 mFirestoreService.updateUserInfos(mUser);
             }catch (Exception e){
-                Log.w(TAG, "activateUser.exception: ", e);
+                Tracer.log(TAG, "activateUser.exception: ", e);
             }
         }
 
@@ -280,19 +279,19 @@ public class TrackerService extends Service{
 
         @Override
         public long getCounter() {
-            Log.w(TAG, "TrackerBinder.getCounter");
+            Tracer.log(TAG, "TrackerBinder.getCounter");
             return mTimer;
         }
 
         @Override
         public UserModel getUser() {
-            Log.w(TAG, "TrackerBinder.getUID");
+            Tracer.log(TAG, "TrackerBinder.getUID");
             return mUser;
         }
 
         @Override
         public void registerCallback(ITrackerBinderCallback callback){
-            Log.w(TAG, "TrackerBinder.registerCallback");
+            Tracer.log(TAG, "TrackerBinder.registerCallback");
             mBinderCallback = callback;
             //si il fait un rebind() en faisant un back dans l'application
             //il ne passera pas par unbind() alors il faut stoper le thread precedent
@@ -305,45 +304,45 @@ public class TrackerService extends Service{
 
         @Override
         public void unregisterCallback(){
-            Log.w(TAG, "TrackerBinder.unregisterCallback");
+            Tracer.log(TAG, "TrackerBinder.unregisterCallback");
             untrackCounter();
             mBinderCallback = null;
         }
 
         @Override
         public boolean isSignedIn(){
-            Log.w(TAG, "TrackerBinder.isSignedIn");
+            Tracer.log(TAG, "TrackerBinder.isSignedIn");
             return mAuthService.isSignedIn();
         }
 
         @Override
         public void signOut(){
-            Log.w(TAG, "TrackerBinder.signOut");
+            Tracer.log(TAG,"TrackerBinder.signOut");
             //on reset le user
             resetUser();
         }
 
         @Override
         public void signIn(String email, String psw){
-            Log.w(TAG, "TrackerBinder.signIn[0]");
+            Tracer.log(TAG, "TrackerBinder.signIn[email]");
             mAuthService.signInUser(email, psw);
         }
 
         @Override
         public void signIn(AuthCredential authCredential){
-            Log.w(TAG, "TrackerBinder.signIn[1]");
+            Tracer.log(TAG, "TrackerBinder.signIn[credentials]");
             mAuthService.signInUser(authCredential);
         }
 
         @Override
         public void createUser(String email, String psw){
-            Log.w(TAG, "TrackerBinder.createUser");
+            Tracer.log(TAG, "TrackerBinder.createUser");
             mAuthService.createUser(email, psw);
         }
 
         @Override
         public void onSignedIn(Object obj){
-            Log.w(TAG, "TrackerBinder.onSignedIn");
+            Tracer.log(TAG, "TrackerBinder.onSignedIn");
             //on set le user de base du service
             setUser();
             //on tranmet la reponse object au caller
@@ -353,8 +352,7 @@ public class TrackerService extends Service{
 
         @Override
         public void onSignedOut(Object obj){
-            // va etre caller par firestoreData par le listener du deactivate
-            Log.w(TAG, "TrackerBinder.onSignedOut");
+            Tracer.log(TAG, "TrackerBinder.onSignedOut");
             //on tranmet la reponse object au caller
             mBinderCallback.onSignedOut(obj);
         }

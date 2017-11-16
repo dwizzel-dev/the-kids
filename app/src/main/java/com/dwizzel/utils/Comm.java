@@ -1,8 +1,6 @@
 package com.dwizzel.utils;
 
 import android.telephony.SmsManager;
-import android.util.Log;
-import android.widget.Toast;
 
 /**
  * Created by Dwizzel on 10/11/2017.
@@ -11,14 +9,14 @@ import android.widget.Toast;
 
 public class Comm {
 
-    private static final String TAG = "TheKids.Comm";
+    private static final String TAG = "Comm";
 
     public void sendSMS(String phoneNo, String msg) {
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNo, null, msg, null, null);
         } catch (Exception e) {
-            Log.w(TAG, "sendSMS.exception: ", e);
+            Tracer.log(TAG, "sendSMS.exception: ", e);
         }
     }
 

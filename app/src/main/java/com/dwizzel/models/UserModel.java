@@ -1,6 +1,5 @@
 package com.dwizzel.models;
 
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
@@ -23,6 +22,12 @@ public class UserModel {
     public UserModel(String email, String uid) {
         this.email = email;
         this.uid = uid;
+    }
+
+    public UserModel(String email, String uid, String position) {
+        this.email = email;
+        this.uid = uid;
+        this.position = position;
     }
 
     public String getEmail() {

@@ -1,8 +1,8 @@
 package com.dwizzel.services;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
+import com.dwizzel.utils.Tracer;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -44,7 +44,7 @@ class FirestoreService {
         }
     }
 
-    private final static String TAG = "TheKids.FirestoreData";
+    private final static String TAG = "FirestoreService";
     private static FirestoreService sInst;
     private FirebaseFirestore mDb;
 
@@ -60,7 +60,7 @@ class FirestoreService {
     }
 
     private void setUserInfos(UserModel user){
-        Log.w(TAG, String.format("setUserInfos: %s | %s", user.getEmail(), user.getUid()));
+        Tracer.log(TAG, String.format("setUserInfos: %s | %s", user.getEmail(), user.getUid()));
         try{
             //add the new user collection with his id
             mDb.collection(DB.Users.collection).document(user.getUid())
@@ -68,23 +68,23 @@ class FirestoreService {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
-                            Log.w(TAG, "createUser.addOnSuccessListener");
+                            Tracer.log(TAG, "createUser.addOnSuccessListener");
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "createUser.addOnFailureListener.Exception: ", e);
+                            Tracer.log(TAG, "createUser.addOnFailureListener.Exception: ", e);
                         }
                     });
         }catch (Exception e){
-            Log.w(TAG, "createUser.Exception: ", e);
+            Tracer.log(TAG, "createUser.Exception: ", e);
         }
 
     }
 
     void updateUserInfos(UserModel user){
-        Log.w(TAG, String.format("updateUserInfos: %s", user.getUid()));
+        Tracer.log(TAG, String.format("updateUserInfos: %s", user.getUid()));
         try{
             //https://firebase.google.com/docs/firestore/manage-data/add-data
             //update juste le updateTime
@@ -96,56 +96,56 @@ class FirestoreService {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
-                            Log.w(TAG, "updateUserInfos.addOnSuccessListener");
+                            Tracer.log(TAG, "updateUserInfos.addOnSuccessListener");
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "updateUserInfos.addOnFailureListener.Exception: ", e);
+                            Tracer.log(TAG,"updateUserInfos.addOnFailureListener.Exception: ", e);
                         }
                     });
         }catch (Exception e){
-            Log.w(TAG, "updateUserInfos.Exception: ", e);
+            Tracer.log(TAG, "updateUserInfos.Exception: ", e);
         }
 
     }
 
     void getUserInfos(final UserModel user){
-        Log.w(TAG, String.format("getUserInfos: %s | %s", user.getEmail(), user.getUid()));
+        Tracer.log(TAG, String.format("getUserInfos: %s | %s", user.getEmail(), user.getUid()));
         try{
             mDb.collection(DB.Users.collection).document(user.getUid())
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            Log.w(TAG, "getUserInfos.onComplete");
+                            Tracer.log(TAG, "getUserInfos.onComplete");
                             if (task.isSuccessful()) {
                                 DocumentSnapshot document = task.getResult();
-                                Log.w(TAG, "getUserInfos.document: " +  document.exists());
+                                Tracer.log(TAG, "getUserInfos.document: " +  document.exists());
                                 if(document.exists()){
-                                    Log.w(TAG, "DATA: " + document.getData());
+                                    Tracer.log(TAG, "DATA: " + document.getData());
                                     //vu qu'il est deja creer on fait un updateTime
                                     updateUserInfos(user);
                                 }else{
-                                    Log.w(TAG, "no document, creating new user");
+                                    Tracer.log(TAG, "no document, creating new user");
                                     // si on a rien alors on a un nouveau user
                                     // alors on l'enregistre dans la collection
                                     // "thekids-dab99 > users"
                                     setUserInfos(user);
                                 }
                             } else {
-                                Log.w(TAG, "getUserInfos.onComplete.exception: ", task.getException());
+                                Tracer.log(TAG, "getUserInfos.onComplete.exception: ", task.getException());
                             }
                         }
                     });
         }catch (Exception e){
-            Log.w(TAG, "getUserInfos.Exception: ", e);
+            Tracer.log(TAG, "getUserInfos.Exception: ", e);
         }
     }
 
     void activateUser(final String uid, String position){
-        Log.w(TAG, String.format("activateUser: %s | %s", uid, position));
+        Tracer.log(TAG, String.format("activateUser: %s | %s", uid, position));
         //get a timestamp for activity timer pending
         try{
             //add the new user collection with his id
@@ -155,24 +155,24 @@ class FirestoreService {
                         @Override
                         public void onSuccess(Void avoid) {
                             //on set le dernier UID actif pour la verif au delete
-                            Log.w(TAG, "activateUser.addOnSuccessListener: " + uid);
+                            Tracer.log(TAG, "activateUser.addOnSuccessListener: " + uid);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "activateUser.addOnFailureListener.Exception: ", e);
+                            Tracer.log(TAG, "activateUser.addOnFailureListener.Exception: ", e);
                         }
                     });
         }catch (Exception e){
-            Log.w(TAG, "activateUser.Exception: ", e);
+            Tracer.log(TAG, "activateUser.Exception: ", e);
         }
 
     }
 
     void deactivateUser(final String uid){
         //TODO: on risque d'avoir le retour du listener apres, car le Auth sera deja signOut
-        Log.w(TAG, String.format("deactivateUser: %s", uid));
+        Tracer.log(TAG, String.format("deactivateUser: %s", uid));
         //minor check
         if(uid != null && !uid.equals("")) {
             //get a timestamp for activity timer pending
@@ -183,20 +183,20 @@ class FirestoreService {
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void avoid) {
-                                Log.w(TAG, "deactivateUser.addOnSuccessListener: " + uid);
+                                Tracer.log(TAG, "deactivateUser.addOnSuccessListener: " + uid);
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "deactivateUser.addOnFailureListener.Exception: ", e);
+                                Tracer.log(TAG, "deactivateUser.addOnFailureListener.Exception: ", e);
                             }
                         });
             } catch (Exception e) {
-                Log.w(TAG, "deactivateUser.Exception: ", e);
+                Tracer.log(TAG, "deactivateUser.Exception: ", e);
             }
         }else {
-            Log.w(TAG, "deactivateUser.Exception: ++ UID is empty ++");
+            Tracer.log(TAG, "deactivateUser.Exception: ++ UID is empty ++");
         }
     }
 

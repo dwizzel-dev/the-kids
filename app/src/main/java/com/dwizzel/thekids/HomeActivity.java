@@ -2,33 +2,33 @@ package com.dwizzel.thekids;
 
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 
 public class HomeActivity extends BaseActivity {
 
-    private static final String TAG = "TheKids.HomeActivity";
+    private static final String TAG = "HomeActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
-        Log.w(TAG, "onCreate");
+        Tracer.log(TAG, "onCreate");
         super.onCreate(savedInstanceState);
     }
 
     @Override
     protected void onDestroy(){
-        Log.w(TAG, "onDestroy");
+        Tracer.log(TAG, "onDestroy");
         super.onDestroy();
     }
 
     @Override
     protected void startActivity(){
-        Log.w(TAG, "startActivity");
+        Tracer.log(TAG, "startActivity");
         super.startActivity();
         setContentView(R.layout.activity_home);
         setTitle(R.string.main_title);

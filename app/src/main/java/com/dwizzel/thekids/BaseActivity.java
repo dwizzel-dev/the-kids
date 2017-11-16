@@ -8,11 +8,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-
 import com.dwizzel.models.UserModel;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.*;
+import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 import java.util.Observable;
 import java.util.Observer;
@@ -23,7 +22,7 @@ import java.util.Observer;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    private static final String TAGBASE = "TheKids.BaseActivity";
+    private static final String TAGBASE = "BaseActivity";
     private UserModel mUser;
     private String mUserId;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
@@ -32,7 +31,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.w(TAGBASE, "onServiceConnected");
+            Tracer.log(TAGBASE, "onServiceConnected");
             mTrackerBinder = (TrackerService.TrackerBinder)service;
             mTrackerBinder.registerCallback(mServiceCallback);
             mServiceBoundObservable.set(true);
@@ -40,7 +39,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.w(TAGBASE, "onServiceDisconnected");
+            Tracer.log(TAGBASE, "onServiceDisconnected");
             mServiceBoundObservable.set(false);
             mTrackerBinder = null;
         }
@@ -61,10 +60,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
-        private static final String TAG = "TheKids.ITrackerBinder";
+        private static final String TAG = "BaseActivity.ITrackerBinder";
         @Override
         public void handleResponse(long counter){
-            Log.d(TAG, String.format("thread counter: %d", counter));
+            Tracer.log(TAG, String.format("thread counter: %d", counter));
         }
         @Override
         public void onSignedIn(Object obj){
@@ -78,28 +77,28 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-        Log.w(TAGBASE, "onPostCreate");
+        Tracer.log(TAGBASE, "onPostCreate");
         super.onPostCreate(savedInstanceState);
 
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.w(TAGBASE, "onCreate");
+        Tracer.log(TAGBASE, "onCreate");
         super.onCreate(savedInstanceState);
         bindToAuthService();
     }
 
     @Override
     protected void onStart() {
-        Log.w(TAGBASE, "onStart");
+        Tracer.log(TAGBASE, "onStart");
         super.onStart();
         checkIfSignedIn();
     }
 
     @Override
     protected void onDestroy(){
-        Log.w(TAGBASE, "onDestroy");
+        Tracer.log(TAGBASE, "onDestroy");
         super.onDestroy();
         //clear le binder
         if(mTrackerBinder != null) {
@@ -113,7 +112,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        Log.w(TAGBASE, "onStop");
+        Tracer.log(TAGBASE, "onStop");
         super.onStop();
     }
 
@@ -123,11 +122,11 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void startActivity(){
-        Log.w(TAGBASE, "startActivity");
+        Tracer.log(TAGBASE, "startActivity");
     }
 
     private void checkIfSignedIn(){
-        Log.w(TAGBASE, "checkIfSignedIn");
+        Tracer.log(TAGBASE, "checkIfSignedIn");
 
         //TODO: trouver un moyen pour ne pas qu'il restart le checkUserInfos() du startMainActivity()
         if( mTrackerBinder != null && mServiceBoundObservable.get()){
@@ -152,12 +151,12 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             }
         }else {
-            Log.w(TAGBASE, "checkIfSigneddIn: service not bound yet");
+            Tracer.log(TAGBASE, "checkIfSigneddIn: service not bound yet");
             //on va mettre un observer dessus pour caller la method une fois connecte
             mServiceBoundObservable.addObserver(new Observer() {
                 @Override
                 public void update(Observable observable, Object o) {
-                    Log.w(TAGBASE, "checkIfSigneddIn.mServiceBoundObservable.update: " + o);
+                    Tracer.log(TAGBASE, "checkIfSigneddIn.mServiceBoundObservable.update: " + o);
                     //plus besoin d'etre observe
                     observable.deleteObserver(this);
                     //si ok on check
@@ -170,7 +169,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void signOutUser(){
-        Log.w(TAGBASE, "signOutUser");
+        Tracer.log(TAGBASE, "signOutUser");
         //on avretit le service que l'on sign out
         mTrackerBinder.signOut();
         //show le msg

@@ -15,13 +15,13 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import com.dwizzel.Const;
 import com.dwizzel.models.UserModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
+import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -38,7 +38,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 
 public class FacebookLoginActivity extends AppCompatActivity {
 
-    private final static String TAG = "TheKids.FacebookLogin";
+    private final static String TAG = "FacebookLoginActivity";
     private CallbackManager mFacebookCallbackManager;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
@@ -46,7 +46,7 @@ public class FacebookLoginActivity extends AppCompatActivity {
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.w(TAG, "onServiceConnected");
+            Tracer.log(TAG, "onServiceConnected");
             mTrackerBinder = (TrackerService.TrackerBinder)service;
             mTrackerBinder.registerCallback(mServiceCallback);
             mServiceBoundObservable.set(true);
@@ -54,7 +54,7 @@ public class FacebookLoginActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.w(TAG, "onServiceDisconnected");
+            Tracer.log(TAG, "onServiceDisconnected");
             mServiceBoundObservable.set(false);
             mTrackerBinder = null;
         }
@@ -75,7 +75,7 @@ public class FacebookLoginActivity extends AppCompatActivity {
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
 
-        private static final String TAG = "TheKids.ITrackerBinder";
+        private static final String TAG = "FacebookLoginActivity.ITrackerBinder";
 
         @Override
         public void handleResponse(long counter){
@@ -83,7 +83,7 @@ public class FacebookLoginActivity extends AppCompatActivity {
         }
         @Override
         public void onSignedIn(Object obj){
-            Log.d(TAG, "onSignedIn");
+            Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
             Utils.getInstance().hideProgressDialog();
             //check les erreurs et exception
@@ -102,13 +102,13 @@ public class FacebookLoginActivity extends AppCompatActivity {
         }
         @Override
         public void onSignedOut(Object obj){
-            Log.d(TAG, "onSignedOut");
+            Tracer.log(TAG, "onSignedOut");
         }
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.w(TAG, "onCreate");
+        Tracer.log(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         bindToAuthService();
     }
@@ -134,7 +134,7 @@ public class FacebookLoginActivity extends AppCompatActivity {
     }
 
     protected void setFacebookLogin(){
-        Log.w(TAG, "setFacebookLogin");
+        Tracer.log(TAG, "setFacebookLogin");
         //facebook
         LoginButton loginButton = findViewById(R.id.facebook_button);
         loginButton.setReadPermissions("public_profile", "email");
@@ -144,17 +144,17 @@ public class FacebookLoginActivity extends AppCompatActivity {
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult){
-                        Log.w(TAG, "mFacebookCallbackManager.onSuccess");
+                        Tracer.log(TAG, "mFacebookCallbackManager.onSuccess");
                         signInUser(FacebookAuthProvider.getCredential(
                                 loginResult.getAccessToken().getToken()));
                     }
                     @Override
                     public void onCancel() {
-                        Log.w(TAG, "mFacebookCallbackManager.onCancel");
+                        Tracer.log(TAG, "mFacebookCallbackManager.onCancel");
                     }
                     @Override
                     public void onError(FacebookException e) {
-                        Log.w(TAG, "mFacebookCallbackManager.execption:", e);
+                        Tracer.log(TAG, "mFacebookCallbackManager.execption:", e);
                     }
                 });
     }

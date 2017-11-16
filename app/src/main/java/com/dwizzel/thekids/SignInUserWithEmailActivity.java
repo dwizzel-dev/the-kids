@@ -7,7 +7,6 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,11 +18,12 @@ import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
+import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 
 public class SignInUserWithEmailActivity extends AppCompatActivity {
 
-    private static final String TAG = "TheKids.SignInUserWithEmail";
+    private static final String TAG = "SignInUserWithEmail";
     private String email;
     private String psw;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
@@ -32,7 +32,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.w(TAG, "onServiceConnected");
+            Tracer.log(TAG, "onServiceConnected");
             mTrackerBinder = (TrackerService.TrackerBinder)service;
             mTrackerBinder.registerCallback(mServiceCallback);
             mServiceBoundObservable.set(true);
@@ -40,7 +40,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.w(TAG, "onServiceDisconnected");
+            Tracer.log(TAG, "onServiceDisconnected");
             mServiceBoundObservable.set(false);
             mTrackerBinder = null;
         }
@@ -61,7 +61,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
 
-        private static final String TAG = "TheKids.ITrackerBinder";
+        private static final String TAG = "ITrackerBinder";
 
         @Override
         public void handleResponse(long counter){
@@ -69,7 +69,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         }
         @Override
         public void onSignedIn(Object obj){
-            Log.d(TAG, "onSignedIn");
+            Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
             Utils.getInstance().hideProgressDialog();
             //check les erreurs et exception
@@ -94,7 +94,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         }
         @Override
         public void onSignedOut(Object obj){
-            Log.d(TAG, "onSignedOut");
+            Tracer.log(TAG, "onSignedOut");
         }
     };
 
@@ -114,7 +114,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy(){
-        Log.w(TAG, "onDestroy");
+        Tracer.log(TAG, "onDestroy");
         super.onDestroy();
         //clear le binder
         if(mTrackerBinder != null) {

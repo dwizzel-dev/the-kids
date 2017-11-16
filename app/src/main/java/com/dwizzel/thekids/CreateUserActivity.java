@@ -5,12 +5,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.dwizzel.utils.Tracer;
+
 public class CreateUserActivity extends FacebookLoginActivity {
 
-    private final static String TAG = "TheKids.CreateUserActiv";
+    private final static String TAG = "CreateUserActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Tracer.log(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_user);
         setTitle(R.string.create_user_title);

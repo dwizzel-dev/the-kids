@@ -6,12 +6,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.dwizzel.utils.Tracer;
+
 public class LoginActivity extends AppCompatActivity {
 
-    private final static String TAG = "TheKids.LoginActivity";
+    private final static String TAG = "LoginActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Tracer.log(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         //view
         setContentView(R.layout.activity_login);
@@ -40,7 +43,14 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy(){
+        Tracer.log(TAG, "onDestroy");
+        super.onDestroy();
+    }
+
+    @Override
     protected void onStart(){
+        Tracer.log(TAG, "onStart");
         super.onStart();
     }
 
