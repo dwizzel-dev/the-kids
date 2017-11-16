@@ -42,14 +42,12 @@ public class FirestoreData {
         return sInst;
     }
 
-    public void createUser(String username, String uid){
-        Log.w(TAG, String.format("createUser: %s | %s", username, uid));
+    public void createUser(UserModel user){
+        Log.w(TAG, String.format("createUser: %s | %s", user.getEmail(), user.getUid()));
         try{
-            //use a models
-            UserModel userModel = new UserModel(username, uid);
             //add the new user collection with his id
-            mDb.collection("users").document(uid)
-                    .set(userModel)
+            mDb.collection("users").document(user.getUid())
+                    .set(user)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
@@ -68,10 +66,10 @@ public class FirestoreData {
 
     }
 
-    public void getUserinfos(final String username, final String uid){
-        Log.w(TAG, String.format("getUserinfos: %s | %s", username, uid));
+    public void getUserinfos(final UserModel user){
+        Log.w(TAG, String.format("getUserinfos: %s | %s", user.getEmail(), user.getUid()));
         try{
-            mDb.collection("users").document(uid)
+            mDb.collection("users").document(user.getUid())
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
@@ -87,7 +85,7 @@ public class FirestoreData {
                                     // si on a rien alors on a un nouveau user
                                     // alors on l'enregistre dans la collection
                                     // "thekids-dab99 > users"
-                                    createUser(username, uid);
+                                    createUser(user);
                                 }
                             } else {
                                 Log.w(TAG, "getUserinfos.onComplete.exception: ", task.getException());
@@ -140,18 +138,20 @@ public class FirestoreData {
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void avoid) {
-                                Log.w(TAG, "activateUser.addOnSuccessListener");
+                                Log.w(TAG, "deactivateUser.addOnSuccessListener");
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "activateUser.addOnFailureListener.Exception: ", e);
+                                Log.w(TAG, "deactivateUser.addOnFailureListener.Exception: ", e);
                             }
                         });
             } catch (Exception e) {
                 Log.w(TAG, "deactivateUser.Exception: ", e);
             }
+        }else {
+            Log.w(TAG, "deactivateUser.Exception: ++ UID is empty ++");
         }
     }
 

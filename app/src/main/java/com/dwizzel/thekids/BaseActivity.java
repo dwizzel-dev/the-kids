@@ -9,6 +9,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import com.dwizzel.models.UserModel;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.*;
 import com.dwizzel.utils.Utils;
@@ -22,7 +24,7 @@ import java.util.Observer;
 public abstract class BaseActivity extends AppCompatActivity {
 
     private static final String TAGBASE = "TheKids.BaseActivity";
-    private String mUsername;
+    private UserModel mUser;
     private String mUserId;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
@@ -59,15 +61,19 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
-        private static final String TAG = "TheKids.ITrackerBinderCallback";
+        private static final String TAG = "TheKids.ITrackerBinder";
         @Override
         public void handleResponse(long counter){
             Log.d(TAG, String.format("thread counter: %d", counter));
         }
         @Override
-        public void onSignedIn(Object obj){}
+        public void onSignedIn(Object obj){
+
+        }
         @Override
-        public void onSignedOut(Object obj){}
+        public void onSignedOut(Object obj){
+
+        }
     };
 
     @Override
@@ -111,12 +117,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    public String getUsername(){
-        return mUsername;
-    }
-
-    public String getUserId(){
-        return mUserId;
+    public UserModel getUser(){
+        //accessible via les classes qui extend celle-ci
+        return mUser;
     }
 
     protected void startActivity(){
@@ -140,12 +143,9 @@ public abstract class BaseActivity extends AppCompatActivity {
             }else{
                 //si les infos sur l'usager ne sont setter, comme dans un retour de sign In
                 //car ceux qui extends cette class vont l'utiliser pour faire des call a firestoreDB
-                if(mUsername == null){
-                    mUsername = mTrackerBinder.getUserLoginName();
-                }
-                if(mUserId == null){
-                    mUserId = mTrackerBinder.getUserID();
-                }
+                if(mUser == null){
+                    mUser = mTrackerBinder.getUser();
+                    }
                 //sinon repart toujours l'activity de la classe qui extends BaseActivity
                 //si on est la c'est quand on redonne le focus a l'application
                 startActivity();

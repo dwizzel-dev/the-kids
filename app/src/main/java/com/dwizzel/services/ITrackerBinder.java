@@ -1,5 +1,6 @@
 package com.dwizzel.services;
 
+import com.dwizzel.models.UserModel;
 import com.google.firebase.auth.AuthCredential;
 
 /**
@@ -29,6 +30,8 @@ public interface ITrackerBinder {
     String getUserLoginName();
 
     String getUserID();
+
+    UserModel getUser();
 
     void onSignedOut(Object obj);
 

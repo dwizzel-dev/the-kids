@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import com.dwizzel.auth.AuthService;
+import com.dwizzel.models.UserModel;
 import com.dwizzel.utils.FirestoreData;
 import com.facebook.AccessToken;
 import com.google.firebase.auth.AuthCredential;
@@ -30,6 +31,9 @@ import java.util.TimeZone;
  *
  * NOTES: on va le faire en IBinder sans le AIDL, car pas besoin d'IPC, et j'aimerais mieux partager
  * des objets plus complexes, mais bon on l'aura pratique haha!
+ *
+ * NOTES: vu que le service peut repartir sans l'application on va chercher les infos de base et on set
+ * les infos du user dans le service
  */
 
 public class TrackerService extends Service{
@@ -41,6 +45,7 @@ public class TrackerService extends Service{
     private ITrackerBinderCallback mBinderCallback;
     private AuthService mAuthService;
     private FirestoreData mFirestoreData;
+    private UserModel mUser;
 
     @NonNull
     public static Intent getIntent(Context context) {
@@ -77,7 +82,10 @@ public class TrackerService extends Service{
         try {
             mAuthService = new AuthService(getApplicationContext());
             mFirestoreData = FirestoreData.getInstance();
-            startTimer();
+            //start running time elapsed
+            startRunningTime();
+            //check pour user infos si etait connecte
+            setUser();
         }catch(Exception e){
             Log.w(TAG, "onCreate.exception: ", e);
         }
@@ -109,8 +117,8 @@ public class TrackerService extends Service{
         return simpleDateFormat.format(new Date(mTimer*1000));
     }
 
-    private void startTimer() {
-        Log.w(TAG, "startTimer");
+    private void startRunningTime() {
+        Log.w(TAG, "startRunningTime");
         if(mThTimer == null) {
             try {
                 mThTimer = new Thread(new Runnable() {
@@ -191,29 +199,59 @@ public class TrackerService extends Service{
     }
 
     private void getUserInfos(){
+        Log.w(TAG, "getUserInfos");
        try {
-           mFirestoreData.getUserinfos(mAuthService.getUserLoginName(), mAuthService.getUserID());
+           mFirestoreData.getUserinfos(mUser);
         }catch (Exception e){
             Log.w(TAG, "getUserInfos.exception: ", e);
         }
     }
 
     private void activateUser(){
+        Log.w(TAG, "activateUser");
         try {
-            mFirestoreData.activateUser(mAuthService.getUserID(), "here");
+            mFirestoreData.activateUser(mUser.getUid(), "here");
         }catch (Exception e){
             Log.w(TAG, "activateUser.exception: ", e);
         }
     }
 
     private void deactivateUser(){
+        Log.w(TAG, "deactivateUser");
         try {
-            mFirestoreData.deactivateUser(mAuthService.getUserID());
+            mFirestoreData.deactivateUser(mUser.getUid());
         }catch (Exception e){
             Log.w(TAG, "deactivateUser.exception: ", e);
         }
     }
 
+    private void setUser(){
+        Log.w(TAG, "setUser");
+        //on va checker si est deja logue et on set les infos ou pas du UserModel
+        if(mAuthService.isSignedIn()){
+            //on creer le user de base
+            mUser = new UserModel(mAuthService.getUserLoginName(), mAuthService.getUserID());
+            //on va chercher les infos du user ou on les creer
+            getUserInfos();
+            //on active le user dans la liste des users actifs
+            activateUser();
+        }
+    }
+
+    private void resetUser(){
+        Log.w(TAG, "resetUser");
+        // on enleve de la table actif avant
+        deactivateUser();
+        // et on enleve du service une fois que l'on sait qu'il est retire de la table active
+        // sinon ne sera plus logue alors plus capable de faire un delete vu qu'il faut etre logiue
+        // et aussi car une fois relogue c'est la qu'il va recevoir le retour du
+        // deactivateUser.addOnSuccessListener
+        // mais on va le faire avec un script cote serveur si n'est pas actif depuix X temps
+        // alors il le delete
+        mAuthService.signOut();
+        //on reset
+        mUser = null;
+    }
 
 
 
@@ -236,13 +274,19 @@ public class TrackerService extends Service{
         @Override
         public String getUserLoginName() {
             Log.w(TAG, "TrackerBinder.getUserLoginName");
-            return mAuthService.getUserLoginName();
+            return mUser.getEmail();
         }
 
         @Override
         public String getUserID() {
             Log.w(TAG, "TrackerBinder.getUID");
-            return mAuthService.getUserID();
+            return mUser.getUid();
+        }
+
+        @Override
+        public UserModel getUser() {
+            Log.w(TAG, "TrackerBinder.getUID");
+            return mUser;
         }
 
         @Override
@@ -274,10 +318,8 @@ public class TrackerService extends Service{
         @Override
         public void signOut(){
             Log.w(TAG, "TrackerBinder.signOut");
-            //on enleve de la table actif avant
-            deactivateUser();
-            // et on enleve du service sino ne sera plus logue
-            mAuthService.signOut();
+            //on reset le user
+            resetUser();
         }
 
         @Override
@@ -301,10 +343,8 @@ public class TrackerService extends Service{
         @Override
         public void onSignedIn(Object obj){
             Log.w(TAG, "TrackerBinder.onSignedIn");
-            //on va chercher les infos du user ou on les creer
-            getUserInfos();
-            //on active le user dans la liste des users actifs
-            activateUser();
+            //on set le user de base du service
+            setUser();
             //on tranmet la reponse object au caller
             mBinderCallback.onSignedIn(obj);
         }
