@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.dwizzel.Const;
 import com.dwizzel.models.UserModel;
 import com.dwizzel.objects.ServiceResponseObject;
+import com.dwizzel.objects.UserObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
@@ -171,9 +172,11 @@ public class FacebookLoginActivity extends AppCompatActivity {
 
     private void userIsSignedInRoutine(){
         //on affiche qu'il est logue
-        Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
-                getResources().getString(R.string.toast_connected_as,
-                        ((UserModel)mTrackerBinder.getUser()).getEmail()));
+        if(mTrackerBinder != null) {
+            Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
+                    getResources().getString(R.string.toast_connected_as,
+                            mTrackerBinder.getUser().getEmail()));
+        }
         //on va a activity principal
         Intent intent = new Intent(FacebookLoginActivity.this,
                 HomeActivity.class);

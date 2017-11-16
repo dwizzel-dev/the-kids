@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import com.dwizzel.models.UserModel;
+import com.dwizzel.objects.UserObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.*;
 import com.dwizzel.utils.Tracer;
@@ -23,7 +24,7 @@ import java.util.Observer;
 public abstract class BaseActivity extends AppCompatActivity {
 
     private static final String TAGBASE = "BaseActivity";
-    private UserModel mUser;
+    private UserObject mUser;
     private String mUserId;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
@@ -116,7 +117,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    public UserModel getUser(){
+    public UserObject getUser(){
         //accessible via les classes qui extend celle-ci
         return mUser;
     }

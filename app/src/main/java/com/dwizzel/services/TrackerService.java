@@ -7,7 +7,10 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import com.dwizzel.models.PositionModel;
 import com.dwizzel.models.UserModel;
+import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
 import com.google.firebase.auth.AuthCredential;
 import java.text.SimpleDateFormat;
@@ -42,7 +45,7 @@ public class TrackerService extends Service{
     private ITrackerBinderCallback mBinderCallback;
     private AuthService mAuthService;
     private FirestoreService mFirestoreService;
-    private UserModel mUser;
+    private UserObject mUser;
 
     @NonNull
     public static Intent getIntent(Context context) {
@@ -199,7 +202,7 @@ public class TrackerService extends Service{
     private void getUserInfos(){
         Tracer.log(TAG, "getUserInfos");
         try {
-           mFirestoreService.getUserInfos(mUser);
+           mFirestoreService.getUserInfos(mUser.toUserModel());
         }catch (Exception e){
             Tracer.log(TAG, "getUserInfos.exception: ", e);
         }
@@ -208,7 +211,7 @@ public class TrackerService extends Service{
     private void activateUser(){
         Tracer.log(TAG, "activateUser");
         try {
-            mFirestoreService.activateUser(mUser.getUid(), null);
+            mFirestoreService.activateUser(mUser.getUserId());
         }catch (Exception e){
             Tracer.log(TAG, "activateUser.exception: ", e);
         }
@@ -217,7 +220,7 @@ public class TrackerService extends Service{
     private void deactivateUser(){
         Tracer.log(TAG, "deactivateUser");
         try {
-            mFirestoreService.deactivateUser(mUser.getUid());
+            mFirestoreService.deactivateUser(mUser.getUserId());
         }catch (Exception e){
             Tracer.log(TAG, "deactivateUser.exception: ", e);
         }
@@ -228,7 +231,7 @@ public class TrackerService extends Service{
         //on va checker si est deja logue et on set les infos ou pas du UserModel
         if(mAuthService.isSignedIn()){
             //on creer le user de base
-            mUser = new UserModel(mAuthService.getUserLoginName(), mAuthService.getUserID());
+            mUser = new UserObject(mAuthService.getEmail(), mAuthService.getUserID());
             //on va chercher les infos du user ou on les creer
             getUserInfos();
             //on active le user dans la liste des users actifs
@@ -258,7 +261,7 @@ public class TrackerService extends Service{
         // si le updateTime est trop long de 5 minutes
         if(mAuthService.isSignedIn()){
             try {
-                mFirestoreService.updateUserInfos(mUser);
+                mFirestoreService.updateUserInfos(mUser.toUserModel());
             }catch (Exception e){
                 Tracer.log(TAG, "activateUser.exception: ", e);
             }
@@ -284,7 +287,7 @@ public class TrackerService extends Service{
         }
 
         @Override
-        public UserModel getUser() {
+        public UserObject getUser() {
             Tracer.log(TAG, "TrackerBinder.getUID");
             return mUser;
         }

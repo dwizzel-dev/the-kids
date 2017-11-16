@@ -144,8 +144,8 @@ class FirestoreService {
         }
     }
 
-    void activateUser(final String uid, String position){
-        Tracer.log(TAG, String.format("activateUser: %s | %s", uid, position));
+    void activateUser(final String uid){
+        Tracer.log(TAG, String.format("activateUser: %s", uid));
         //get a timestamp for activity timer pending
         try{
             //add the new user collection with his id

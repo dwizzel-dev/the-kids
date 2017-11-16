@@ -6,6 +6,8 @@ package com.dwizzel;
 
 public final class Const {
 
+
+
     public static final class notif {
 
         public static final int TYPE_NOTIF_ERROR = 0x00000001;
@@ -47,6 +49,15 @@ public final class Const {
         public static final int NO_CONNECTION = 0x00000302;
         public static final int NULL_POINTER = 0x00000303;
 
+    }
+
+    public static final class user {
+
+        public static final int TYPE_EMAIL = 0x00000401;
+        public static final int TYPE_GOOGLE = 0x00000402;
+        public static final int TYPE_FACEBOOK = 0x00000403;
+        public static final int TYPE_INSTAGRAM = 0x00000404;
+        public static final int TYPE_TWITTER = 0x00000405;
 
     }
 }

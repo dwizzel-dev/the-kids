@@ -179,9 +179,11 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
 
     private void userIsSignedInRoutine(){
         //on affiche qu'il est logue
-        Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
-                getResources().getString(R.string.toast_connected_as,
-                        ((UserModel)mTrackerBinder.getUser()).getEmail()));
+        if(mTrackerBinder != null) {
+            Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
+                    getResources().getString(R.string.toast_connected_as,
+                            mTrackerBinder.getUser().getEmail()));
+        }
         //on va a activity principal
         Intent intent = new Intent(SignInUserWithEmailActivity.this,
                 HomeActivity.class);

@@ -196,9 +196,11 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
 
     private void userIsCreatedRoutine(){
         //on affiche qu'il est logue
-        Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
-                getResources().getString(R.string.toast_connected_as,
-                        ((UserModel)mTrackerBinder.getUser()).getEmail()));
+        if(mTrackerBinder != null) {
+            Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
+                    getResources().getString(R.string.toast_connected_as,
+                            mTrackerBinder.getUser().getEmail()));
+        }
         //on va a activity principal
         Intent intent = new Intent(CreateUserWithEmailActivity.this,
                 HomeActivity.class);
