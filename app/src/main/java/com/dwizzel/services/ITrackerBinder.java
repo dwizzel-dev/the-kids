@@ -27,10 +27,6 @@ public interface ITrackerBinder {
 
     void onSignedIn(Object obj);
 
-    String getUserLoginName();
-
-    String getUserID();
-
     UserModel getUser();
 
     void onSignedOut(Object obj);

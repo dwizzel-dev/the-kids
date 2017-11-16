@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import com.dwizzel.Const;
+import com.dwizzel.models.UserModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.ITrackerBinderCallback;
@@ -37,7 +38,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 
 public class FacebookLoginActivity extends AppCompatActivity {
 
-    private final static String TAG = "TheKids.FacebookLoginAc";
+    private final static String TAG = "TheKids.FacebookLogin";
     private CallbackManager mFacebookCallbackManager;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
@@ -172,7 +173,7 @@ public class FacebookLoginActivity extends AppCompatActivity {
         //on affiche qu'il est logue
         Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
                 getResources().getString(R.string.toast_connected_as,
-                        mTrackerBinder.getUserLoginName()));
+                        ((UserModel)mTrackerBinder.getUser()).getEmail()));
         //on va a activity principal
         Intent intent = new Intent(FacebookLoginActivity.this,
                 HomeActivity.class);

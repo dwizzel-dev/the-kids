@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.dwizzel.utils.FirestoreData;
 import com.dwizzel.utils.Utils;
 
 public class HomeActivity extends BaseActivity {

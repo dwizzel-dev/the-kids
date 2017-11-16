@@ -1,4 +1,4 @@
-package com.dwizzel.utils;
+package com.dwizzel.services;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -126,6 +126,7 @@ public class FirestoreData {
 
     }
 
+    //TODO: on risque d'avoir le retour du listener apres, car le Auth sera deja signOut
     public void deactivateUser(String uid){
         Log.w(TAG, String.format("deactivateUser: %s", uid));
         //minor check

@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.dwizzel.Const;
+import com.dwizzel.models.UserModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.ITrackerBinderCallback;
@@ -22,7 +23,7 @@ import com.dwizzel.utils.Utils;
 
 public class SignInUserWithEmailActivity extends AppCompatActivity {
 
-    private static final String TAG = "TheKids.SignInUserWithEmailActivity";
+    private static final String TAG = "TheKids.SignInUserWithEmail";
     private String email;
     private String psw;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
@@ -180,7 +181,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         //on affiche qu'il est logue
         Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
                 getResources().getString(R.string.toast_connected_as,
-                        mTrackerBinder.getUserLoginName()));
+                        ((UserModel)mTrackerBinder.getUser()).getEmail()));
         //on va a activity principal
         Intent intent = new Intent(SignInUserWithEmailActivity.this,
                 HomeActivity.class);

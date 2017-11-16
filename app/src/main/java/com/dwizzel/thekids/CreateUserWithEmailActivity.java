@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Gravity;
 
 import com.dwizzel.Const;
+import com.dwizzel.models.UserModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.ITrackerBinderCallback;
@@ -25,7 +26,7 @@ import com.dwizzel.utils.Utils;
 
 public class CreateUserWithEmailActivity extends AppCompatActivity {
 
-    private static final String TAG = "TheKids.CreateUserWithEmailActivity";
+    private static final String TAG = "TheKids.CreateUserWithEmail";
     private String email = "";
     private String psw = "";
     private Integer currFragmentNum;
@@ -197,7 +198,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         //on affiche qu'il est logue
         Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
                 getResources().getString(R.string.toast_connected_as,
-                        mTrackerBinder.getUserLoginName()));
+                        ((UserModel)mTrackerBinder.getUser()).getEmail()));
         //on va a activity principal
         Intent intent = new Intent(CreateUserWithEmailActivity.this,
                 HomeActivity.class);

@@ -8,10 +8,8 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import com.dwizzel.auth.AuthService;
+
 import com.dwizzel.models.UserModel;
-import com.dwizzel.utils.FirestoreData;
-import com.facebook.AccessToken;
 import com.google.firebase.auth.AuthCredential;
 
 import java.text.SimpleDateFormat;
@@ -63,7 +61,7 @@ public class TrackerService extends Service{
     @Override
     public IBinder onBind(Intent intent) {
         Log.w(TAG, "onBind:" + intent);
-        return mTackerBinder;
+        return mTrackerBinder;
     }
 
     @Override
@@ -80,7 +78,7 @@ public class TrackerService extends Service{
         Log.w(TAG, "onCreate");
         super.onCreate();
         try {
-            mAuthService = new AuthService(getApplicationContext());
+            mAuthService = new AuthService(getApplicationContext(), mTrackerBinder);
             mFirestoreData = FirestoreData.getInstance();
             //start running time elapsed
             startRunningTime();
@@ -96,7 +94,7 @@ public class TrackerService extends Service{
         Log.w(TAG, "onUnbind:" + intent);
         //si clear le callback
         try {
-            ((TrackerService.TrackerBinder) mTackerBinder).unregisterCallback();
+            ((TrackerService.TrackerBinder) mTrackerBinder).unregisterCallback();
         }catch (Exception e){
             Log.w(TAG, "onUnbind.Exception: ", e);
         }
@@ -261,7 +259,7 @@ public class TrackerService extends Service{
 
 
     //TODO: pas oublier de faire rouler dans le meme process
-    private final IBinder mTackerBinder = new TrackerBinder();
+    private final IBinder mTrackerBinder = new TrackerBinder();
 
     public class TrackerBinder extends Binder implements ITrackerBinder {
 
@@ -269,18 +267,6 @@ public class TrackerService extends Service{
         public long getCounter() {
             Log.w(TAG, "TrackerBinder.getCounter");
             return mTimer;
-        }
-
-        @Override
-        public String getUserLoginName() {
-            Log.w(TAG, "TrackerBinder.getUserLoginName");
-            return mUser.getEmail();
-        }
-
-        @Override
-        public String getUserID() {
-            Log.w(TAG, "TrackerBinder.getUID");
-            return mUser.getUid();
         }
 
         @Override
@@ -325,19 +311,19 @@ public class TrackerService extends Service{
         @Override
         public void signIn(String email, String psw){
             Log.w(TAG, "TrackerBinder.signIn[0]");
-            mAuthService.signInUser(this, email, psw);
+            mAuthService.signInUser(email, psw);
         }
 
         @Override
         public void signIn(AuthCredential authCredential){
             Log.w(TAG, "TrackerBinder.signIn[1]");
-            mAuthService.signInUser(this, authCredential);
+            mAuthService.signInUser(authCredential);
         }
 
         @Override
         public void createUser(String email, String psw){
             Log.w(TAG, "TrackerBinder.createUser");
-            mAuthService.createUser(this, email, psw);
+            mAuthService.createUser(email, psw);
         }
 
         @Override
