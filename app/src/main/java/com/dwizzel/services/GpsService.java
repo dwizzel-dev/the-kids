@@ -181,7 +181,7 @@ public class GpsService implements LocationListener {
         return mCanGetLocation;
     }
 
-    PositionObject getPosition(){
+    public PositionObject getPosition(){
         return mPosition;
     }
 
@@ -192,7 +192,7 @@ public class GpsService implements LocationListener {
                 location.getLongitude(), location.getAltitude());
         //on avertit le TrackerService que notre position a change
         if(mTrackerBinder != null) {
-            mTrackerBinder.onGpsPositionUpdate(mPosition);
+            mTrackerBinder.onGpsPositionUpdate();
         }
     }
 

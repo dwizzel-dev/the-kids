@@ -237,44 +237,68 @@ public class TrackerService extends Service{
     private void setUser(){
         Tracer.log(TAG, "setUser");
         //on va checker si est deja logue et on set les infos ou pas du UserModel
+        //car peu etre un Restart de l'app ou comme un new signIn
         if(mAuthService.isSignedIn()){
             //on creer le user de base
             mUser.setEmail(mAuthService.getEmail());
             mUser.setUid(mAuthService.getUserID());
             mUser.setSigned(true);
             mUser.setActive(true);
-            //un observer pour quand le gps change d'etat de ON ou Off ou permission
+            //on check le type de authentification
+            //mUser.setLoginType(Const.user.TYPE_EMAIL);
+            //on enleve les observer precedent si il etait logue IN, OUT, IN, OUT etc...
+            mUser.deleteObservers();
+            //observer pour quand on change quelque chose au user
             mUser.addObserver(new Observer() {
                 @Override
                 public void update(Observable observable, Object o) {
-                    Tracer.log(TAG, "setUser.mUser.update: " + observable);
-                    if(((UserObject)observable).isGps()) {
-                        setUserPosition(mGpsService.getPosition());
+                    Tracer.log(TAG, "setUser.mUser.update: \n" + observable + "\n" + o);
+                    // 1 - le gps change d'etat de ON ou Off ou permission
+                    // 2 - le user est cree
+                    try{
+                        switch(((UserObject.Obj)o).getType()){
+                            case Const.notif.TYPE_NOTIF_GPS:
+                                if((boolean)((UserObject.Obj)o).getValue()){
+                                    setUserPosition();
+                                }
+                                break;
+                            case Const.notif.TYPE_NOTIF_CREATED:
+                                //il est cree ou ete cree dans la DB alors on update les infos
+                                if((boolean)((UserObject.Obj)o).getValue()) {
+                                    //on peut maintenant starter le gps
+                                    //TODO: faire un check si actif et le demander a l'usager de l'activer
+                                    if (mGpsService.startUsingGPS()) {
+                                        //pour les tests on fait comme si etait toujours actif par defaut
+                                        Tracer.log(TAG, "setUser.mUser.update.startUsingGPS: +++ true");
+                                        //ok alors on fait un update du user et de notre position dans la DB
+                                        //vu qu'il a un observer dessus c'est lui qui va caller la shot
+                                        mUser.setGps(true);
+                                    } else {
+                                        Tracer.log(TAG, "setUser.mUser.update.startUsingGPS: --- false");
+                                    }
+                                    //on update les infos dans la DB
+                                    mFirestoreService.updateUserInfos();
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+
+                    }catch (NullPointerException npe){
+                        Tracer.log(TAG, "setUser.mUser.update.NullPointerException: ", npe);
                     }
                 }
             });
             //on va chercher les infos du user sur la DB ou on les creer
             getUserInfos();
-            //start le GPS
-            //TODO: faire un check si actif et le demander a l'usager de l'activer
-            if(mGpsService.startUsingGPS()) {
-                //pour les tests on fait comme si etait toujours actif par defaut
-                Tracer.log(TAG, "setUser.mGpsService.startUsingGPS: +++ true");
-                //ok alors on fait un update du user et de notre position dans la DB
-                //vu qu'il a un observer dessus c'est lui qui va caller la shot
-                mUser.setGps(true);
-            }else{
-                Tracer.log(TAG, "setUser.mGpsService.startUsingGPS: --- false");
-            }
         }
     }
 
-    private void setUserPosition(PositionObject position){
+    private void setUserPosition(){
         Tracer.log(TAG, "setUserPosition");
         //le user object
         //si on est la c'est que le gps est On
-        //mUser.setGps(true);
-        mUser.setPosition(position);
+        mUser.setPosition(mGpsService.getPosition());
         //la db
         mFirestoreService.updateUserPosition();
     }
@@ -310,10 +334,12 @@ public class TrackerService extends Service{
         if(mAuthService.isSignedIn()){
             //on va checke les permissions du gps si etait OFF, peut-etre maintenant il est ON
             //car quand on enleve des permissions il restart, mais si on les redonne il ne fait rien
+            /*
             if(!mUser.isGps() && mGpsService.hasPermission()){
                 //vu que le user a un observer c'est lui qui va notifier que le gps est On
                 //mUser.setGps(true);
             }
+            */
             //update les infos de l'usager
             try {
                 mFirestoreService.updateUserInfos();
@@ -383,10 +409,10 @@ public class TrackerService extends Service{
             //on tranmet la reponse object au caller
             mBinderCallback.onSignedOut(obj);
         }
-        public void onGpsPositionUpdate(PositionObject position){
+        public void onGpsPositionUpdate(){
             Tracer.log(TAG, "TrackerBinder.onGpsPositionUpdate");
             //on fait un update du user et celui de la DB
-            setUserPosition(position);
+            setUserPosition();
         }
 
     }

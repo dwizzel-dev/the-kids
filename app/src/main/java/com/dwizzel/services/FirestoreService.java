@@ -78,7 +78,6 @@ class FirestoreService {
                         public void onSuccess(Void avoid) {
                             Tracer.log(TAG, "createUser.addOnSuccessListener");
                             //maintenant il est cree alors on set et cherche les infos
-                            mUser.setCreated(true);
                             getUserInfos();
                         }
                     })
@@ -131,30 +130,25 @@ class FirestoreService {
     void updateUserPosition(){
         Tracer.log(TAG, "updateUserPosition");
         try{
-            // il faut que le user soit creer avant tout
-            if(mUser.isCreated()) {
-                //update juste le updateTimePosition et position
-                mDb.collection(DB.Users.collection).document(mUser.getUid())
-                        .update(
-                                DB.Users.Field.updateTimePosition, FieldValue.serverTimestamp(),
-                                DB.Users.Field.position, mUser.toUserModel().getPosition(),
-                                DB.Users.Field.gps, mUser.isGps()
-                        )
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void avoid) {
-                                Tracer.log(TAG, "updateUserPosition.addOnSuccessListener");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Tracer.log(TAG, "updateUserPosition.addOnFailureListener.Exception: ", e);
-                            }
-                        });
-            }else{
-                Tracer.log(TAG, "updateUserPosition: user not created yet");
-            }
+            //update juste le updateTimePosition et position
+            mDb.collection(DB.Users.collection).document(mUser.getUid())
+                    .update(
+                            DB.Users.Field.updateTimePosition, FieldValue.serverTimestamp(),
+                            DB.Users.Field.position, mUser.toUserModel().getPosition(),
+                            DB.Users.Field.gps, mUser.isGps()
+                    )
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "updateUserPosition.addOnSuccessListener");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG,"updateUserPosition.addOnFailureListener.Exception: ", e);
+                        }
+                    });
         }catch (Exception e){
             Tracer.log(TAG, "updateUserPosition.Exception: ", e);
         }
@@ -177,9 +171,8 @@ class FirestoreService {
                                     Tracer.log(TAG, "DATA: " + document.getData());
                                     //on set le data du user
                                     mUser.setData(document.getData());
-                                    //vu qu'il est deja creer on fait un updateTime
+                                    //il avait deja ete cree precedement
                                     mUser.setCreated(true);
-                                    updateUserInfos();
                                 }else{
                                     Tracer.log(TAG, "no document, creating new user");
                                     // si on a rien alors on a un nouveau user

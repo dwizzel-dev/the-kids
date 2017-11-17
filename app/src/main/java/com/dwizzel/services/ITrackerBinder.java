@@ -30,6 +30,6 @@ public interface ITrackerBinder {
 
     void onSignedOut(Object obj);
 
-    void onGpsPositionUpdate(PositionObject position);
+    void onGpsPositionUpdate();
 
 }

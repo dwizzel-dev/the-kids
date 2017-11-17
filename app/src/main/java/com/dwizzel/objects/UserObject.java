@@ -24,7 +24,7 @@ public class UserObject extends Observable{
     private boolean gps = false;
     private Object data = "";
     private PositionObject position = new PositionObject(0.0,0.0,0.0);
-    private int loginType = Const.user.TYPE_EMAIL; //facebook, twitter, email, instagram, etc...
+    private int loginType = 0; //facebook, twitter, email, instagram, etc...
 
     private UserObject(){
         //default
@@ -47,7 +47,7 @@ public class UserObject extends Observable{
         signed = false;
         data = null;
         position = new PositionObject(0.0,0.0,0.0);
-        loginType = Const.user.TYPE_EMAIL;
+        loginType = 0;
     }
 
     public String getEmail(){
@@ -116,16 +116,19 @@ public class UserObject extends Observable{
 
     public void setCreated(boolean created){
         this.created = created;
+        //alors on notify les observer juste quand il est creer
+        if(this.created) {
+            setChanged();
+            notifyObservers(new Obj(Const.notif.TYPE_NOTIF_CREATED, true));
+        }
     }
 
     public void setGps(boolean gps) {
-        //alors on notify les observer
-        boolean prevGps = this.gps;
         this.gps = gps;
-        //si est maintenant a On alors qu'il etait a OFf
-        if(!prevGps && gps) {
+        //alors on notify les observer juste quand le gps est active
+        if(this.gps) {
             setChanged();
-            notifyObservers();
+            notifyObservers(new Obj(Const.notif.TYPE_NOTIF_GPS, true));
         }
     }
 
@@ -141,6 +144,28 @@ public class UserObject extends Observable{
         userModel.setPosition(position.getLongitude(), position.getLatitude(),
                     position.getAltitude());
         return userModel;
+    }
+
+    //-----------------------------------------------------------------------------------------
+
+    public class Obj {
+
+        private int type;
+        private Object value;
+
+        public Obj(int type, Object value){
+            this.type = type;
+            this.value = value;
+        }
+
+        public int getType(){
+            return type;
+        }
+
+        public Object getValue(){
+            return value;
+        }
+
     }
 
 }
