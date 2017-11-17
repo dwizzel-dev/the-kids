@@ -2,6 +2,7 @@ package com.dwizzel.services;
 
 import android.support.annotation.NonNull;
 
+import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -44,6 +45,7 @@ class FirestoreService {
                 static final String updateTimePosition = "updateTimePosition";
                 static final String position = "position";
                 static final String gps = "gps";
+                static final String loginType = "loginType";
             }
         }
     }
@@ -51,9 +53,11 @@ class FirestoreService {
     private final static String TAG = "FirestoreService";
     private static FirestoreService sInst;
     private FirebaseFirestore mDb;
+    private UserObject mUser;
 
     private FirestoreService() {
         mDb = FirebaseFirestore.getInstance();
+        mUser = UserObject.getInstance();
     }
 
     static FirestoreService getInstance() {
@@ -63,16 +67,19 @@ class FirestoreService {
         return sInst;
     }
 
-    private void setUserInfos(UserModel user){
-        Tracer.log(TAG, String.format("setUserInfos: %s | %s", user.getEmail(), user.getUid()));
+    private void setUserInfos(){
+        Tracer.log(TAG, "setUserInfos");
         try{
             //add the new user collection with his id
-            mDb.collection(DB.Users.collection).document(user.getUid())
-                    .set(user)
+            mDb.collection(DB.Users.collection).document(mUser.getUid())
+                    .set(mUser.toUserModel())
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
                             Tracer.log(TAG, "createUser.addOnSuccessListener");
+                            //maintenant il est cree alors on set et cherche les infos
+                            mUser.setCreated(true);
+                            getUserInfos();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -87,65 +94,77 @@ class FirestoreService {
 
     }
 
-    void updateUserInfos(UserModel user){
-        Tracer.log(TAG, String.format("updateUserInfos: %s", user.getUid()));
+    void updateUserInfos(){
+        Tracer.log(TAG, "updateUserInfos");
         try{
-            //update juste le updateTime
-            mDb.collection(DB.Users.collection).document(user.getUid())
-                    .update(
-                            DB.Users.Field.updateTime, FieldValue.serverTimestamp(),
-                            DB.Users.Field.gps, user.isGps()
-                    )
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void avoid) {
-                            Tracer.log(TAG, "updateUserInfos.addOnSuccessListener");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Tracer.log(TAG,"updateUserInfos.addOnFailureListener.Exception: ", e);
-                        }
-                    });
+            // il faut que le user soit creer avant tout
+            if(mUser.isCreated()) {
+                //update juste le updateTime
+                mDb.collection(DB.Users.collection).document(mUser.getUid())
+                        .update(
+                                DB.Users.Field.updateTime, FieldValue.serverTimestamp(),
+                                DB.Users.Field.gps, mUser.isGps(),
+                                DB.Users.Field.active, mUser.isActive(),
+                                DB.Users.Field.loginType, mUser.getLoginType()
+                        )
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void avoid) {
+                                Tracer.log(TAG, "updateUserInfos.addOnSuccessListener");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Tracer.log(TAG, "updateUserInfos.addOnFailureListener.Exception: ", e);
+                            }
+                        });
+            }else {
+                Tracer.log(TAG, "updateUserInfos: user not created yet");
+            }
         }catch (Exception e){
             Tracer.log(TAG, "updateUserInfos.Exception: ", e);
         }
 
     }
 
-    void updateUserPosition(UserModel user){
-        Tracer.log(TAG, String.format("updateUserPosition: %s", user.getUid()));
+    void updateUserPosition(){
+        Tracer.log(TAG, "updateUserPosition");
         try{
-            //update juste le updateTimePosition et position
-            mDb.collection(DB.Users.collection).document(user.getUid())
-                    .update(
-                            DB.Users.Field.updateTimePosition, FieldValue.serverTimestamp(),
-                            DB.Users.Field.position, user.getPosition(),
-                            DB.Users.Field.gps, user.isGps()
-                    )
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void avoid) {
-                            Tracer.log(TAG, "updateUserPosition.addOnSuccessListener");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Tracer.log(TAG,"updateUserPosition.addOnFailureListener.Exception: ", e);
-                        }
-                    });
+            // il faut que le user soit creer avant tout
+            if(mUser.isCreated()) {
+                //update juste le updateTimePosition et position
+                mDb.collection(DB.Users.collection).document(mUser.getUid())
+                        .update(
+                                DB.Users.Field.updateTimePosition, FieldValue.serverTimestamp(),
+                                DB.Users.Field.position, mUser.toUserModel().getPosition(),
+                                DB.Users.Field.gps, mUser.isGps()
+                        )
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void avoid) {
+                                Tracer.log(TAG, "updateUserPosition.addOnSuccessListener");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Tracer.log(TAG, "updateUserPosition.addOnFailureListener.Exception: ", e);
+                            }
+                        });
+            }else{
+                Tracer.log(TAG, "updateUserPosition: user not created yet");
+            }
         }catch (Exception e){
             Tracer.log(TAG, "updateUserPosition.Exception: ", e);
         }
 
     }
 
-    void getUserInfos(final UserModel user){
-        Tracer.log(TAG, String.format("getUserInfos: %s | %s", user.getEmail(), user.getUid()));
+    void getUserInfos(){
+        Tracer.log(TAG, "getUserInfos");
         try{
-            mDb.collection(DB.Users.collection).document(user.getUid())
+            mDb.collection(DB.Users.collection).document(mUser.getUid())
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
@@ -156,14 +175,17 @@ class FirestoreService {
                                 Tracer.log(TAG, "getUserInfos.document: " +  document.exists());
                                 if(document.exists()){
                                     Tracer.log(TAG, "DATA: " + document.getData());
+                                    //on set le data du user
+                                    mUser.setData(document.getData());
                                     //vu qu'il est deja creer on fait un updateTime
-                                    updateUserInfos(user);
+                                    mUser.setCreated(true);
+                                    updateUserInfos();
                                 }else{
                                     Tracer.log(TAG, "no document, creating new user");
                                     // si on a rien alors on a un nouveau user
                                     // alors on l'enregistre dans la collection
                                     // "thekids-dab99 > users"
-                                    setUserInfos(user);
+                                    setUserInfos();
                                 }
                             } else {
                                 Tracer.log(TAG, "getUserInfos.onComplete.exception: ", task.getException());
@@ -175,18 +197,21 @@ class FirestoreService {
         }
     }
 
-    void activateUser(final String uid){
-        Tracer.log(TAG, String.format("activateUser: %s", uid));
+    void activateUser(){
+        Tracer.log(TAG, "activateUser");
         //get a timestamp for activity timer pending
         try{
             //add the new user collection with his id
-            mDb.collection(DB.Users.collection).document(uid)
-                    .update(DB.Users.Field.active, true)
+            mDb.collection(DB.Users.collection).document(mUser.getUid())
+                    .update(
+                            DB.Users.Field.active, mUser.isActive(),
+                            DB.Users.Field.gps, mUser.isGps()
+                    )
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
                             //on set le dernier UID actif pour la verif au delete
-                            Tracer.log(TAG, "activateUser.addOnSuccessListener: " + uid);
+                            Tracer.log(TAG, "activateUser.addOnSuccessListener: " + mUser.getUid());
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -201,35 +226,4 @@ class FirestoreService {
 
     }
 
-    void deactivateUser(final String uid){
-        //TODO: on risque d'avoir le retour du listener apres, car le Auth sera deja signOut
-        Tracer.log(TAG, String.format("deactivateUser: %s", uid));
-        //minor check
-        if(uid != null && !uid.equals("")) {
-            //get a timestamp for activity timer pending
-            try {
-                //add the new user collection with his id
-                mDb.collection(DB.Users.collection).document(uid)
-                        .update(DB.Users.Field.active, false)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void avoid) {
-                                Tracer.log(TAG, "deactivateUser.addOnSuccessListener: " + uid);
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Tracer.log(TAG, "deactivateUser.addOnFailureListener.Exception: ", e);
-                            }
-                        });
-            } catch (Exception e) {
-                Tracer.log(TAG, "deactivateUser.Exception: ", e);
-            }
-        }else {
-            Tracer.log(TAG, "deactivateUser.Exception: ++ UID is empty ++");
-        }
-    }
-
-
-}
+ }

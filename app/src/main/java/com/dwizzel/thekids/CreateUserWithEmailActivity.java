@@ -18,6 +18,7 @@ import android.view.Gravity;
 import com.dwizzel.Const;
 import com.dwizzel.models.UserModel;
 import com.dwizzel.objects.ServiceResponseObject;
+import com.dwizzel.objects.UserObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
@@ -206,19 +207,23 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
 
     private void userIsCreatedRoutine(){
         //on affiche qu'il est logue
-        if(mTrackerBinder != null) {
+        try{
             Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
-                    getResources().getString(R.string.toast_connected_as,
-                            mTrackerBinder.getUser().getEmail()));
+                        getResources().getString(R.string.toast_connected_as,
+                                UserObject.getInstance().getEmail()));
+            //on va a activity principal
+            Intent intent = new Intent(CreateUserWithEmailActivity.this,
+                    HomeActivity.class);
+            //start activity and clear the backStack
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }catch (NullPointerException npe){
+            Tracer.log(TAG, "userIsSignedInRoutine.NullPointerException: " , npe);
+        }catch (Exception e){
+            Tracer.log(TAG, "userIsSignedInRoutine.Exception: " , e);
         }
-        //on va a activity principal
-        Intent intent = new Intent(CreateUserWithEmailActivity.this,
-                HomeActivity.class);
-        //start activity and clear the backStack
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
     }
 
     private void createUser() {

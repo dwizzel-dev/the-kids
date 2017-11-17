@@ -8,7 +8,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.dwizzel.objects.PermissionObject;
+import com.dwizzel.Const;
 import com.dwizzel.objects.PositionObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
@@ -84,12 +84,13 @@ public class TrackerService extends Service{
         Tracer.log(TAG, "onCreate");
         super.onCreate();
         try {
+            mUser = UserObject.getInstance();
             mAuthService = new AuthService(this, mTrackerBinder);
             mFirestoreService = FirestoreService.getInstance();
             mGpsService = new GpsService(this, mTrackerBinder);
             //start running time elapsed
             startRunningTime();
-            //check pour user infos si etait connecte
+            //check pour user infos si etait deja connecte avant le restart du tracker service
             setUser();
         }catch(Exception e){
             Tracer.log(TAG, "onCreate.exception", e);
@@ -206,7 +207,7 @@ public class TrackerService extends Service{
     private void getUserInfos(){
         Tracer.log(TAG, "getUserInfos");
         try {
-           mFirestoreService.getUserInfos(mUser.toUserModel());
+           mFirestoreService.getUserInfos();
         }catch (Exception e){
             Tracer.log(TAG, "getUserInfos.exception: ", e);
         }
@@ -215,7 +216,8 @@ public class TrackerService extends Service{
     private void activateUser(){
         Tracer.log(TAG, "activateUser");
         try {
-            mFirestoreService.activateUser(mUser.getUserId());
+            mUser.setActive(true);
+            mFirestoreService.activateUser();
         }catch (Exception e){
             Tracer.log(TAG, "activateUser.exception: ", e);
         }
@@ -224,7 +226,9 @@ public class TrackerService extends Service{
     private void deactivateUser(){
         Tracer.log(TAG, "deactivateUser");
         try {
-            mFirestoreService.deactivateUser(mUser.getUserId());
+            mUser.setActive(false);
+            mUser.setGps(false);
+            mFirestoreService.activateUser();
         }catch (Exception e){
             Tracer.log(TAG, "deactivateUser.exception: ", e);
         }
@@ -235,7 +239,10 @@ public class TrackerService extends Service{
         //on va checker si est deja logue et on set les infos ou pas du UserModel
         if(mAuthService.isSignedIn()){
             //on creer le user de base
-            mUser = new UserObject(mAuthService.getEmail(), mAuthService.getUserID());
+            mUser.setEmail(mAuthService.getEmail());
+            mUser.setUid(mAuthService.getUserID());
+            mUser.setSigned(true);
+            mUser.setActive(true);
             //un observer pour quand le gps change d'etat de ON ou Off ou permission
             mUser.addObserver(new Observer() {
                 @Override
@@ -248,10 +255,6 @@ public class TrackerService extends Service{
             });
             //on va chercher les infos du user sur la DB ou on les creer
             getUserInfos();
-            //on met le status a active dans la DB
-            //TODO: peut-etre que le user n'est pas encore cree alors va planter sur le activateUser
-            //faudrait avoir une confirmation qu'il est bien rajoute
-            activateUser();
             //start le GPS
             //TODO: faire un check si actif et le demander a l'usager de l'activer
             if(mGpsService.startUsingGPS()) {
@@ -270,10 +273,10 @@ public class TrackerService extends Service{
         Tracer.log(TAG, "setUserPosition");
         //le user object
         //si on est la c'est que le gps est On
-        mUser.setGps(true);
+        //mUser.setGps(true);
         mUser.setPosition(position);
         //la db
-        mFirestoreService.updateUserPosition(mUser.toUserModel());
+        mFirestoreService.updateUserPosition();
     }
 
     private void resetUser(){
@@ -290,7 +293,8 @@ public class TrackerService extends Service{
         // alors il le delete
         // ou un trigger avec CloudFunction sur le firebaseAuthentification
         mAuthService.signOut();
-        mUser = null;
+        //on reset les infos
+        mUser.resetUser();
     }
 
     private void keepActive(){
@@ -312,7 +316,7 @@ public class TrackerService extends Service{
             }
             //update les infos de l'usager
             try {
-                mFirestoreService.updateUserInfos(mUser.toUserModel());
+                mFirestoreService.updateUserInfos();
             }catch (Exception e){
                 Tracer.log(TAG, "activateUser.exception: ", e);
             }
@@ -329,10 +333,6 @@ public class TrackerService extends Service{
         public long getCounter() {
             Tracer.log(TAG, "TrackerBinder.getCounter");
             return mTimer;
-        }
-        public UserObject getUser() {
-            Tracer.log(TAG, "TrackerBinder.getUID");
-            return mUser;
         }
         public void registerCallback(ITrackerBinderCallback callback){
             Tracer.log(TAG, "TrackerBinder.registerCallback");

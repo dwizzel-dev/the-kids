@@ -34,12 +34,14 @@ class AuthService {
     private TrackerService.TrackerBinder mTrackerBinder;
     private static int count = 0;
     private final Context mContext;
+    private UserObject mUser;
 
     AuthService(Context context, IBinder trackerBinder) throws Exception {
         Tracer.log(TAG, "count:" + count++);
         mContext = context;
         try {
-            FirebaseApp.initializeApp(this.mContext);
+            mUser = UserObject.getInstance();
+            FirebaseApp.initializeApp(mContext);
             mFirebaseAuth = FirebaseAuth.getInstance();
             mTrackerBinder = (TrackerService.TrackerBinder) trackerBinder;
         }catch (Exception e){
@@ -95,7 +97,12 @@ class AuthService {
         Tracer.log(TAG, "signOut");
         try {
             //le facebook
-            LoginManager.getInstance().logOut();
+            if(mUser.getLoginType() == Const.user.TYPE_FACEBOOK) {
+                LoginManager.getInstance().logOut();
+            }
+            //signout le user
+            mUser.setActive(false);
+            mUser.setSigned(false);
             //le firebase
             mFirebaseAuth.signOut();
         } catch (Exception e) {
@@ -156,10 +163,14 @@ class AuthService {
                                     }
                                 } else {
                                     try {
+                                        //on set le user comme signed in
+                                        mUser.setEmail(getEmail());
+                                        mUser.setUid(getUserID());
+                                        mUser.setSigned(true);
+                                        mUser.setActive(true);
+                                        mUser.setLoginType(Const.user.TYPE_EMAIL);
                                         //pas erreur alors on continue
-                                        mTrackerBinder.onSignedIn(
-                                                new ServiceResponseObject(
-                                                        new UserObject(getEmail(), getUserID())));
+                                        mTrackerBinder.onSignedIn(new ServiceResponseObject());
                                     }catch(NullPointerException npe){
                                         Tracer.log(TAG, "signInUser.onComplete.NullPointerException: ", npe);
                                     }
@@ -208,10 +219,13 @@ class AuthService {
                                     }
                                 } else {
                                     try {
+                                        mUser.setEmail(getEmail());
+                                        mUser.setUid(getUserID());
+                                        mUser.setSigned(true);
+                                        mUser.setActive(true);
+                                        mUser.setLoginType(Const.user.TYPE_EMAIL);
                                         //pas erreur alors on continue
-                                        mTrackerBinder.onSignedIn(
-                                                new ServiceResponseObject(
-                                                        new UserObject(getEmail(), getUserID())));
+                                        mTrackerBinder.onSignedIn(new ServiceResponseObject());
                                     }catch(NullPointerException npe){
                                         Tracer.log(TAG, "createUser.onComplete.NullPointerException: ", npe);
                                     }
@@ -249,10 +263,13 @@ class AuthService {
                                 }
                             } else {
                                 try {
+                                    mUser.setEmail(getEmail());
+                                    mUser.setUid(getUserID());
+                                    mUser.setSigned(true);
+                                    mUser.setActive(true);
+                                    mUser.setLoginType(Const.user.TYPE_FACEBOOK);
                                     //pas erreur alors on continue
-                                    mTrackerBinder.onSignedIn(
-                                            new ServiceResponseObject(
-                                                    new UserObject(getEmail(), getUserID())));
+                                    mTrackerBinder.onSignedIn(new ServiceResponseObject());
                                 }catch(NullPointerException npe){
                                     Tracer.log(TAG, "signInCredential.onComplete.NullPointerException: ", npe);
                                 }

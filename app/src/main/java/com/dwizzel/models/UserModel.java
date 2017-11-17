@@ -1,5 +1,6 @@
 package com.dwizzel.models;
 
+import com.dwizzel.Const;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
@@ -18,6 +19,7 @@ public class UserModel {
     private Date updateTimePosition;
     private boolean active = true;
     private boolean gps = false;
+    private int loginType = Const.user.TYPE_EMAIL;
     private HashMap<String, Double> position;
 
     public UserModel(){}
@@ -78,6 +80,14 @@ public class UserModel {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public void setLoginType(int loginType) {
+        this.loginType = loginType;
+    }
+
+    public int getLoginType() {
+        return loginType;
     }
 
 }

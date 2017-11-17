@@ -2,6 +2,7 @@ package com.dwizzel.objects;
 
 import com.dwizzel.Const;
 import com.dwizzel.models.UserModel;
+import com.dwizzel.utils.Tracer;
 
 import java.util.Observable;
 
@@ -10,25 +11,43 @@ import java.util.Observable;
  * Created by Dwizzel on 15/11/2017.
  */
 
-public final class UserObject extends Observable{
+public class UserObject extends Observable{
 
     private static final String TAG = "UserObject";
-    private String email;
-    private String uid;
-    private boolean active = true;
+    private static UserObject sInst;
+    private static int sRefCount = 0;
+    private String email = "";
+    private String uid = "";
+    private boolean created = false;
+    private boolean signed = false;
+    private boolean active = false;
     private boolean gps = false;
+    private Object data = "";
     private PositionObject position = new PositionObject(0.0,0.0,0.0);
-    private int type = Const.user.TYPE_EMAIL; //facebook, twitter, email, instagram, etc...
+    private int loginType = Const.user.TYPE_EMAIL; //facebook, twitter, email, instagram, etc...
 
-    public UserObject(String username, String uid) {
-        this.email = username;
-        this.uid = uid;
+    private UserObject(){
+        //default
     }
 
-    public UserObject(String username, String uid, int type) {
-        this.email = username;
-        this.uid = uid;
-        this.type = type;
+    public static UserObject getInstance(){
+        Tracer.log(TAG, "getInstance: " + (sRefCount++));
+        if(sInst == null){
+            sInst = new UserObject();
+        }
+        return  sInst;
+    }
+
+    public void resetUser(){
+        email = "";
+        uid = "";
+        active = false;
+        gps = false;
+        created = false;
+        signed = false;
+        data = null;
+        position = new PositionObject(0.0,0.0,0.0);
+        loginType = Const.user.TYPE_EMAIL;
     }
 
     public String getEmail(){
@@ -39,12 +58,16 @@ public final class UserObject extends Observable{
         return uid;
     }
 
+    public Object getData(){
+        return data;
+    }
+
     public boolean isActive(){
         return active;
     }
 
-    public int getType(){
-        return type;
+    public int getLoginType(){
+        return loginType;
     }
 
     public boolean isGps() {
@@ -59,8 +82,40 @@ public final class UserObject extends Observable{
         this.active = active;
     }
 
-    public void setType(int type){
-        this.type = type;
+    public void setLoginType(int type){
+        this.loginType = type;
+    }
+
+    public void setEmail(String email){
+        this.email = email;
+    }
+
+    public void setData(Object data){
+        this.data = data;
+    }
+
+    public void setUid(String uid){
+        this.uid = uid;
+    }
+
+    public String getUid(){
+        return uid;
+    }
+
+    public boolean isSigned(){
+        return signed;
+    }
+
+    public void setSigned(boolean signed){
+        this.signed = signed;
+    }
+
+    public boolean isCreated(){
+        return created;
+    }
+
+    public void setCreated(boolean created){
+        this.created = created;
     }
 
     public void setGps(boolean gps) {
@@ -82,6 +137,7 @@ public final class UserObject extends Observable{
         UserModel userModel = new UserModel(email, uid);
         userModel.setGps(gps);
         userModel.setActive(active);
+        userModel.setLoginType(loginType);
         userModel.setPosition(position.getLongitude(), position.getLatitude(),
                     position.getAltitude());
         return userModel;

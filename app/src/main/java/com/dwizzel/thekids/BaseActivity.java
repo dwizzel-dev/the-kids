@@ -8,8 +8,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import com.dwizzel.models.UserModel;
-import com.dwizzel.objects.UserObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.*;
 import com.dwizzel.utils.Tracer;
@@ -24,7 +22,6 @@ import java.util.Observer;
 public abstract class BaseActivity extends AppCompatActivity {
 
     private static final String TAGBASE = "BaseActivity";
-    private UserObject mUser;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
 
@@ -128,19 +125,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    public UserObject getUser(){
-        //accessible via les classes qui extend celle-ci
-        return mUser;
-    }
-
     protected void startActivity(){
         Tracer.log(TAGBASE, "startActivity");
     }
 
     private void checkIfSignedIn(){
         Tracer.log(TAGBASE, "checkIfSignedIn");
-
-        //TODO: trouver un moyen pour ne pas qu'il restart le checkUserInfos() du startMainActivity()
         if( mTrackerBinder != null && mServiceBoundObservable.get()){
             if(!mTrackerBinder.isSignedIn()){
                 //le login page
@@ -152,12 +142,6 @@ public abstract class BaseActivity extends AppCompatActivity {
                 finish();
 
             }else{
-                //si les infos sur l'usager ne sont setter, comme dans un retour de sign In
-                //car ceux qui extends cette class vont l'utiliser
-                // pour faire des call a FirestoreService
-                if(mUser == null){
-                    mUser = mTrackerBinder.getUser();
-                    }
                 //sinon repart toujours l'activity de la classe qui extends BaseActivity
                 //si on est la c'est quand on redonne le focus a l'application
                 startActivity();

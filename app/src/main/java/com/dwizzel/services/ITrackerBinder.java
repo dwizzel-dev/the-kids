@@ -28,8 +28,6 @@ public interface ITrackerBinder {
 
     void onSignedIn(Object obj);
 
-    UserObject getUser();
-
     void onSignedOut(Object obj);
 
     void onGpsPositionUpdate(PositionObject position);

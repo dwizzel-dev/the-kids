@@ -182,19 +182,23 @@ public class FacebookLoginActivity extends AppCompatActivity {
 
     private void userIsSignedInRoutine(){
         //on affiche qu'il est logue
-        if(mTrackerBinder != null) {
+        try {
             Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
                     getResources().getString(R.string.toast_connected_as,
-                            mTrackerBinder.getUser().getEmail()));
+                            UserObject.getInstance().getEmail()));
+            //on va a activity principal
+            Intent intent = new Intent(FacebookLoginActivity.this,
+                    HomeActivity.class);
+            //start activity and clear the backStack
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }catch (NullPointerException npe){
+            Tracer.log(TAG, "userIsSignedInRoutine.NullPointerException: " , npe);
+        }catch (Exception e){
+            Tracer.log(TAG, "userIsSignedInRoutine.Exception: " , e);
         }
-        //on va a activity principal
-        Intent intent = new Intent(FacebookLoginActivity.this,
-                HomeActivity.class);
-        //start activity and clear the backStack
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
     }
 
 
