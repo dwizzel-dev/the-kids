@@ -75,14 +75,10 @@ public class FacebookLoginActivity extends AppCompatActivity {
     }
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
-
         private static final String TAG = "FacebookLoginActivity.ITrackerBinder";
-
-        @Override
         public void handleResponse(long counter){
             //Log.d(TAG, String.format("thread counter: %d", counter));
         }
-        @Override
         public void onSignedIn(Object obj){
             Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
@@ -101,9 +97,23 @@ public class FacebookLoginActivity extends AppCompatActivity {
                     break;
             }
         }
-        @Override
         public void onSignedOut(Object obj){
             Tracer.log(TAG, "onSignedOut");
+        }
+        public void onGpsEnabled(Object obj){
+            Tracer.log(TAG, "onGpsEnabled");
+        }
+        public void onGpsDisabled(Object obj){
+            Tracer.log(TAG, "onGpsDisabled");
+        }
+        public void onGpsEnable(Object obj){
+            Tracer.log(TAG, "onGpsEnable");
+        }
+        public void onGpsDisable(Object obj){
+            Tracer.log(TAG, "onGpsDisable");
+        }
+        public void onGpsUpdate(Object obj){
+            Tracer.log(TAG, "onGpsUpdate");
         }
     };
 

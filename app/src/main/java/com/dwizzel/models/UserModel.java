@@ -15,7 +15,9 @@ public class UserModel {
     private String uid;
     private @ServerTimestamp Date createTime;
     private @ServerTimestamp Date updateTime;
+    private Date updateTimePosition;
     private boolean active = true;
+    private boolean gps = false;
     private HashMap<String, Double> position;
 
     public UserModel(){}
@@ -24,9 +26,9 @@ public class UserModel {
         this.email = email;
         this.uid = uid;
         position = new HashMap<String, Double>(){{
-                put("latitude", 0.00);
-                put("longitude", 0.00);
-                put("altitude", 0.00);
+                put("latitude", 0.0);
+                put("longitude", 0.0);
+                put("altitude", 0.0);
         }};
     }
 
@@ -38,6 +40,10 @@ public class UserModel {
         return uid;
     }
 
+    public boolean isGps() {
+        return gps;
+    }
+
     public Date getCreateTime() {
         return createTime;
     }
@@ -46,12 +52,20 @@ public class UserModel {
         return updateTime;
     }
 
-    public boolean getActive() {
+    public Date getUpdateTimePosition() {
+        return updateTimePosition;
+    }
+
+    public boolean isActive() {
         return active;
     }
 
     public HashMap<String, Double> getPosition() {
         return position;
+    }
+
+    public void setGps(boolean gps) {
+        this.gps = gps;
     }
 
     public void setPosition(final double longitude, final double latitude, final double altitude) {

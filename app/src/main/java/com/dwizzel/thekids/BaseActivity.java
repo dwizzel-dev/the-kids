@@ -25,7 +25,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private static final String TAGBASE = "BaseActivity";
     private UserObject mUser;
-    private String mUserId;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
 
@@ -62,17 +61,29 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         private static final String TAG = "BaseActivity.ITrackerBinder";
-        @Override
         public void handleResponse(long counter){
             Tracer.log(TAG, String.format("thread counter: %d", counter));
         }
-        @Override
         public void onSignedIn(Object obj){
-
+            Tracer.log(TAG, "onSignedIn");
         }
-        @Override
         public void onSignedOut(Object obj){
-
+            Tracer.log(TAG, "onSignedOut");
+        }
+        public void onGpsEnabled(Object obj){
+            Tracer.log(TAG, "onGpsEnabled");
+        }
+        public void onGpsDisabled(Object obj){
+            Tracer.log(TAG, "onGpsDisabled");
+        }
+        public void onGpsEnable(Object obj){
+            Tracer.log(TAG, "onGpsEnable");
+        }
+        public void onGpsDisable(Object obj){
+            Tracer.log(TAG, "onGpsDisable");
+        }
+        public void onGpsUpdate(Object obj){
+            Tracer.log(TAG, "onGpsUpdate");
         }
     };
 
@@ -142,14 +153,14 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             }else{
                 //si les infos sur l'usager ne sont setter, comme dans un retour de sign In
-                //car ceux qui extends cette class vont l'utiliser pour faire des call a firestoreDB
+                //car ceux qui extends cette class vont l'utiliser
+                // pour faire des call a FirestoreService
                 if(mUser == null){
                     mUser = mTrackerBinder.getUser();
                     }
                 //sinon repart toujours l'activity de la classe qui extends BaseActivity
                 //si on est la c'est quand on redonne le focus a l'application
                 startActivity();
-
             }
         }else {
             Tracer.log(TAGBASE, "checkIfSigneddIn: service not bound yet");

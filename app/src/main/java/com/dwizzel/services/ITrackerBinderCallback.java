@@ -12,4 +12,14 @@ public interface ITrackerBinderCallback {
 
     void onSignedOut(Object obj);
 
+    void onGpsEnabled(Object obj);
+
+    void onGpsEnable(Object obj);
+
+    void onGpsDisable(Object obj);
+
+    void onGpsDisabled(Object obj);
+
+    void onGpsUpdate(Object obj);
+
 }

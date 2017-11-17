@@ -1,44 +1,42 @@
-package com.dwizzel.models;
+package com.dwizzel.objects;
 
 /**
  * Created by Dwizzel on 16/11/2017.
  */
 
-public class PositionModel {
+public class PositionObject {
 
     private double latitude = 0.00;
     private double longitude = 0.00;
     private double altitude = 0.00;
 
-    public PositionModel(){}
-
-    public PositionModel(double latitude, double longitude, double altitude){
+    public PositionObject(double latitude, double longitude, double altitude){
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
     }
 
-    public double getLatitude() {
+    double getLatitude() {
         return latitude;
         }
 
-    public double getLongitude() {
+    double getLongitude() {
         return longitude;
     }
 
-    public double getAltitude() {
+    double getAltitude() {
         return altitude;
     }
 
-    public void setLatitude(double latitude) {
+    void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public void setLongitude(double longitude) {
+    void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
-    public void setAltitude(double altitude) {
+    void setAltitude(double altitude) {
         this.altitude = altitude;
     }
 

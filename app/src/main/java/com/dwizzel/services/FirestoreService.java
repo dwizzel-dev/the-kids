@@ -28,6 +28,8 @@ import com.dwizzel.models.UserModel;
  *  - sur le signIn pour les mettre dans la collection "active"
  *  - sur un signOut pour les enlever de la collection "active"
  *
+ *  TODO: checker la connectivity
+ *
  */
 
 class FirestoreService {
@@ -39,7 +41,9 @@ class FirestoreService {
             class Field {
                 static final String active = "active";
                 static final String updateTime = "updateTime";
+                static final String updateTimePosition = "updateTimePosition";
                 static final String position = "position";
+                static final String gps = "gps";
             }
         }
     }
@@ -86,12 +90,11 @@ class FirestoreService {
     void updateUserInfos(UserModel user){
         Tracer.log(TAG, String.format("updateUserInfos: %s", user.getUid()));
         try{
-            //https://firebase.google.com/docs/firestore/manage-data/add-data
             //update juste le updateTime
             mDb.collection(DB.Users.collection).document(user.getUid())
                     .update(
                             DB.Users.Field.updateTime, FieldValue.serverTimestamp(),
-                            DB.Users.Field.position, user.getPosition()
+                            DB.Users.Field.gps, user.isGps()
                     )
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -107,6 +110,34 @@ class FirestoreService {
                     });
         }catch (Exception e){
             Tracer.log(TAG, "updateUserInfos.Exception: ", e);
+        }
+
+    }
+
+    void updateUserPosition(UserModel user){
+        Tracer.log(TAG, String.format("updateUserPosition: %s", user.getUid()));
+        try{
+            //update juste le updateTimePosition et position
+            mDb.collection(DB.Users.collection).document(user.getUid())
+                    .update(
+                            DB.Users.Field.updateTimePosition, FieldValue.serverTimestamp(),
+                            DB.Users.Field.position, user.getPosition(),
+                            DB.Users.Field.gps, user.isGps()
+                    )
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "updateUserPosition.addOnSuccessListener");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG,"updateUserPosition.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+        }catch (Exception e){
+            Tracer.log(TAG, "updateUserPosition.Exception: ", e);
         }
 
     }

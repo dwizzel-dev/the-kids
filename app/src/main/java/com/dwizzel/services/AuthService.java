@@ -5,12 +5,12 @@ package com.dwizzel.services;
  */
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import com.dwizzel.Const;
+import com.dwizzel.objects.PermissionObject;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
@@ -69,8 +69,10 @@ class AuthService {
     private boolean hasPermission() {
         Tracer.log(TAG, "hasPermission");
         if(mContext != null) {
-            return (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED);
+            PermissionObject perms = new PermissionObject(mContext);
+            Tracer.log(TAG, "Permissions[ACCESS_NETWORK_STATE]: " + perms.isAccessNetworkState());
+            Tracer.log(TAG, "Permissions[INTERNET]: " + perms.isInternet());
+            return (perms.isAccessNetworkState() && perms.isInternet());
         }
         return false;
     }

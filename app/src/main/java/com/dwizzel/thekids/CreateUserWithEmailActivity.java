@@ -26,7 +26,7 @@ import com.dwizzel.utils.Utils;
 
 public class CreateUserWithEmailActivity extends AppCompatActivity {
 
-    private static final String TAG = "CreateUserWithEmail";
+    private static final String TAG = "CreateUserWithEmailActivity";
     private String email = "";
     private String psw = "";
     private Integer currFragmentNum;
@@ -65,14 +65,10 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     }
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
-
-        private static final String TAG = "ITrackerBinder";
-
-        @Override
+        private static final String TAG = "CreateUserWithEmailActivity.ITrackerBinder";
         public void handleResponse(long counter){
             //Tracer.log(TAG, String.format("thread counter: %d", counter));
         }
-        @Override
         public void onSignedIn(Object obj){
             Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
@@ -100,9 +96,23 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
                     break;
             }
         }
-        @Override
         public void onSignedOut(Object obj){
             Tracer.log(TAG, "onSignedOut");
+        }
+        public void onGpsEnabled(Object obj){
+            Tracer.log(TAG, "onGpsEnabled");
+        }
+        public void onGpsDisabled(Object obj){
+            Tracer.log(TAG, "onGpsDisabled");
+        }
+        public void onGpsEnable(Object obj){
+            Tracer.log(TAG, "onGpsEnable");
+        }
+        public void onGpsDisable(Object obj){
+            Tracer.log(TAG, "onGpsDisable");
+        }
+        public void onGpsUpdate(Object obj){
+            Tracer.log(TAG, "onGpsUpdate");
         }
     };
 

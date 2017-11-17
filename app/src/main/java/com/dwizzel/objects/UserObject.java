@@ -1,11 +1,10 @@
 package com.dwizzel.objects;
 
 import com.dwizzel.Const;
-import com.dwizzel.models.PositionModel;
 import com.dwizzel.models.UserModel;
-import com.dwizzel.utils.Tracer;
 
 import java.util.Observable;
+
 
 /**
  * Created by Dwizzel on 15/11/2017.
@@ -16,9 +15,10 @@ public final class UserObject extends Observable{
     private static final String TAG = "UserObject";
     private String email;
     private String uid;
-    private boolean active;
-    private PositionModel position = new PositionModel(0.00,0.00,0.00);
-    private int type = Const.user.TYPE_EMAIL;
+    private boolean active = true;
+    private boolean gps = false;
+    private PositionObject position = new PositionObject(0.0,0.0,0.0);
+    private int type = Const.user.TYPE_EMAIL; //facebook, twitter, email, instagram, etc...
 
     public UserObject(String username, String uid) {
         this.email = username;
@@ -39,7 +39,7 @@ public final class UserObject extends Observable{
         return uid;
     }
 
-    public boolean getActive(){
+    public boolean isActive(){
         return active;
     }
 
@@ -47,7 +47,11 @@ public final class UserObject extends Observable{
         return type;
     }
 
-    public PositionModel getPosition(){
+    public boolean isGps() {
+        return gps;
+    }
+
+    public PositionObject getPosition(){
         return position;
     }
 
@@ -59,12 +63,24 @@ public final class UserObject extends Observable{
         this.type = type;
     }
 
-    public void setPosition(PositionModel position){
+    public void setGps(boolean gps) {
+        //alors on notify les observer
+        boolean prevGps = this.gps;
+        this.gps = gps;
+        //si est maintenant a On alors qu'il etait a OFf
+        if(!prevGps && gps) {
+            setChanged();
+            notifyObservers();
+        }
+    }
+
+    public void setPosition(PositionObject position){
         this.position = position;
     }
 
     public UserModel toUserModel(){
         UserModel userModel = new UserModel(email, uid);
+        userModel.setGps(gps);
         userModel.setActive(active);
         userModel.setPosition(position.getLongitude(), position.getLatitude(),
                     position.getAltitude());
