@@ -96,10 +96,11 @@ class AuthService {
     void signOut() {
         Tracer.log(TAG, "signOut");
         try {
+            //pas de condition sinon prob quand il swap out l'appli et revient avec un restart
             //le facebook
-            if(mUser.getLoginType() == Const.user.TYPE_FACEBOOK) {
+            //if(mUser.getLoginType() == Const.user.TYPE_FACEBOOK) {
                 LoginManager.getInstance().logOut();
-            }
+            //}
             //le firebase
             mFirebaseAuth.signOut();
         } catch (Exception e) {
