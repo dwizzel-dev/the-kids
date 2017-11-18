@@ -13,12 +13,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.dwizzel.Const;
-import com.dwizzel.objects.PositionObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
 import com.google.firebase.auth.AuthCredential;
 
-import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Observable;
@@ -46,9 +44,13 @@ import java.util.TimeZone;
 public class TrackerService extends Service{
 
     private final static String TAG = "TrackerService";
-    private Thread mThTimer;
+
+    //timer
+    private HandlerThread mThTimer;
+    private Handler mHandlerTimer;
+    private Runnable mRunnableTimer;
+
     private long mTimer = 0;
-    private int mKeepAliveSignal = 60; //seconds
     private Thread mThCounter;
     private ITrackerBinderCallback mBinderCallback;
     private AuthService mAuthService;
@@ -58,80 +60,38 @@ public class TrackerService extends Service{
     private final IBinder mTrackerBinder = new TrackerBinder();
 
 
-
-
-    //TODO: start remove this --------------------------------------------------------------------
-    // https://stackoverflow.com/questions/11407943/this-handler-class-should-be-static-or-leaks-might-occur-incominghandler
-    // https://blog.mindorks.com/android-core-looper-handler-and-handlerthread-bd54d69fe91a
-
-    /*
-    ServiceHandler mServiceHandler;
-    private static class ServiceHandler extends Handler {
-        ServiceHandler() {}
-        @Override
-        public void handleMessage(Message msg) {
-            Tracer.log(TAG, "ServiceHandler.handleMessage: " + msg);
-        }
-    }
-    private class LooperThread extends Thread {
+    class TimerRunnable implements Runnable{
+        private final static String TAG = "TimerRunnable";
+        private boolean loop = true;
+        private int keepAliveDelay = 60;
+        private int sleepDelay = 1000;
+        TimerRunnable(){}
         @Override
         public void run() {
             try {
-                Looper.prepare();
-                Looper.loop();
-            }catch (Exception e){
-                Tracer.log(TAG, "LooperThread.Throwable: ", e);
-            }
-        }
-    }
-    */
-    /*
-    Handler mServiceHandler;
-    class myHandlerThread extends HandlerThread {
-        public myHandlerThread(String name) {
-            super(name);
-        }
-        @Override
-        protected void onLooperPrepared() {
-            Tracer.log(TAG, "LooperThread.onLooperPrepared+++++++++++++++++++++++++++++++++++");
-            mServiceHandler = new Handler(getLooper()){
-                @Override
-                public void handleMessage(Message msg) {
-                    Tracer.log(TAG, "Handler.handleMessage: " + msg);
+                while (loop) {
+                    Thread.sleep(sleepDelay);
+                    mTimer++;
+                    if (mTimer % keepAliveDelay == 0) {
+                        keepActive();
+                    }
+                    Tracer.tog("run: ", getTimer());
                 }
-            };
-        }
-        @Override
-        public void run() {
-            Tracer.log(TAG, "LooperThread.run+++++++++++++++++++++++++++++++++++");
-            try {
-                Looper.prepare();
-                Looper.loop();
-            }catch (Exception e){
-                Tracer.log(TAG, "LooperThread.Throwable: ", e);
+            } catch (InterruptedException ie) {
+                Tracer.log(TAG, "run.InterruptedException");
+            } catch (Exception e) {
+                Tracer.log(TAG, "run.Exception: ", e);
             }
         }
     }
-    */
-    HandlerThread mHandlerThread;
-    HandlerThread mHandlerThread2;
-    ServiceHandler mServiceHandler;
-    ServiceHandler mServiceHandler2;
-    class ServiceHandler extends Handler {
-        ServiceHandler(Looper looper) {
-            super(looper);
-        }
+    class TimerHandler extends Handler {
+        private final static String TAG = "TimerHandler";
+        TimerHandler(Looper looper) {super(looper);}
         @Override
         public void handleMessage(Message msg) {
-            Tracer.log(TAG, "ServiceHandler.handleMessage: " + msg);
+            Tracer.log(TAG, "handleMessage: " + msg);
         }
     }
-
-
-
-    //TODO: end remove this --------------------------------------------------------------------
-
-
 
     @NonNull
     public static Intent getIntent(Context context) {
@@ -156,8 +116,12 @@ public class TrackerService extends Service{
     public void onDestroy(){
         Tracer.log(TAG, "onDestroy");
         super.onDestroy();
+        //clea le timer
+        if(mHandlerTimer != null){
+            mHandlerTimer.removeCallbacks(mRunnableTimer);
+        }
         if(mThTimer != null){
-            mThTimer.interrupt();
+            mThTimer.quitSafely();
         }
     }
 
@@ -166,48 +130,6 @@ public class TrackerService extends Service{
         Tracer.log(TAG, "onCreate");
         super.onCreate();
         try {
-            //TODO: start remove this
-            //test looper
-            mHandlerThread = new HandlerThread("ServiceHandlerThread");
-            mHandlerThread.start();
-            mHandlerThread2 = new HandlerThread("ServiceHandlerThread2");
-            mHandlerThread2.start();
-            mServiceHandler = new ServiceHandler(mHandlerThread.getLooper());
-            mServiceHandler.post(new Runnable(){
-                @Override
-                public void run() {
-                    int count = 0;
-                    try {
-                        while(count < 30){
-                            Thread.sleep(100);
-                            Tracer.log(TAG, "mServiceHandler.run: COUNT--1--" + count++);
-                        }
-                    }catch (InterruptedException ie){
-                        Tracer.log(TAG, "mServiceHandler.run.InterruptedException: ", ie);
-                    } catch (Exception e){
-                        Tracer.log(TAG, "mServiceHandler.run.Exception: ", e);
-                    }
-                }
-            });
-            mServiceHandler2 = new ServiceHandler(mHandlerThread2.getLooper());
-            mServiceHandler2.post(new Runnable(){
-                @Override
-                public void run() {
-                    int count = 0;
-                    try {
-                        while(count < 30){
-                            Thread.sleep(200);
-                            Tracer.log(TAG, "mServiceHandler2.run: COUNT++2++ " + count++);
-                        }
-                    }catch (InterruptedException ie){
-                        Tracer.log(TAG, "mServiceHandler2.run.InterruptedException: ", ie);
-                    } catch (Exception e){
-                        Tracer.log(TAG, "mServiceHandler2.run.Exception: ", e);
-                    }
-                }
-            });
-            //TODO: end remove this
-
             mUser = UserObject.getInstance();
             mAuthService = new AuthService(this, mTrackerBinder);
             mFirestoreService = FirestoreService.getInstance();
@@ -250,76 +172,16 @@ public class TrackerService extends Service{
         Tracer.log(TAG, "startRunningTime");
         if(mThTimer == null) {
             try {
-                mThTimer = new Thread(new Runnable() {
-                    private final static String TAG = "TrackerService.mThTimer";
-                    @Override
-                    public void run() {
-                        try {
-                            while (true) {
-                                //pause au seconde
-                                Thread.sleep(1000);
-                                mTimer++;
-                                //test message
-                                if(mServiceHandler != null) {
-                                    Message msg = new Message();
-                                    msg.obj = "call the handler: " + mTimer;
-                                    mServiceHandler.sendMessage(msg);
-                                    }
-                                //end test message
-                                //keepAlive du state au serveur au minute
-                                if(mTimer%mKeepAliveSignal == 0){
-                                    keepActive();
-                                }
-                                Tracer.tog("TIMER:", getTimer());
-                            }
-                        } catch (InterruptedException ie) {
-                            Tracer.log(TAG, "run.InterruptedException");
-                        } catch (Exception e){
-                            Tracer.log(TAG, "run.Exception: ", e);
-                        }
-                    }
-                });
+                mThTimer = new HandlerThread("mThTimer");
                 mThTimer.start();
+                mHandlerTimer = new TimerHandler(mThTimer.getLooper());
+                mRunnableTimer = new TimerRunnable();
+                mHandlerTimer.post(mRunnableTimer);
             }catch (Exception e){
                 Tracer.log(TAG, "startTimer.Exception: ", e);
             }
         }
     }
-
-    /*
-    private void startRunningTime() {
-        Tracer.log(TAG, "startRunningTime");
-        if(mThTimer == null) {
-            try {
-                mThTimer = new Thread(new Runnable() {
-                    private final static String TAG = "TrackerService.mThTimer";
-                    @Override
-                    public void run() {
-                        try {
-                            while (true) {
-                                //pause au seconde
-                                Thread.sleep(1000);
-                                mTimer++;
-                                //keepAlive du state au serveur au minute
-                                if(mTimer%mKeepAliveSignal == 0){
-                                    keepActive();
-                                }
-                                Tracer.tog("TIMER:", getTimer());
-                            }
-                        } catch (InterruptedException ie) {
-                            Tracer.log(TAG, "run.InterruptedException");
-                        } catch (Exception e){
-                            Tracer.log(TAG, "run.Exception: ", e);
-                        }
-                    }
-                });
-                mThTimer.start();
-            }catch (Exception e){
-                Tracer.log(TAG, "startTimer.Exception: ", e);
-            }
-        }
-    }
-    */
 
     private void untrackCounter(){
         Tracer.log(TAG, "untrackCounter");
@@ -469,20 +331,20 @@ public class TrackerService extends Service{
 
     private void resetUser(){
         Tracer.log(TAG, "resetUser");
-        // on enleve de la table actif avant
+        // NOTE: est appele quand on fait un signOut
+        // on enleve de la table actif de la DB avant
         deactivateUser();
         //on stop le gps
         mGpsService.stopUsingGPS();
-        // et on enleve du service une fois que l'on sait qu'il est retire de la table active
-        // sinon ne sera plus logue alors plus capable de faire un delete vu qu'il faut etre logiue
-        // et aussi car une fois relogue c'est la qu'il va recevoir le retour du
-        // deactivateUser.addOnSuccessListener
-        // mais on va le faire avec un script cote serveur si n'est pas actif depuix X temps
-        // alors il le delete
-        // ou un trigger avec CloudFunction sur le firebaseAuthentification
+        // firebaseAuthentification
         mAuthService.signOut();
         //on reset les infos
         mUser.resetUser();
+        //on call l'activity appelante pour le signOut
+        if(mBinderCallback != null) {
+            mBinderCallback.onSignedOut(null);
+        }
+        //NOTE: le OnUnbind va s'occuper de stopper le thread et clearer le mBinderCallback
     }
 
     private void keepActive(){

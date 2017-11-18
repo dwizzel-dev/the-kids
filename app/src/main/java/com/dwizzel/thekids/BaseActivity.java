@@ -49,7 +49,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     private void bindToAuthService(){
         //start le service de base, sinon il va s'arreter des que l'apli est ferme
         if(!mServiceBoundObservable.get()) {
-            Intent intent = TrackerService.getIntent(this);
+            Intent intent = TrackerService.getIntent(BaseActivity.this);
             startService(intent);
             //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -66,6 +66,17 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         public void onSignedOut(Object obj){
             Tracer.log(TAG, "onSignedOut");
+            //show le msg
+            Utils.getInstance().showToastMsg(BaseActivity.this, R.string.toast_signed_out);
+            //on reload l'activity dans laquelle il est, qui check si va checker si logue
+            //recreate(); //je crois que ca cause des errrus mais pas certain
+            //on va au login activity
+            //le login page
+            Intent intent = new Intent(BaseActivity.this, LoginActivity.class);
+            //start activity de login car pas encore logue, clear le backStack aussi
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         }
         public void onGpsEnabled(Object obj){
             Tracer.log(TAG, "onGpsEnabled");
@@ -109,6 +120,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onDestroy(){
         Tracer.log(TAGBASE, "onDestroy");
         super.onDestroy();
+        //end l'activity qui instencie
+        onSubDestroy();
         //clear le binder
         if(mTrackerBinder != null) {
             unbindService(mConnection);
@@ -125,8 +138,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    protected void startActivity(){
-        Tracer.log(TAGBASE, "startActivity");
+    protected void onSubCreate(){
+        Tracer.log(TAGBASE, "onSubCreate");
+    }
+    protected void onSubDestroy(){
+        Tracer.log(TAGBASE, "onSubDestroy");
     }
 
     private void checkIfSignedIn(){
@@ -134,17 +150,15 @@ public abstract class BaseActivity extends AppCompatActivity {
         if( mTrackerBinder != null && mServiceBoundObservable.get()){
             if(!mTrackerBinder.isSignedIn()){
                 //le login page
-                Intent intent = new Intent(this, LoginActivity.class);
+                Intent intent = new Intent(BaseActivity.this, LoginActivity.class);
                 //start activity de login car pas encore logue, clear le backStack aussi
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                finish();
-
             }else{
                 //sinon repart toujours l'activity de la classe qui extends BaseActivity
                 //si on est la c'est quand on redonne le focus a l'application
-                startActivity();
+                onSubCreate();
             }
         }else {
             Tracer.log(TAGBASE, "checkIfSigneddIn: service not bound yet");
@@ -168,10 +182,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         Tracer.log(TAGBASE, "signOutUser");
         //on avretit le service que l'on sign out
         mTrackerBinder.signOut();
-        //show le msg
-        Utils.getInstance().showToastMsg(this, R.string.toast_signed_out);
-        //on reload l'activity dans laquelle il est, qui check si va checker si logue
-        recreate();
+
     }
 
 }

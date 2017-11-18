@@ -21,15 +21,14 @@ public class HomeActivity extends BaseActivity {
     }
 
     @Override
-    protected void onDestroy(){
-        Tracer.log(TAG, "onDestroy");
-        super.onDestroy();
+    protected void onSubDestroy(){
+        Tracer.log(TAG, "onSubDestroy");
+        //si on a des chose a cleaner ici
     }
 
     @Override
-    protected void startActivity(){
-        Tracer.log(TAG, "startActivity");
-        super.startActivity();
+    protected void onSubCreate(){
+        Tracer.log(TAG, "onSubCreate");
         setContentView(R.layout.activity_home);
         setTitle(R.string.main_title);
         setButton();
@@ -68,7 +67,8 @@ public class HomeActivity extends BaseActivity {
                     public void onClick(View v) {
                         if(getTrackerBinder() != null) {
                             Utils.getInstance().showToastMsg(HomeActivity.this,
-                                    String.format("counter: %d", getTrackerBinder().getCounter()));
+                                    String.format(Utils.getInstance().getLocale(HomeActivity.this),
+                                            "counter: %d", getTrackerBinder().getCounter()));
                         }
                     }
                 });

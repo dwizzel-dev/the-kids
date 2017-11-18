@@ -16,6 +16,7 @@ import android.util.Patterns;
 import android.widget.Toast;
 
 
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class Utils {
@@ -55,7 +56,6 @@ public class Utils {
                         bConnected = activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
                     }
                 }catch(Exception e) {
-                    //TODO: handle the errors
                     Tracer.log(TAG, "checkConnectivity.exception: ", e);
                 }
             }
@@ -63,25 +63,23 @@ public class Utils {
         return bConnected;
     }
 
-    public void showToastMsg(Activity activity, int msgId){
+    public void showToastMsg(Context context, int msgId){
         Tracer.log(TAG, "showToastMsg");
-        if(activity != null) {
+        if(context != null) {
             try {
-                Toast.makeText(activity, msgId, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getResources().getString(msgId), Toast.LENGTH_SHORT).show();
             }catch(Exception e){
-                //TODO: handle the errors
                 Tracer.log(TAG, "showToastMsg[0].exception: ", e);
             }
         }
     }
 
-    public void showToastMsg(Activity activity, String msg){
+    public void showToastMsg(Context context, String msg){
         Tracer.log(TAG, "showToastMsg");
-        if(activity != null) {
+        if(context != null) {
             try {
-                Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
             }catch(Exception e){
-                //TODO: handle the errors
                 Tracer.log(TAG, "showToastMsg[1].exception: ", e);
             }
         }
@@ -131,5 +129,8 @@ public class Utils {
         }
     }
 
+    public Locale getLocale(Context context){
+        return context.getResources().getConfiguration().locale;
+    }
 
 }
