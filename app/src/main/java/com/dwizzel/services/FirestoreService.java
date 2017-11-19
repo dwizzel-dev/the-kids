@@ -1,5 +1,6 @@
 package com.dwizzel.services;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.dwizzel.objects.UserObject;
@@ -33,7 +34,7 @@ import com.dwizzel.models.UserModel;
  *
  */
 
-class FirestoreService {
+class FirestoreService implements IFirestoreService{
 
     //name of database collection and fields
     class DB{
@@ -51,21 +52,18 @@ class FirestoreService {
     }
 
     private final static String TAG = "FirestoreService";
-    private static FirestoreService sInst;
     private FirebaseFirestore mDb;
     private UserObject mUser;
+    private Context mContext;
+    private ITrackerService mTrackerService;
 
-    private FirestoreService() {
+
+    public FirestoreService (Context context, ITrackerService trackerService) {
         mDb = FirebaseFirestore.getInstance();
         mUser = UserObject.getInstance();
-    }
-
-    static FirestoreService getInstance() {
-        if (sInst == null) {
-            sInst = new FirestoreService();
+        mTrackerService = trackerService;
+        mContext = context;
         }
-        return sInst;
-    }
 
     private void setUserInfos(){
         Tracer.log(TAG, "setUserInfos");
@@ -93,7 +91,7 @@ class FirestoreService {
 
     }
 
-    void updateUserInfos(){
+    public void updateUserInfos(){
         Tracer.log(TAG, "updateUserInfos");
         try{
             // il faut que le user soit creer avant tout
@@ -130,7 +128,7 @@ class FirestoreService {
 
     }
 
-    void updateUserPosition(){
+    public void updateUserPosition(){
         Tracer.log(TAG, "updateUserPosition");
         try{
             //update juste le updateTimePosition et position
@@ -158,7 +156,7 @@ class FirestoreService {
 
     }
 
-    void getUserInfos(){
+    public void getUserInfos(){
         Tracer.log(TAG, "getUserInfos");
         try{
             mDb.collection(DB.Users.collection).document(mUser.getUid())
@@ -176,6 +174,8 @@ class FirestoreService {
                                     mUser.setData(document.getData());
                                     //il avait deja ete cree precedement
                                     mUser.setCreated(true);
+                                    //on call le tracker pour dire qu'il est pret
+                                    mTrackerService.onUserCreated(null);
                                 }else{
                                     Tracer.log(TAG, "no document, creating new user");
                                     // si on a rien alors on a un nouveau user
@@ -193,7 +193,7 @@ class FirestoreService {
         }
     }
 
-    void activateUser(){
+    public void activateUser(){
         Tracer.log(TAG, "activateUser");
         //get a timestamp for activity timer pending
         try{

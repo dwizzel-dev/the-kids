@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+
+import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.*;
 import com.dwizzel.utils.Tracer;
@@ -58,32 +60,17 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         private static final String TAG = "BaseActivity.ITrackerBinder";
-        public void handleResponse(long counter){
-            Tracer.log(TAG, String.format("thread counter: %d", counter));
+        public void handleResponse(ServiceResponseObject sro){
+            Tracer.log(TAG, String.format("handleResponse: %s", sro));
         }
-        public void onSignedIn(Object obj){
+        public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");
         }
-        public void onSignedOut(Object obj){
+        public void onSignedOut(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedOut");
             //show le msg
             Utils.getInstance().showToastMsg(BaseActivity.this, R.string.toast_signed_out);
             startLoginActivity();
-        }
-        public void onGpsEnabled(Object obj){
-            Tracer.log(TAG, "onGpsEnabled");
-        }
-        public void onGpsDisabled(Object obj){
-            Tracer.log(TAG, "onGpsDisabled");
-        }
-        public void onGpsEnable(Object obj){
-            Tracer.log(TAG, "onGpsEnable");
-        }
-        public void onGpsDisable(Object obj){
-            Tracer.log(TAG, "onGpsDisable");
-        }
-        public void onGpsUpdate(Object obj){
-            Tracer.log(TAG, "onGpsUpdate");
         }
     };
 

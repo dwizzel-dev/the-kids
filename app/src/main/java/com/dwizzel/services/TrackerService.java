@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 
 import com.dwizzel.Const;
 import com.dwizzel.objects.PositionObject;
+import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
@@ -21,8 +22,6 @@ import com.google.firebase.auth.AuthCredential;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.TimeZone;
 
 /**
@@ -43,7 +42,7 @@ import java.util.TimeZone;
  * les infos du user dans le service
  */
 
-public class TrackerService extends Service{
+public class TrackerService extends Service implements ITrackerService{
 
     private final static String TAG = "TrackerService";
 
@@ -54,9 +53,9 @@ public class TrackerService extends Service{
     private long mTimer = 0;
 
     private ITrackerBinderCallback mBinderCallback;
-    private AuthService mAuthService;
-    private FirestoreService mFirestoreService;
-    private GpsService mGpsService;
+    private IAuthService mAuthService;
+    private IFirestoreService mFirestoreService;
+    private IGpsService mGpsService;
     private UserObject mUser;
     private final IBinder mTrackerBinder = new TrackerBinder();
 
@@ -100,10 +99,10 @@ public class TrackerService extends Service{
         super.onCreate();
         try {
             mUser = UserObject.getInstance();
-            mAuthService = new AuthService(TrackerService.this, mTrackerBinder);
-            mFirestoreService = FirestoreService.getInstance();
-            mGpsService = new GpsService(TrackerService.this, mTrackerBinder);
-            //start running time elapsed
+            mAuthService = new AuthService(TrackerService.this, TrackerService.this);
+            mFirestoreService = new FirestoreService(TrackerService.this, TrackerService.this);
+            mGpsService = new GpsService(TrackerService.this, TrackerService.this);
+            //start running keep alive timer
             startRunningTime();
             //check pour user infos si etait deja connecte avant le restart du tracker service
             setUser();
@@ -132,7 +131,8 @@ public class TrackerService extends Service{
     }
 
     private String getTimer(){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Utils.getInstance().getLocale(TrackerService.this));
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss",
+                Utils.getInstance().getLocale(TrackerService.this));
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return simpleDateFormat.format(new Date(mTimer*1000));
     }
@@ -149,15 +149,6 @@ public class TrackerService extends Service{
             }catch (Exception e){
                 Tracer.log(TAG, "startTimer.Exception: ", e);
             }
-        }
-    }
-
-    private void getUserInfos(){
-        Tracer.log(TAG, "getUserInfos");
-        try {
-           mFirestoreService.getUserInfos();
-        }catch (Exception e){
-            Tracer.log(TAG, "getUserInfos.exception: ", e);
         }
     }
 
@@ -192,51 +183,8 @@ public class TrackerService extends Service{
             mUser.setUid(mAuthService.getUserID());
             mUser.setSigned(true);
             mUser.setActive(true);
-            //on check le type de authentification
-            //mUser.setLoginType(Const.user.TYPE_EMAIL);
-            //on enleve les observer precedent si il etait logue IN, OUT, IN, OUT etc...
-            mUser.deleteObservers();
-            //observer pour quand on change quelque chose au user
-            mUser.addObserver(new Observer() {
-                @Override
-                public void update(Observable observable, Object o) {
-                    Tracer.log(TAG, "setUser.mUser.update: \n" + observable + "\n" + o);
-                    try{
-                        switch(((UserObject.Obj)o).getType()){
-                            case Const.notif.TYPE_NOTIF_CREATED :
-                                //il est cree ou ete cree dans la DB alors on update les infos
-                                if((boolean)((UserObject.Obj)o).getValue()){
-                                    //on peut maintenant setter le gps
-                                    switch(mGpsService.checkGpsStatus()){
-                                        case Const.gps.NO_PERMISSION :
-                                            Tracer.log(TAG, "NO GPS PERMISSIONS ++++");
-                                            break;
-                                        case Const.gps.NO_PROVIDER :
-                                            Tracer.log(TAG, "NO GPS PROVIDER ++++");
-                                            break;
-                                        default:
-                                            //on check la derniere postion si possible
-                                            PositionObject positionObject = mGpsService.getLastPosition();
-                                            if(positionObject != null){
-                                                mUser.setPosition(positionObject);
-                                            }
-                                            mUser.setGps(true);
-                                            break;
-                                    }
-                                    //on update les infos dans la DB
-                                    mFirestoreService.updateUserInfos();
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }catch (NullPointerException npe){
-                        Tracer.log(TAG, "setUser.mUser.update.NullPointerException: ", npe);
-                    }
-                }
-            });
             //on va chercher les infos du user sur la DB ou on les creer
-            getUserInfos();
+            mFirestoreService.getUserInfos();
         }
     }
 
@@ -292,7 +240,59 @@ public class TrackerService extends Service{
                 Tracer.log(TAG, "activateUser.exception: ", e);
             }
         }
+        //for debug check user object
+        //Tracer.log(TAG, "User: ", mUser);
+    }
 
+    public void onUserSignedIn(ServiceResponseObject sro){
+        Tracer.log(TAG, "onUserSignedIn");
+        //on set le user de base du service si on a pas d'erreur sinon on les refill au caller
+        if(sro.getErr() == 0) {
+            setUser();
+        }else{
+            Tracer.log(TAG, "onUserSignedIn", sro);
+        }
+        //on tranmet la reponse object au caller
+        if(mBinderCallback != null) {
+            mBinderCallback.onSignedIn(sro);
+        }
+    }
+
+    public void onUserCreated(ServiceResponseObject sro){
+        Tracer.log(TAG, "onUserCreated");
+        //on peut maintenant setter le gps
+        switch(mGpsService.checkGpsStatus()){
+            case Const.gps.NO_PERMISSION :
+                Tracer.log(TAG, "NO GPS PERMISSIONS ++++");
+                break;
+            case Const.gps.NO_PROVIDER :
+                Tracer.log(TAG, "NO GPS PROVIDER ++++");
+                break;
+            default:
+                //on check la derniere postion si possible
+                PositionObject positionObject = mGpsService.getLastPosition();
+                if(positionObject != null){
+                    mUser.setPosition(positionObject);
+                }
+                mUser.setGps(true);
+                break;
+        }
+        //on update les infos dans la DB
+        mFirestoreService.updateUserInfos();
+    }
+
+    public void onUserSignedOut(ServiceResponseObject sro){
+        Tracer.log(TAG, "onUserSignedOut");
+        //on tranmet la reponse object au caller
+        if(mBinderCallback != null) {
+            mBinderCallback.onSignedOut(sro);
+        }
+    }
+
+    public void onGpsPositionUpdate(){
+        Tracer.log(TAG, "onGpsPositionUpdate");
+        //on fait un update du user et celui de la DB
+        setUserNewPosition();
     }
 
 
@@ -338,23 +338,6 @@ public class TrackerService extends Service{
             Tracer.log(TAG, "TrackerBinder.createUser");
             mAuthService.createUser(email, psw);
         }
-        public void onSignedIn(Object obj){
-            Tracer.log(TAG, "TrackerBinder.onSignedIn");
-            //on set le user de base du service
-            setUser();
-            //on tranmet la reponse object au caller
-            mBinderCallback.onSignedIn(obj);
-        }
-        public void onSignedOut(Object obj){
-            Tracer.log(TAG, "TrackerBinder.onSignedOut");
-            //on tranmet la reponse object au caller
-            mBinderCallback.onSignedOut(obj);
-        }
-        public void onGpsPositionUpdate(){
-            Tracer.log(TAG, "TrackerBinder.onGpsPositionUpdate");
-            //on fait un update du user et celui de la DB
-            setUserNewPosition();
-        }
 
     }
 
@@ -364,7 +347,7 @@ public class TrackerService extends Service{
     class TimerRunnable implements Runnable{
         private final static String TAG = "TimerRunnable";
         private boolean loop = true;
-        private int keepAliveDelay = 60;
+        private int keepAliveDelay = 10;
         private int sleepDelay = 1000;
         TimerRunnable(){}
         @Override

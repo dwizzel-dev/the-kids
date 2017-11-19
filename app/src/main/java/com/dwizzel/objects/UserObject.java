@@ -4,14 +4,12 @@ import com.dwizzel.Const;
 import com.dwizzel.models.UserModel;
 import com.dwizzel.utils.Tracer;
 
-import java.util.Observable;
-
 
 /**
  * Created by Dwizzel on 15/11/2017.
  */
 
-public class UserObject extends Observable{
+public class UserObject{
 
     private static final String TAG = "UserObject";
     private static UserObject sInst;
@@ -116,11 +114,6 @@ public class UserObject extends Observable{
 
     public void setCreated(boolean created){
         this.created = created;
-        //alors on notify les observer juste quand il est creer
-        if(this.created) {
-            setChanged();
-            notifyObservers(new Obj(Const.notif.TYPE_NOTIF_CREATED, true));
-        }
     }
 
     public void setGps(boolean gps) {

@@ -27,23 +27,23 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 
-class AuthService {
+class AuthService implements IAuthService {
 
     private static final String TAG = "AuthService";
     private FirebaseAuth mFirebaseAuth;
-    private TrackerService.TrackerBinder mTrackerBinder;
     private static int count = 0;
     private Context mContext;
     private UserObject mUser;
+    private ITrackerService mTrackerService;
 
-    AuthService(Context context, IBinder trackerBinder) throws Exception {
+    AuthService(Context context, ITrackerService trackerService) throws Exception {
         Tracer.log(TAG, "count:" + count++);
-        mContext = context;
         try {
+            mContext = context;
             mUser = UserObject.getInstance();
             FirebaseApp.initializeApp(mContext);
             mFirebaseAuth = FirebaseAuth.getInstance();
-            mTrackerBinder = (TrackerService.TrackerBinder) trackerBinder;
+            mTrackerService = trackerService;
         }catch (Exception e){
             Tracer.log(TAG, "exception:", e);
             throw new Exception(e);
@@ -79,7 +79,7 @@ class AuthService {
         return false;
     }
 
-    boolean isSignedIn(){
+    public boolean isSignedIn(){
         Tracer.log(TAG, "isSignedIn");
         //check via le firebase si on est logue ou pas
         try{
@@ -93,7 +93,7 @@ class AuthService {
         return false;
     }
 
-    void signOut() {
+    public void signOut() {
         Tracer.log(TAG, "signOut");
         try {
             //pas de condition sinon prob quand il swap out l'appli et revient avec un restart
@@ -108,7 +108,7 @@ class AuthService {
         }
     }
 
-    String getEmail() {
+    public String getEmail() {
         Tracer.log(TAG, "getEmail");
         try {
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
@@ -121,7 +121,7 @@ class AuthService {
         return null;
     }
 
-    String getUserID(){
+    public String getUserID(){
         Tracer.log(TAG, "getUserID");
         try {
             FirebaseUser firebaseUser = mFirebaseAuth.getCurrentUser();
@@ -134,7 +134,7 @@ class AuthService {
         return null;
     }
 
-    void signInUser(String email, String psw){
+    public void signInUser(String email, String psw){
         Tracer.log(TAG, String.format("signInUser: \"%s\" | \"%s\"", email, psw));
         //avertir si pas connecte
         if (checkConnectivity()) {
@@ -147,16 +147,16 @@ class AuthService {
                                     try {
                                         throw task.getException();
                                     } catch (FirebaseAuthInvalidCredentialsException invalidPsw) {
-                                        mTrackerBinder.onSignedIn(
+                                        mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(Const.error.ERROR_INVALID_PASSWORD));
                                     } catch (FirebaseAuthInvalidUserException invalidCredential) {
-                                        mTrackerBinder.onSignedIn(
+                                        mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(Const.error.ERROR_INVALID_CREDENTIALS));
                                     } catch (NullPointerException npe) {
-                                        mTrackerBinder.onSignedIn(
+                                        mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(Const.except.NULL_POINTER));
                                     } catch (Exception e) {
-                                        mTrackerBinder.onSignedIn(
+                                        mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(Const.except.GENERIC));
                                     }
                                 } else {
@@ -164,7 +164,7 @@ class AuthService {
                                         //on set le user comme signed in
                                         mUser.setLoginType(Const.user.TYPE_EMAIL);
                                         //pas erreur alors on continue
-                                        mTrackerBinder.onSignedIn(new ServiceResponseObject());
+                                        mTrackerService.onUserSignedIn(new ServiceResponseObject());
                                     }catch(NullPointerException npe){
                                         Tracer.log(TAG, "signInUser.onComplete.NullPointerException: ", npe);
                                     }
@@ -176,14 +176,14 @@ class AuthService {
             }
         }else{
             try {
-                mTrackerBinder.onSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
+                mTrackerService.onUserSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
             }catch (NullPointerException npe){
                 Tracer.log(TAG, "signInUser.NullPointerException: ", npe);
             }
         }
     }
 
-    void createUser(String email, String psw) {
+    public void createUser(String email, String psw) {
         Tracer.log(TAG, String.format("createUser: \"%s\" | \"%s\"", email, psw));
         //avertir si pas connecte
         if (checkConnectivity()) {
@@ -196,26 +196,26 @@ class AuthService {
                                     try {
                                         throw task.getException();
                                     } catch (FirebaseAuthUserCollisionException existEmail) {
-                                        mTrackerBinder.onSignedIn(
+                                        mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(Const.error.ERROR_EMAIL_EXIST));
                                     }catch (FirebaseAuthWeakPasswordException weakPsw) {
-                                        mTrackerBinder.onSignedIn(
+                                        mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(Const.error.ERROR_WEAK_PASSWORD));
                                     } catch (FirebaseAuthInvalidCredentialsException invalidEmail) {
-                                        mTrackerBinder.onSignedIn(
+                                        mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(Const.error.ERROR_INVALID_EMAIL));
                                     } catch (NullPointerException npe) {
-                                        mTrackerBinder.onSignedIn(
+                                        mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(Const.except.NULL_POINTER));
                                     } catch (Exception e) {
-                                        mTrackerBinder.onSignedIn(
+                                        mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(Const.except.GENERIC));
                                     }
                                 } else {
                                     try {
                                         mUser.setLoginType(Const.user.TYPE_EMAIL);
                                         //pas erreur alors on continue
-                                        mTrackerBinder.onSignedIn(new ServiceResponseObject());
+                                        mTrackerService.onUserSignedIn(new ServiceResponseObject());
                                     }catch(NullPointerException npe){
                                         Tracer.log(TAG, "createUser.onComplete.NullPointerException: ", npe);
                                     }
@@ -227,14 +227,14 @@ class AuthService {
             }
         }else{
             try {
-                mTrackerBinder.onSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
+                mTrackerService.onUserSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
             }catch (NullPointerException npe){
                 Tracer.log(TAG, "createUser.NullPointerException: ", npe);
             }
         }
     }
 
-    void signInUser(AuthCredential token){
+    public void signInUser(AuthCredential token){
         Tracer.log(TAG, String.format("signInCredential: \"%s\"", token));
         try {
             mFirebaseAuth.signInWithCredential(token)
@@ -245,17 +245,17 @@ class AuthService {
                                 try {
                                     throw task.getException();
                                 } catch (NullPointerException npe) {
-                                    mTrackerBinder.onSignedIn(
+                                    mTrackerService.onUserSignedIn(
                                             new ServiceResponseObject(Const.except.NULL_POINTER));
                                 } catch (Exception e) {
-                                    mTrackerBinder.onSignedIn(
+                                    mTrackerService.onUserSignedIn(
                                             new ServiceResponseObject(Const.except.GENERIC));
                                 }
                             } else {
                                 try {
                                     mUser.setLoginType(Const.user.TYPE_FACEBOOK);
                                     //pas erreur alors on continue
-                                    mTrackerBinder.onSignedIn(new ServiceResponseObject());
+                                    mTrackerService.onUserSignedIn(new ServiceResponseObject());
                                 }catch(NullPointerException npe){
                                     Tracer.log(TAG, "signInCredential.onComplete.NullPointerException: ", npe);
                                 }

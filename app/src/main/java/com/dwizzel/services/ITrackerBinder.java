@@ -26,10 +26,4 @@ public interface ITrackerBinder {
 
     void createUser(String user, String psw);
 
-    void onSignedIn(Object obj);
-
-    void onSignedOut(Object obj);
-
-    void onGpsPositionUpdate();
-
 }

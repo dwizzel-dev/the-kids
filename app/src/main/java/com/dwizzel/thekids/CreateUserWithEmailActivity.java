@@ -67,16 +67,14 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
 
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         private static final String TAG = "CreateUserWithEmailActivity.ITrackerBinder";
-        public void handleResponse(long counter){
-            //Tracer.log(TAG, String.format("thread counter: %d", counter));
+        public void handleResponse(ServiceResponseObject sro){
+            Tracer.log(TAG, String.format("handleResponse: %s", sro));
         }
-        public void onSignedIn(Object obj){
+        public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
             Utils.getInstance().hideProgressDialog();
-            //check les erreurs et exception
-            int err = ((ServiceResponseObject)obj).getErr();
-            switch(err){
+            switch(sro.getErr()){
                 case Const.except.NO_CONNECTION:
                     Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
                             R.string.err_no_connectivity);
@@ -97,23 +95,8 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
                     break;
             }
         }
-        public void onSignedOut(Object obj){
+        public void onSignedOut(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedOut");
-        }
-        public void onGpsEnabled(Object obj){
-            Tracer.log(TAG, "onGpsEnabled");
-        }
-        public void onGpsDisabled(Object obj){
-            Tracer.log(TAG, "onGpsDisabled");
-        }
-        public void onGpsEnable(Object obj){
-            Tracer.log(TAG, "onGpsEnable");
-        }
-        public void onGpsDisable(Object obj){
-            Tracer.log(TAG, "onGpsDisable");
-        }
-        public void onGpsUpdate(Object obj){
-            Tracer.log(TAG, "onGpsUpdate");
         }
     };
 

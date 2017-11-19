@@ -34,19 +34,17 @@ import com.dwizzel.utils.Tracer;
  */
 
 /*
-* TODO: meilleur gestion des exceptions de connectivity et permissions
-*
 * NOTES: pour le watcher juste le network suffit,
 * mais pour celui qui est suivi ca prend absoluement le gps
 *
 * */
 
-public class GpsService{
+public class GpsService implements IGpsService{
 
     private PositionObject mPosition = new PositionObject(0,0,0);
     private final static String TAG = "GpsService";
     private Context mContext;
-    private TrackerService.TrackerBinder mTrackerBinder;
+    private ITrackerService mTrackerService;
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // in meters
     private static final long MIN_TIME_BW_UPDATES = 10000; // 60000 = 1 minute
     private LocationManager mLocationManager;
@@ -54,10 +52,10 @@ public class GpsService{
     private boolean isGPSEnabled = false;
     private boolean isNetworkEnabled = false;
 
-    public GpsService(Context context, IBinder trackerBinder) {
+    public GpsService(Context context, ITrackerService trackerService) {
         Tracer.log(TAG, "GpsService");
         mContext = context;
-        mTrackerBinder = (TrackerService.TrackerBinder) trackerBinder;
+        mTrackerService = trackerService;
         locationListener = new LocationListener();
     }
 
@@ -130,7 +128,9 @@ public class GpsService{
                     location = mLocationManager
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     if (location == null) {
-                        Tracer.log(TAG, "getLocation.location: can get last network location");
+                        Tracer.log(TAG, "getLastLocation.location: ----- Last Network Position");
+                    }else{
+                        Tracer.log(TAG, "getLastLocation.location: +++++ Last Network Position");
                     }
                 }
                 if (isGPSEnabled) {
@@ -138,9 +138,10 @@ public class GpsService{
                         location = mLocationManager
                                     .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         if (location == null) {
-                            Tracer.log(TAG, "getLocation.location: can get last gps location");
+                            Tracer.log(TAG, "getLastLocation.location: ----- Last GPS Position");
+                        }else{
+                            Tracer.log(TAG, "getLastLocation.location: +++++ Last GPS Position");
                         }
-
                     }
                 }
             } catch (NullPointerException npe) {
@@ -154,10 +155,9 @@ public class GpsService{
         return location;
     }
 
-    boolean startLocationUpdate(){
+    public boolean startLocationUpdate(){
         Tracer.log(TAG, "startLocationUpdate");
-        //on GPS only
-        ///check les droits
+        //NOTE: on GPS only because network doesn't move haha!
         if(!hasPermission() || !hasProvider()) {
             return false;
         }
@@ -184,14 +184,14 @@ public class GpsService{
         return true;
     }
 
-    void stopLocationUpdate(){
+    public void stopLocationUpdate(){
         Tracer.log(TAG, "stopLocationUpdate");
         if(mLocationManager != null){
             mLocationManager.removeUpdates(locationListener);
         }
     }
 
-    PositionObject getLastPosition(){
+    public PositionObject getLastPosition(){
         Tracer.log(TAG, "getLastPosition");
         ///check les droits
         if(hasPermission() && hasProvider()) {
@@ -205,7 +205,7 @@ public class GpsService{
         return null;
     }
 
-    int checkGpsStatus(){
+    public int checkGpsStatus(){
         Tracer.log(TAG, "checkGpsStatus");
         ///check les droits
         if(!hasPermission()) {
@@ -218,7 +218,7 @@ public class GpsService{
         return Const.gps.NO_ERROR;
     }
 
-    PositionObject getPosition(){
+    public PositionObject getPosition(){
         return mPosition;
     }
 
@@ -235,8 +235,8 @@ public class GpsService{
             mPosition = new PositionObject(location.getLatitude(),
                     location.getLongitude(), location.getAltitude());
             //on avertit le TrackerService que notre position a change
-            if (mTrackerBinder != null) {
-                mTrackerBinder.onGpsPositionUpdate();
+            if (mTrackerService != null) {
+                mTrackerService.onGpsPositionUpdate();
             }
         }
 
