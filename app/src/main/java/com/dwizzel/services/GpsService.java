@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 
+import com.dwizzel.Const;
 import com.dwizzel.objects.PermissionObject;
 import com.dwizzel.objects.PositionObject;
 import com.dwizzel.thekids.R;
@@ -35,26 +36,32 @@ import com.dwizzel.utils.Tracer;
 /*
 * TODO: meilleur gestion des exceptions de connectivity et permissions
 *
+* NOTES: pour le watcher juste le network suffit,
+* mais pour celui qui est suivi ca prend absoluement le gps
+*
 * */
 
-public class GpsService implements LocationListener {
+public class GpsService{
 
     private PositionObject mPosition = new PositionObject(0,0,0);
     private final static String TAG = "GpsService";
     private Context mContext;
-    private boolean mCanGetLocation = false;
     private TrackerService.TrackerBinder mTrackerBinder;
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // in meters
     private static final long MIN_TIME_BW_UPDATES = 10000; // 60000 = 1 minute
     private LocationManager mLocationManager;
+    private LocationListener locationListener;
+    private boolean isGPSEnabled = false;
+    private boolean isNetworkEnabled = false;
 
     public GpsService(Context context, IBinder trackerBinder) {
         Tracer.log(TAG, "GpsService");
         mContext = context;
         mTrackerBinder = (TrackerService.TrackerBinder) trackerBinder;
+        locationListener = new LocationListener();
     }
 
-    public boolean hasPermission() {
+    private boolean hasPermission() {
         Tracer.log(TAG, "hasPermission");
         if(mContext != null) {
             PermissionObject perms = new PermissionObject(mContext);
@@ -90,125 +97,172 @@ public class GpsService implements LocationListener {
         alertDialog.show();
     }
 
-    private void getLocation(){
-        Tracer.log(TAG, "getLocation");
-
-        Location location = null;
-        boolean isGPSEnabled = false;
-        boolean isNetworkEnabled = false;
-
-        //check si on a les droits avant tout
-        if(hasPermission()) {
+    private boolean hasProvider(){
+        Tracer.log(TAG, "hasProvider");
+        if(mLocationManager == null) {
             mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-            try {
-                // getting GPS status
-                isGPSEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        }
+        try {
+            if(mLocationManager != null) {
                 // getting network status
                 isNetworkEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            } catch (NullPointerException npe){
-                Tracer.log(TAG, "getLocation.NullPointerException[0]: ", npe);
-            } catch (Exception e) {
-                Tracer.log(TAG, "getLocation.Exception[0]: ", e);
+                // getting GPS status
+                isGPSEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             }
-            //minor check
-            if (isGPSEnabled || isNetworkEnabled) {
-                mCanGetLocation = true;
-                // First get location from Network Provider
+        } catch (NullPointerException npe){
+            Tracer.log(TAG, "getLocation.NullPointerException: ", npe);
+        } catch (Exception e) {
+            Tracer.log(TAG, "getLocation.Exception: ", e);
+        }
+        return (isGPSEnabled || isNetworkEnabled);
+    }
+
+    private Location getLastLocation(){
+        Tracer.log(TAG, "getLocation");
+        Location location = null;
+        if(mLocationManager == null) {
+            mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        }
+        //minor check
+        if ((isGPSEnabled || isNetworkEnabled) && mLocationManager != null) {
+            try {
                 if (isNetworkEnabled) {
-                    try {
-                        mLocationManager.requestLocationUpdates(
-                                LocationManager.NETWORK_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                        Tracer.log(TAG, "getLocation: ++ Network Enabled");
-                        location = mLocationManager
+                    location = mLocationManager
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (location != null) {
-                            mPosition = new PositionObject(location.getLatitude(),
-                                    location.getLongitude(), location.getAltitude());
-                        }
-                    } catch (NullPointerException npe){
-                        Tracer.log(TAG, "getLocation.NullPointerException[1]: ", npe);
-                    } catch (SecurityException se) {
-                        Tracer.log(TAG, "getLocation.SecurityException[0]: ", se);
+                    if (location == null) {
+                        Tracer.log(TAG, "getLocation.location: can get last network location");
                     }
                 }
-                // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
                     if (location == null) {
-                        try {
-                            mLocationManager.requestLocationUpdates(
-                                    LocationManager.GPS_PROVIDER,
-                                    MIN_TIME_BW_UPDATES,
-                                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                            Tracer.log(TAG, "getLocation: ++ GPS Enabled");
-
-                            location = mLocationManager
+                        location = mLocationManager
                                     .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                            if (location != null) {
-                                mPosition = new PositionObject(location.getLatitude(),
-                                        location.getLongitude(), location.getAltitude());
-                            }
-                        } catch (NullPointerException npe){
-                            Tracer.log(TAG, "getLocation.NullPointerException[2]: ", npe);
-                        } catch (SecurityException se) {
-                            Tracer.log(TAG, "getLocation.SecurityException[1]: ", se);
+                        if (location == null) {
+                            Tracer.log(TAG, "getLocation.location: can get last gps location");
                         }
+
                     }
                 }
+            } catch (NullPointerException npe) {
+                Tracer.log(TAG, "getLastLocation.NullPointerException: ", npe);
+            } catch (SecurityException se) {
+                Tracer.log(TAG, "getLastLocation.SecurityException: ", se);
+            } catch (Exception e) {
+                Tracer.log(TAG, "getLastLocation.Exception[1]: ", e);
             }
-        }else{
-            Tracer.log(TAG, "getLocation : no permissions");
         }
+        return location;
     }
 
-    void stopUsingGPS(){
-        Tracer.log(TAG, "stopUsingGPS");
-        mCanGetLocation = false;
+    boolean startLocationUpdate(){
+        Tracer.log(TAG, "startLocationUpdate");
+        //on GPS only
+        ///check les droits
+        if(!hasPermission() || !hasProvider()) {
+            return false;
+        }
+        if(mLocationManager == null) {
+            mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        }
+        if (!isGPSEnabled || mLocationManager == null) {
+            return false;
+        }
+        //minor check
+        try {
+            mLocationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
+            Tracer.log(TAG, "getLocation: ++ GPS Enabled");
+        }catch (NullPointerException npe){
+            Tracer.log(TAG, "getLocation.NullPointerException: ", npe);
+        } catch (SecurityException se) {
+            Tracer.log(TAG, "getLocation.SecurityException: ", se);
+        }catch (Exception e){
+            Tracer.log(TAG, "getLocation.Exception: ", e);
+        }
+        return true;
+    }
+
+    void stopLocationUpdate(){
+        Tracer.log(TAG, "stopLocationUpdate");
         if(mLocationManager != null){
-            mLocationManager.removeUpdates(GpsService.this);
-            mLocationManager = null;
+            mLocationManager.removeUpdates(locationListener);
         }
     }
 
-    boolean startUsingGPS(){
-        Tracer.log(TAG, "startUsingGPS");
-        //on reset au cas ou etait deja start
-        stopUsingGPS();
-        //et on get
-        getLocation();
-        //selon le getLocation qui va changer le boolean
-        return mCanGetLocation;
+    PositionObject getLastPosition(){
+        Tracer.log(TAG, "getLastPosition");
+        ///check les droits
+        if(hasPermission() && hasProvider()) {
+            Location location = getLastLocation();
+            if (location != null) {
+                mPosition = new PositionObject(location.getLatitude(), location.getLongitude(),
+                        location.getAltitude());
+                return mPosition;
+            }
+        }
+        return null;
     }
 
-    public PositionObject getPosition(){
+    int checkGpsStatus(){
+        Tracer.log(TAG, "checkGpsStatus");
+        ///check les droits
+        if(!hasPermission()) {
+            return Const.gps.NO_PERMISSION;
+        }
+        if(!hasProvider()) {
+            return Const.gps.NO_PROVIDER;
+        }
+        //good
+        return Const.gps.NO_ERROR;
+    }
+
+    PositionObject getPosition(){
         return mPosition;
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        Tracer.log(TAG, "onLocationChanged");
-        mPosition = new PositionObject(location.getLatitude(),
-                location.getLongitude(), location.getAltitude());
-        //on avertit le TrackerService que notre position a change
-        if(mTrackerBinder != null) {
-            mTrackerBinder.onGpsPositionUpdate();
+
+
+    //----------------------------------------------------------------------------------------------
+    // NESTED CLASS
+
+    private class LocationListener implements android.location.LocationListener{
+        @Override
+        public void onLocationChanged(Location location) {
+            Tracer.log(TAG, "onLocationChanged");
+            //Called when the location has changed.
+            mPosition = new PositionObject(location.getLatitude(),
+                    location.getLongitude(), location.getAltitude());
+            //on avertit le TrackerService que notre position a change
+            if (mTrackerBinder != null) {
+                mTrackerBinder.onGpsPositionUpdate();
+            }
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Tracer.log(TAG, "onProviderDisabled");
+            //Called when the provider is disabled by the user.
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Tracer.log(TAG, "onProviderEnabled");
+            //Called when the provider is enabled by the user.
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Tracer.log(TAG, "onStatusChanged");
+            // Called when the provider status changes. This method is called when a provider is unable
+            // to fetch a location or if the provider has recently
+            // become available after a period of unavailability.
         }
     }
 
-    @Override
-    public void onProviderDisabled(String provider) {
-        Tracer.log(TAG, "onProviderDisabled");
-    }
 
-    @Override
-    public void onProviderEnabled(String provider) {
-        Tracer.log(TAG, "onProviderEnabled");
-    }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        Tracer.log(TAG, "onStatusChanged");
-    }
+
 
 }

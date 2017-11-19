@@ -125,11 +125,6 @@ public class UserObject extends Observable{
 
     public void setGps(boolean gps) {
         this.gps = gps;
-        //alors on notify les observer juste quand le gps est active
-        if(this.gps) {
-            setChanged();
-            notifyObservers(new Obj(Const.notif.TYPE_NOTIF_GPS, true));
-        }
     }
 
     public void setPosition(PositionObject position){

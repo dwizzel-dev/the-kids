@@ -98,13 +98,16 @@ class FirestoreService {
         try{
             // il faut que le user soit creer avant tout
             if(mUser.isCreated()) {
+                //
+                UserModel userModel = mUser.toUserModel();
                 //update juste le updateTime
                 mDb.collection(DB.Users.collection).document(mUser.getUid())
                         .update(
                                 DB.Users.Field.updateTime, FieldValue.serverTimestamp(),
-                                DB.Users.Field.gps, mUser.isGps(),
-                                DB.Users.Field.active, mUser.isActive(),
-                                DB.Users.Field.loginType, mUser.getLoginType()
+                                DB.Users.Field.gps, userModel.isGps(),
+                                DB.Users.Field.active, userModel.isActive(),
+                                DB.Users.Field.loginType, userModel.getLoginType(),
+                                DB.Users.Field.position, userModel.getPosition()
                         )
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override

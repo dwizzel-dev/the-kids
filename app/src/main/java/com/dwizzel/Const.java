@@ -43,4 +43,15 @@ public final class Const {
         public static final int TYPE_TWITTER = 0x00000405;
 
     }
+
+    public static final class gps {
+
+        public static final int NO_ERROR= 0x00000501;
+        public static final int NO_PERMISSION = 0x00000502;
+        public static final int NO_PROVIDER = 0x00000503;
+        public static final int GPS_ENABLE = 0x00000505;
+        public static final int NETWORK_ENABLE = 0x00000506;
+
+
+    }
 }

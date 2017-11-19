@@ -13,8 +13,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.dwizzel.Const;
+import com.dwizzel.objects.PositionObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
+import com.dwizzel.utils.Utils;
 import com.google.firebase.auth.AuthCredential;
 
 import java.text.SimpleDateFormat;
@@ -49,49 +51,14 @@ public class TrackerService extends Service{
     private HandlerThread mThTimer;
     private Handler mHandlerTimer;
     private Runnable mRunnableTimer;
-
     private long mTimer = 0;
-    private Thread mThCounter;
+
     private ITrackerBinderCallback mBinderCallback;
     private AuthService mAuthService;
     private FirestoreService mFirestoreService;
     private GpsService mGpsService;
     private UserObject mUser;
     private final IBinder mTrackerBinder = new TrackerBinder();
-
-
-    class TimerRunnable implements Runnable{
-        private final static String TAG = "TimerRunnable";
-        private boolean loop = true;
-        private int keepAliveDelay = 60;
-        private int sleepDelay = 1000;
-        TimerRunnable(){}
-        @Override
-        public void run() {
-            try {
-                while (loop) {
-                    Thread.sleep(sleepDelay);
-                    mTimer++;
-                    if (mTimer % keepAliveDelay == 0) {
-                        keepActive();
-                    }
-                    Tracer.tog("run: ", getTimer());
-                }
-            } catch (InterruptedException ie) {
-                Tracer.log(TAG, "run.InterruptedException");
-            } catch (Exception e) {
-                Tracer.log(TAG, "run.Exception: ", e);
-            }
-        }
-    }
-    class TimerHandler extends Handler {
-        private final static String TAG = "TimerHandler";
-        TimerHandler(Looper looper) {super(looper);}
-        @Override
-        public void handleMessage(Message msg) {
-            Tracer.log(TAG, "handleMessage: " + msg);
-        }
-    }
 
     @NonNull
     public static Intent getIntent(Context context) {
@@ -119,9 +86,11 @@ public class TrackerService extends Service{
         //clea le timer
         if(mHandlerTimer != null){
             mHandlerTimer.removeCallbacks(mRunnableTimer);
+            mHandlerTimer = null;
         }
         if(mThTimer != null){
             mThTimer.quitSafely();
+            mThTimer = null;
         }
     }
 
@@ -131,9 +100,9 @@ public class TrackerService extends Service{
         super.onCreate();
         try {
             mUser = UserObject.getInstance();
-            mAuthService = new AuthService(this, mTrackerBinder);
+            mAuthService = new AuthService(TrackerService.this, mTrackerBinder);
             mFirestoreService = FirestoreService.getInstance();
-            mGpsService = new GpsService(this, mTrackerBinder);
+            mGpsService = new GpsService(TrackerService.this, mTrackerBinder);
             //start running time elapsed
             startRunningTime();
             //check pour user infos si etait deja connecte avant le restart du tracker service
@@ -163,7 +132,7 @@ public class TrackerService extends Service{
     }
 
     private String getTimer(){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Utils.getInstance().getLocale(TrackerService.this));
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return simpleDateFormat.format(new Date(mTimer*1000));
     }
@@ -180,53 +149,6 @@ public class TrackerService extends Service{
             }catch (Exception e){
                 Tracer.log(TAG, "startTimer.Exception: ", e);
             }
-        }
-    }
-
-    private void untrackCounter(){
-        Tracer.log(TAG, "untrackCounter");
-        try{
-            if(mThCounter != null) {
-                mThCounter.interrupt();
-                mThCounter = null;
-            }
-        }catch (Exception e){
-            Tracer.log(TAG, "untrackCounter.Exception: ", e);
-        }
-    }
-
-    private void trackCounter(){
-        Tracer.log(TAG, "trackCounter");
-        try {
-            mThCounter = new Thread(new Runnable() {
-
-                private final static String TAG = "TrackerService.mThCounter";
-
-                @Override
-                public void run() {
-                    try {
-                        while (true) {
-                            //callback le mBinderCallback every 60 seconds
-                            Thread.sleep(60000);
-                            if(mBinderCallback != null) {
-                                //on envoi le callback
-                                mBinderCallback.handleResponse(mTimer);
-                            } else {
-                                //on arrete le thread si no one to callback
-                                Thread.currentThread().interrupt();
-                            }
-                        }
-                    } catch (InterruptedException ie) {
-                        Tracer.log(TAG, "run.InterruptedException");
-                    } catch (Exception e) {
-                        Tracer.log(TAG, "run.Exception: ", e);
-                    }
-
-                }
-            });
-            mThCounter.start();
-        }catch (Exception e){
-            Tracer.log(TAG, "trackCounter.Exception: ", e);
         }
     }
 
@@ -279,28 +201,27 @@ public class TrackerService extends Service{
                 @Override
                 public void update(Observable observable, Object o) {
                     Tracer.log(TAG, "setUser.mUser.update: \n" + observable + "\n" + o);
-                    // 1 - le gps change d'etat de ON ou Off ou permission
-                    // 2 - le user est cree
                     try{
                         switch(((UserObject.Obj)o).getType()){
-                            case Const.notif.TYPE_NOTIF_GPS:
-                                if((boolean)((UserObject.Obj)o).getValue()){
-                                    setUserPosition();
-                                }
-                                break;
-                            case Const.notif.TYPE_NOTIF_CREATED:
+                            case Const.notif.TYPE_NOTIF_CREATED :
                                 //il est cree ou ete cree dans la DB alors on update les infos
-                                if((boolean)((UserObject.Obj)o).getValue()) {
-                                    //on peut maintenant starter le gps
-                                    //TODO: faire un check si actif et le demander a l'usager de l'activer
-                                    if (mGpsService.startUsingGPS()) {
-                                        //pour les tests on fait comme si etait toujours actif par defaut
-                                        Tracer.log(TAG, "setUser.mUser.update.startUsingGPS: +++ true");
-                                        //ok alors on fait un update du user et de notre position dans la DB
-                                        //vu qu'il a un observer dessus c'est lui qui va caller la shot
-                                        mUser.setGps(true);
-                                    } else {
-                                        Tracer.log(TAG, "setUser.mUser.update.startUsingGPS: --- false");
+                                if((boolean)((UserObject.Obj)o).getValue()){
+                                    //on peut maintenant setter le gps
+                                    switch(mGpsService.checkGpsStatus()){
+                                        case Const.gps.NO_PERMISSION :
+                                            Tracer.log(TAG, "NO GPS PERMISSIONS ++++");
+                                            break;
+                                        case Const.gps.NO_PROVIDER :
+                                            Tracer.log(TAG, "NO GPS PROVIDER ++++");
+                                            break;
+                                        default:
+                                            //on check la derniere postion si possible
+                                            PositionObject positionObject = mGpsService.getLastPosition();
+                                            if(positionObject != null){
+                                                mUser.setPosition(positionObject);
+                                            }
+                                            mUser.setGps(true);
+                                            break;
                                     }
                                     //on update les infos dans la DB
                                     mFirestoreService.updateUserInfos();
@@ -309,7 +230,6 @@ public class TrackerService extends Service{
                             default:
                                 break;
                         }
-
                     }catch (NullPointerException npe){
                         Tracer.log(TAG, "setUser.mUser.update.NullPointerException: ", npe);
                     }
@@ -320,13 +240,17 @@ public class TrackerService extends Service{
         }
     }
 
-    private void setUserPosition(){
-        Tracer.log(TAG, "setUserPosition");
-        //le user object
-        //si on est la c'est que le gps est On
+    private void setUserNewPosition(){
+        Tracer.log(TAG, "setUserNewPosition");
+        //set le user
         mUser.setPosition(mGpsService.getPosition());
-        //la db
-        mFirestoreService.updateUserPosition();
+        //set la db
+        //NOTE: si on veut ca live il faut activer le mGpsService.startLocationUpdate() pour avoir
+        // les infos en direct a haque mouvement,
+        // si on veut ca live dans la DB,
+        // il faut activer la ligne ci-dessous
+        // sinon il va se faire au updateUserInfo du keepAlive
+        //mFirestoreService.updateUserPosition();
     }
 
     private void resetUser(){
@@ -335,7 +259,7 @@ public class TrackerService extends Service{
         // on enleve de la table actif de la DB avant
         deactivateUser();
         //on stop le gps
-        mGpsService.stopUsingGPS();
+        mGpsService.stopLocationUpdate();
         // firebaseAuthentification
         mAuthService.signOut();
         //on reset les infos
@@ -349,23 +273,18 @@ public class TrackerService extends Service{
 
     private void keepActive(){
         Tracer.log(TAG, "keepActive");
-
-        //TODO: si l'usager enleve des permissions le service va restarter,
-        //mais si il les remet ca ne restart pas, ce qui cause un probleme a savoir si gps ou pas
-        //donc il faut checker dans la loop les permissions de temps a autres
-        //example: pas de permission de gps et il remet les permissions du gps
-
-        //TODO: cronjob sur le serveur pour changer le active state en cas de trop long update
-        // genre si l'application est fermer sans qu'il est pu se deloguer avant avec force stop
         if(mAuthService.isSignedIn()){
             //on va checke les permissions du gps si etait OFF, peut-etre maintenant il est ON
             //car quand on enleve des permissions il restart, mais si on les redonne il ne fait rien
-            /*
-            if(!mUser.isGps() && mGpsService.hasPermission()){
-                //vu que le user a un observer c'est lui qui va notifier que le gps est On
-                //mUser.setGps(true);
+            if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.gps.NO_ERROR){
+                //NOTE: on va juste setter la derniere position
+                //pour avoir le tracking live il faudrait activer le mGpsService.startLocationUpdate()
+                PositionObject positionObject = mGpsService.getLastPosition();
+                if(positionObject != null){
+                    mUser.setPosition(positionObject);
+                }
+                mUser.setGps(true);
             }
-            */
             //update les infos de l'usager
             try {
                 mFirestoreService.updateUserInfos();
@@ -378,8 +297,7 @@ public class TrackerService extends Service{
 
 
     //--------------------------------------------------------------------------------------------
-
-    //Nested class TrackerBinder
+    //NESTED CLASS
 
     public class TrackerBinder extends Binder implements ITrackerBinder {
         public long getCounter() {
@@ -394,12 +312,9 @@ public class TrackerService extends Service{
             //avant de le repartir, sinon il y aura autant de thread que de call
             //a registerCallback() sans unregisterCallback()
             //tant que le callstack n'est pas cleare quand il passe d'une activity a l'autre
-            untrackCounter();
-            trackCounter();
         }
         public void unregisterCallback(){
             Tracer.log(TAG, "TrackerBinder.unregisterCallback");
-            untrackCounter();
             mBinderCallback = null;
         }
         public boolean isSignedIn(){
@@ -438,8 +353,48 @@ public class TrackerService extends Service{
         public void onGpsPositionUpdate(){
             Tracer.log(TAG, "TrackerBinder.onGpsPositionUpdate");
             //on fait un update du user et celui de la DB
-            setUserPosition();
+            setUserNewPosition();
         }
 
+    }
+
+    //--------------------------------------------------------------------------------------------
+    //NESTED CLASS
+
+    class TimerRunnable implements Runnable{
+        private final static String TAG = "TimerRunnable";
+        private boolean loop = true;
+        private int keepAliveDelay = 60;
+        private int sleepDelay = 1000;
+        TimerRunnable(){}
+        @Override
+        public void run() {
+            try {
+                while (loop) {
+                    Thread.sleep(sleepDelay);
+                    mTimer++;
+                    if (mTimer % keepAliveDelay == 0) {
+                        keepActive();
+                    }
+                    Tracer.tog("run: ", getTimer());
+                }
+            } catch (InterruptedException ie) {
+                Tracer.log(TAG, "run.InterruptedException");
+            } catch (Exception e) {
+                Tracer.log(TAG, "run.Exception: ", e);
+            }
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------
+    //NESTED CLASS
+
+    class TimerHandler extends Handler {
+        private final static String TAG = "TimerHandler";
+        TimerHandler(Looper looper) {super(looper);}
+        @Override
+        public void handleMessage(Message msg) {
+            Tracer.log(TAG, "handleMessage: " + msg);
+        }
     }
 }

@@ -68,15 +68,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             Tracer.log(TAG, "onSignedOut");
             //show le msg
             Utils.getInstance().showToastMsg(BaseActivity.this, R.string.toast_signed_out);
-            //on reload l'activity dans laquelle il est, qui check si va checker si logue
-            //recreate(); //je crois que ca cause des errrus mais pas certain
-            //on va au login activity
-            //le login page
-            Intent intent = new Intent(BaseActivity.this, LoginActivity.class);
-            //start activity de login car pas encore logue, clear le backStack aussi
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            startLoginActivity();
         }
         public void onGpsEnabled(Object obj){
             Tracer.log(TAG, "onGpsEnabled");
@@ -149,12 +141,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         Tracer.log(TAGBASE, "checkIfSignedIn");
         if( mTrackerBinder != null && mServiceBoundObservable.get()){
             if(!mTrackerBinder.isSignedIn()){
-                //le login page
-                Intent intent = new Intent(BaseActivity.this, LoginActivity.class);
-                //start activity de login car pas encore logue, clear le backStack aussi
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
+                startLoginActivity();
             }else{
                 //sinon repart toujours l'activity de la classe qui extends BaseActivity
                 //si on est la c'est quand on redonne le focus a l'application
@@ -182,6 +169,25 @@ public abstract class BaseActivity extends AppCompatActivity {
         Tracer.log(TAGBASE, "signOutUser");
         //on avretit le service que l'on sign out
         mTrackerBinder.signOut();
+
+    }
+
+    protected void startLoginActivity(){
+        Intent intent = new Intent(BaseActivity.this, LoginActivity.class);
+        //start activity de login car pas encore logue, clear le backStack aussi
+        /*
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        */
+        //TODO: a tester si c'est plus clean
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                | Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_TASK_ON_HOME
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
 
     }
 
