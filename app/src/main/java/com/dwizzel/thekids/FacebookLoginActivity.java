@@ -73,15 +73,17 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
         public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
-            Utils.getInstance().hideProgressDialog();
+            if(sro.getErr() != Const.error.NO_ERROR){
+                //ppour aficher les erreurs sinon il continue au created
+                Utils.getInstance().hideProgressDialog();
+            }
             //check les erreurs et exception
             switch(sro.getErr()){
+                case Const.error.NO_ERROR:
+                    break;
                 case Const.except.NO_CONNECTION:
                     Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
                             R.string.err_no_connectivity);
-                    break;
-                case Const.error.NO_ERROR:
-                    userIsSignedInRoutine();
                     break;
                 default:
                     break;
@@ -89,6 +91,17 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
         }
         public void onSignedOut(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedOut");
+        }
+        public void onCreated(ServiceResponseObject sro){
+            Tracer.log(TAG, "onCreated");
+            //tout est beau on peut starter
+            switch(sro.getErr()) {
+                case Const.error.NO_ERROR:
+                    userIsCreated();
+                    break;
+                default:
+                    break;
+            }
         }
     };
 
@@ -155,12 +168,14 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
         }
     }
 
-    private void userIsSignedInRoutine(){
+    private void userIsCreated(){
         //on affiche qu'il est logue
         try {
-            Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
-                    getResources().getString(R.string.toast_connected_as,
-                            UserObject.getInstance().getEmail()));
+            Utils.getInstance().showToastMsg(
+                    FacebookLoginActivity.this,
+                    getResources().getString(R.string.toast_connected_as_and_last,
+                            UserObject.getInstance().getEmail(),
+                            UserObject.getInstance().getLastConnection(FacebookLoginActivity.this)));
             //on va a activity principal
             Intent intent = new Intent(FacebookLoginActivity.this,
                     HomeActivity.class);
@@ -170,9 +185,9 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }catch (NullPointerException npe){
-            Tracer.log(TAG, "userIsSignedInRoutine.NullPointerException: " , npe);
+            Tracer.log(TAG, "userIsCreated.NullPointerException: " , npe);
         }catch (Exception e){
-            Tracer.log(TAG, "userIsSignedInRoutine.Exception: " , e);
+            Tracer.log(TAG, "userIsCreated.Exception: " , e);
         }
     }
 

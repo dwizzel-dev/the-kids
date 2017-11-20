@@ -1,7 +1,10 @@
 package com.dwizzel.objects;
 
+import android.content.Context;
+
 import com.dwizzel.datamodels.DataModel;
 import com.dwizzel.utils.Tracer;
+import com.dwizzel.utils.Utils;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
 
@@ -151,6 +154,14 @@ public class UserObject{
 
     public void setPosition(GeoPoint position){
         this.position = position;
+    }
+
+    public String getLastConnection(Context context){
+        //cherche la date
+        if(data != null){
+            return Utils.getInstance().formatDate(context, data.getUpdateTime());
+        }
+        return "";
     }
 
     //---------------------------------------------------------------------------------------------

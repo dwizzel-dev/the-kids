@@ -54,7 +54,8 @@
     <string name="dialog_loading">in progress</string>
 
     <!-- TOAST MESSAGE -->
-    <string name="toast_connected_as">you are connected as %1$s</string>
+    <string name="toast_connected_as">connected as %1$s</string>
+    <string name="toast_connected_as_and_last">connected as %1$s last time at %2$s</string>
     <string name="toast_signed_out">you are are signed out</string>
 
     <!-- FIREBASE ERROR -->

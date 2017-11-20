@@ -62,14 +62,16 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
-            Utils.getInstance().hideProgressDialog();
+            if(sro.getErr() != Const.error.NO_ERROR){
+                //ppour aficher les erreurs sinon il continue au created
+                Utils.getInstance().hideProgressDialog();
+            }
             switch(sro.getErr()){
+                case Const.error.NO_ERROR:
+                    break;
                 case Const.except.NO_CONNECTION:
                     Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
                             R.string.err_no_connectivity);
-                    break;
-                case Const.error.NO_ERROR:
-                    userIsSignedInRoutine();
                     break;
                 case Const.error.ERROR_INVALID_PASSWORD:
                     displayErrMsg(R.string.err_invalid_password);
@@ -83,6 +85,17 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         }
         public void onSignedOut(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedOut");
+        }
+        public void onCreated(ServiceResponseObject sro){
+            Tracer.log(TAG, "onCreated");
+            //tout est beau on peut starter
+            switch(sro.getErr()) {
+                case Const.error.NO_ERROR:
+                    userIsCreated();
+                    break;
+                default:
+                    break;
+            }
         }
     };
 
@@ -165,12 +178,14 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         }
     }
 
-    private void userIsSignedInRoutine(){
+    private void userIsCreated(){
         //on affiche qu'il est logue
         try {
-            Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
-                    getResources().getString(R.string.toast_connected_as,
-                            UserObject.getInstance().getEmail()));
+            Utils.getInstance().showToastMsg(
+                    SignInUserWithEmailActivity.this,
+                    getResources().getString(R.string.toast_connected_as_and_last,
+                            UserObject.getInstance().getEmail(),
+                            UserObject.getInstance().getLastConnection(SignInUserWithEmailActivity.this)));
             //on va a activity principal
             Intent intent = new Intent(SignInUserWithEmailActivity.this,
                     HomeActivity.class);
@@ -180,9 +195,9 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }catch (NullPointerException npe){
-            Tracer.log(TAG, "userIsSignedInRoutine.NullPointerException: " , npe);
+            Tracer.log(TAG, "userIsCreated.NullPointerException: " , npe);
         }catch (Exception e){
-            Tracer.log(TAG, "userIsSignedInRoutine.Exception: " , e);
+            Tracer.log(TAG, "userIsCreated.Exception: " , e);
         }
     }
 

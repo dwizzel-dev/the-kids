@@ -69,14 +69,10 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
             Utils.getInstance().showToastMsg(BaseActivity.this, R.string.toast_signed_out);
             startLoginActivity();
         }
+        public void onCreated(ServiceResponseObject sro){
+            Tracer.log(TAG, "onCreated");
+        }
     };
-
-    @Override
-    public void onPostCreate(@Nullable Bundle savedInstanceState) {
-        Tracer.log(TAGBASE, "onPostCreate");
-        super.onPostCreate(savedInstanceState);
-
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

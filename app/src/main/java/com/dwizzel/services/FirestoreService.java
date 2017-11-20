@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.dwizzel.datamodels.DataModel;
+import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -202,7 +203,7 @@ class FirestoreService implements IFirestoreService{
                                             //il avait deja ete cree precedement
                                             mUser.setCreated(true);
                                             //on call le tracker pour dire qu'il est pret
-                                            mTrackerService.onUserCreated(null);
+                                            mTrackerService.onUserCreated(new ServiceResponseObject());
                                         }else{
                                             Tracer.log(TAG, "no document, creating new user");
                                             // si on a rien alors on a un nouveau user

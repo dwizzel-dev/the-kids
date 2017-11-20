@@ -11,5 +11,6 @@ public interface ITrackerBinderCallback {
     void handleResponse(ServiceResponseObject sroj);
     void onSignedIn(ServiceResponseObject sro);
     void onSignedOut(ServiceResponseObject sro);
+    void onCreated(ServiceResponseObject sro);
 
 }

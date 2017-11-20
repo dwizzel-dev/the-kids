@@ -20,7 +20,10 @@ import android.util.Patterns;
 import android.widget.Toast;
 
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class Utils {
@@ -158,6 +161,13 @@ public class Utils {
         });
         // show message
         alertDialog.show();
+    }
+
+    public String formatDate(Context context, Date date){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                Utils.getInstance().getLocale(context));
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return simpleDateFormat.format(date);
     }
 
 }

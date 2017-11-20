@@ -68,14 +68,16 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
-            Utils.getInstance().hideProgressDialog();
+            if(sro.getErr() != Const.error.NO_ERROR){
+                //ppour aficher les erreurs sinon il continue au created
+                Utils.getInstance().hideProgressDialog();
+            }
             switch(sro.getErr()){
+                case Const.error.NO_ERROR:
+                    break;
                 case Const.except.NO_CONNECTION:
                     Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
                             R.string.err_no_connectivity);
-                    break;
-                case Const.error.NO_ERROR:
-                    userIsCreatedRoutine();
                     break;
                 case Const.error.ERROR_WEAK_PASSWORD:
                     gotoFragmentAndShowErrors(1, R.string.psw_weak);
@@ -92,6 +94,18 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         }
         public void onSignedOut(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedOut");
+        }
+        public void onCreated(ServiceResponseObject sro){
+            Tracer.log(TAG, "onCreated");
+            Utils.getInstance().hideProgressDialog();
+            //tout est beau on peut starter
+            switch(sro.getErr()) {
+                case Const.error.NO_ERROR:
+                    userIsCreated();
+                    break;
+                default:
+                    break;
+            }
         }
     };
 
@@ -183,7 +197,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         return 0;
     }
 
-    private void userIsCreatedRoutine(){
+    private void userIsCreated(){
         //on affiche qu'il est logue
         try{
             Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
@@ -198,9 +212,9 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }catch (NullPointerException npe){
-            Tracer.log(TAG, "userIsSignedInRoutine.NullPointerException: " , npe);
+            Tracer.log(TAG, "userIsCreated.NullPointerException: " , npe);
         }catch (Exception e){
-            Tracer.log(TAG, "userIsSignedInRoutine.Exception: " , e);
+            Tracer.log(TAG, "userIsCreated.Exception: " , e);
         }
     }
 

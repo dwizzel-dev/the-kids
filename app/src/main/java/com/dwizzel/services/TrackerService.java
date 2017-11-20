@@ -258,6 +258,7 @@ public class TrackerService extends Service implements ITrackerService{
         if(mBinderCallback != null) {
             mBinderCallback.onSignedIn(sro);
         }
+
     }
 
     public void onUserCreated(ServiceResponseObject sro){
@@ -278,6 +279,12 @@ public class TrackerService extends Service implements ITrackerService{
                 }
                 mUser.setGps(true);
                 break;
+        }
+        //on a les infos de firestore et on a crer les user
+        //on peut maintenant ouvrir la appz
+        //on tranmet la reponse au activy qui a caller si il y a
+        if(mBinderCallback != null) {
+            mBinderCallback.onCreated(sro);
         }
         //on update les infos dans la DB
         mFirestoreService.updateUserInfos();
