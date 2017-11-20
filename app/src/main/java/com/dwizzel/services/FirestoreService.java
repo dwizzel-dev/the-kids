@@ -57,8 +57,7 @@ class FirestoreService implements IFirestoreService{
     private Context mContext;
     private ITrackerService mTrackerService;
 
-
-    public FirestoreService (Context context, ITrackerService trackerService) {
+    FirestoreService (Context context, ITrackerService trackerService) {
         mDb = FirebaseFirestore.getInstance();
         mUser = UserObject.getInstance();
         mTrackerService = trackerService;
