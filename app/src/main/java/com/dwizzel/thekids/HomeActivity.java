@@ -1,6 +1,6 @@
 package com.dwizzel.thekids;
 
-import android.os.Bundle;
+import android.content.Intent;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,25 +14,59 @@ public class HomeActivity extends BaseActivity {
 
     private static final String TAG = "HomeActivity";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState){
-        Tracer.log(TAG, "onCreate");
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    protected void onSubDestroy(){
+    public void onSubDestroy(){
         Tracer.log(TAG, "onSubDestroy");
         //si on a des chose a cleaner ici
     }
 
-    @Override
-    protected void onSubCreate(){
+    public void onSubCreate(){
         Tracer.log(TAG, "onSubCreate");
         setContentView(R.layout.activity_home);
-        setTitle(R.string.main_title);
-        setButton();
         createActionBar();
+        setButton();
+    }
+
+    public void createActionBar(){
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        //set the title
+        toolbar.setTitle(R.string.app_name);
+        //set has the action bar
+        setSupportActionBar(toolbar);
+    }
+
+    private void setButton() {
+        Button buttWatchOverMe = findViewById(R.id.buttWatchOverMe);
+        Button buttWatchOverSomeone = findViewById(R.id.buttWatchOverSomeone);
+        Button buttWatchCurrent = findViewById(R.id.buttWatchCurrent);
+        //butt create
+        buttWatchOverSomeone.setOnClickListener(
+                new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Intent intent = new Intent(HomeActivity.this,
+                                WatchOverSomeoneActivity.class);
+                        //start activity
+                        startActivity(intent);
+                    }
+                });
+        buttWatchOverMe.setOnClickListener(
+                new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Intent intent = new Intent(HomeActivity.this,
+                                WatchOverMeActivity.class);
+                        //start activity
+                        startActivity(intent);
+                    }
+                });
+        buttWatchCurrent.setOnClickListener(
+                new View.OnClickListener() {
+                    public void onClick(View v) {
+                        if (getTrackerBinder() != null) {
+                            Utils.getInstance().showToastMsg(HomeActivity.this,
+                                    String.format(Utils.getInstance().getLocale(HomeActivity.this),
+                                            "counter: %d", getTrackerBinder().getCounter()));
+                        }
+                    }
+                });
     }
 
     @Override
@@ -44,7 +78,6 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()){
             case R.id.menu_action_settings:
                 break;
@@ -57,29 +90,6 @@ public class HomeActivity extends BaseActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void setButton(){
-        Button buttWatchOverMe = findViewById(R.id.buttWatchOverSomeone);
-        //butt create
-        buttWatchOverMe.setOnClickListener(
-                new View.OnClickListener() {
-                    public void onClick(View v) {
-                        if(getTrackerBinder() != null) {
-                            Utils.getInstance().showToastMsg(HomeActivity.this,
-                                    String.format(Utils.getInstance().getLocale(HomeActivity.this),
-                                            "counter: %d", getTrackerBinder().getCounter()));
-                        }
-                    }
-                });
-    }
-
-    private void createActionBar(){
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        //set the title
-        toolbar.setTitle(R.string.app_name);
-        //set has the action bar
-        setSupportActionBar(toolbar);
     }
 
 }

@@ -8,6 +8,7 @@ package com.dwizzel.services;
 public interface IFirestoreService {
 
     void activateUser();
+    void deactivateUser();
     void getUserInfos();
     void updateUserPosition();
     void updateUserInfos();

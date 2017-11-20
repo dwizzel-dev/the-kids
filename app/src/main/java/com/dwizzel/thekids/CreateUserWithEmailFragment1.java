@@ -19,12 +19,7 @@ public class CreateUserWithEmailFragment1 extends Fragment {
     public CreateUserWithEmailFragment1() {
         // Required empty public constructor
     }
-    public static CreateUserWithEmailFragment1 newInstance() {
-        CreateUserWithEmailFragment1 fragment = new CreateUserWithEmailFragment1();
-        args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

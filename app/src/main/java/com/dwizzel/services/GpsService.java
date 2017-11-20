@@ -1,22 +1,13 @@
 package com.dwizzel.services;
 
-
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
-
 import com.dwizzel.Const;
 import com.dwizzel.objects.PermissionObject;
-import com.dwizzel.objects.PositionObject;
-import com.dwizzel.thekids.R;
 import com.dwizzel.utils.Tracer;
+import com.google.firebase.firestore.GeoPoint;
 
 /**
  * Created by Dwizzel on 16/11/2017.
@@ -41,7 +32,7 @@ import com.dwizzel.utils.Tracer;
 
 public class GpsService implements IGpsService{
 
-    private PositionObject mPosition = new PositionObject(0,0,0);
+    private GeoPoint mPosition = new GeoPoint(0,0);
     private final static String TAG = "GpsService";
     private Context mContext;
     private ITrackerService mTrackerService;
@@ -71,28 +62,6 @@ public class GpsService implements IGpsService{
                     && perms.isInternet() && perms.isAccessCoarseLocation());
         }
         return false;
-    }
-
-    public void showSettingsAlert(){
-        Tracer.log(TAG, "showSettingsAlert");
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-        alertDialog.setTitle(R.string.alert_gps_title);
-        alertDialog.setMessage(R.string.alert_gps_title);
-        // settings button
-        alertDialog.setPositiveButton(R.string.butt_settings, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                mContext.startActivity(intent);
-            }
-        });
-        // cancel button
-        alertDialog.setNegativeButton(R.string.butt_cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        // show message
-        alertDialog.show();
     }
 
     private boolean hasProvider(){
@@ -191,14 +160,13 @@ public class GpsService implements IGpsService{
         }
     }
 
-    public PositionObject getLastPosition(){
+    public GeoPoint getLastPosition(){
         Tracer.log(TAG, "getLastPosition");
         ///check les droits
         if(hasPermission() && hasProvider()) {
             Location location = getLastLocation();
             if (location != null) {
-                mPosition = new PositionObject(location.getLatitude(), location.getLongitude(),
-                        location.getAltitude());
+                mPosition = new GeoPoint(location.getLatitude(), location.getLongitude());
                 return mPosition;
             }
         }
@@ -218,7 +186,7 @@ public class GpsService implements IGpsService{
         return Const.gps.NO_ERROR;
     }
 
-    public PositionObject getPosition(){
+    public GeoPoint getPosition(){
         return mPosition;
     }
 
@@ -232,8 +200,7 @@ public class GpsService implements IGpsService{
         public void onLocationChanged(Location location) {
             Tracer.log(TAG, "onLocationChanged");
             //Called when the location has changed.
-            mPosition = new PositionObject(location.getLatitude(),
-                    location.getLongitude(), location.getAltitude());
+            mPosition = new GeoPoint(location.getLatitude(), location.getLongitude());
             //on avertit le TrackerService que notre position a change
             if (mTrackerService != null) {
                 mTrackerService.onGpsPositionUpdate();

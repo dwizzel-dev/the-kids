@@ -1,7 +1,5 @@
 package com.dwizzel.services;
 
-import com.dwizzel.objects.PositionObject;
-import com.dwizzel.objects.UserObject;
 import com.google.firebase.auth.AuthCredential;
 
 /**

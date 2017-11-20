@@ -13,7 +13,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.dwizzel.Const;
-import com.dwizzel.models.UserModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.observers.BooleanObserver;
@@ -45,10 +44,6 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
             mTrackerBinder = null;
         }
     };
-
-    public TrackerService.TrackerBinder getTrackerBinder(){
-        return mTrackerBinder;
-    }
 
     private void bindToAuthService(){
         if(!mServiceBoundObservable.get()) {

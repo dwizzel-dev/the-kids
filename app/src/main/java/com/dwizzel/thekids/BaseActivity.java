@@ -17,11 +17,8 @@ import com.dwizzel.utils.Utils;
 import java.util.Observable;
 import java.util.Observer;
 
-/**
- * Created by Dwizzel on 30/10/2017.
- */
 
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity implements IBaseActivity {
 
     private static final String TAGBASE = "BaseActivity";
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
@@ -75,28 +72,28 @@ public abstract class BaseActivity extends AppCompatActivity {
     };
 
     @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+    public void onPostCreate(@Nullable Bundle savedInstanceState) {
         Tracer.log(TAGBASE, "onPostCreate");
         super.onPostCreate(savedInstanceState);
 
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         Tracer.log(TAGBASE, "onCreate");
         super.onCreate(savedInstanceState);
         bindToAuthService();
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         Tracer.log(TAGBASE, "onStart");
         super.onStart();
         checkIfSignedIn();
     }
 
     @Override
-    protected void onDestroy(){
+    public void onDestroy(){
         Tracer.log(TAGBASE, "onDestroy");
         super.onDestroy();
         //end l'activity qui instencie
@@ -112,16 +109,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         Tracer.log(TAGBASE, "onStop");
         super.onStop();
-    }
-
-    protected void onSubCreate(){
-        Tracer.log(TAGBASE, "onSubCreate");
-    }
-    protected void onSubDestroy(){
-        Tracer.log(TAGBASE, "onSubDestroy");
     }
 
     private void checkIfSignedIn(){
@@ -177,5 +167,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         finish();
 
     }
+
+
 
 }

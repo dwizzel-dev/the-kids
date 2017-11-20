@@ -1,8 +1,12 @@
 package com.dwizzel.objects;
 
-import com.dwizzel.Const;
-import com.dwizzel.models.UserModel;
+import com.dwizzel.datamodels.DataModel;
 import com.dwizzel.utils.Tracer;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.GeoPoint;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -20,12 +24,33 @@ public class UserObject{
     private boolean signed = false;
     private boolean active = false;
     private boolean gps = false;
-    private Object data = "";
-    private PositionObject position = new PositionObject(0.0,0.0,0.0);
+    private DataModel data;
+    private GeoPoint position = new GeoPoint(0.0,0.0);
     private int loginType = 0; //facebook, twitter, email, instagram, etc...
+    private HashMap<String, WatcherObject> watchers = new HashMap<>();
 
     private UserObject(){
         //default
+    }
+
+    public boolean addWatcher(String uid, WatcherObject watcher) {
+        if (!watchers.containsKey(uid)){
+            watchers.put(uid, watcher);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeWatcher(String uid) {
+        if (watchers.containsKey(uid)){
+            watchers.remove(uid);
+            return true;
+        }
+        return false;
+    }
+
+    public HashMap<String, WatcherObject> getWatchers(){
+        return watchers;
     }
 
     public static UserObject getInstance(){
@@ -44,7 +69,7 @@ public class UserObject{
         created = false;
         signed = false;
         data = null;
-        position = new PositionObject(0.0,0.0,0.0);
+        position = new GeoPoint(0.0,0.0);
         loginType = 0;
     }
 
@@ -72,7 +97,7 @@ public class UserObject{
         return gps;
     }
 
-    public PositionObject getPosition(){
+    public GeoPoint getPosition(){
         return position;
     }
 
@@ -88,7 +113,7 @@ public class UserObject{
         this.email = email;
     }
 
-    public void setData(Object data){
+    public void setData(DataModel data){
         this.data = data;
     }
 
@@ -120,40 +145,38 @@ public class UserObject{
         this.gps = gps;
     }
 
-    public void setPosition(PositionObject position){
+    public void setPosition(double latitude, double longitude){
+        this.position = new GeoPoint(longitude, latitude);
+    }
+
+    public void setPosition(GeoPoint position){
         this.position = position;
     }
 
-    public UserModel toUserModel(){
-        UserModel userModel = new UserModel(email, uid);
-        userModel.setGps(gps);
-        userModel.setActive(active);
-        userModel.setLoginType(loginType);
-        userModel.setPosition(position.getLongitude(), position.getLatitude(),
-                    position.getAltitude());
-        return userModel;
+    //---------------------------------------------------------------------------------------------
+    //Firestore Data Model
+
+
+    public Map<String, Object> toUserData(){
+        Map<String, Object> map = new HashMap<>(3);
+        map.put("email", getEmail() );
+        map.put("uid", getUid());
+        map.put("createTime", FieldValue.serverTimestamp());
+        map.put("updateTime", FieldValue.serverTimestamp());
+        map.put("loginType", getLoginType());
+        return map;
     }
 
-    //-----------------------------------------------------------------------------------------
-
-    public class Obj {
-
-        private int type;
-        private Object value;
-
-        public Obj(int type, Object value){
-            this.type = type;
-            this.value = value;
-        }
-
-        public int getType(){
-            return type;
-        }
-
-        public Object getValue(){
-            return value;
-        }
-
+    public Map<String, Object> toActiveData(){
+        Map<String, Object> map = new HashMap<>(3);
+        map.put("updateTime", FieldValue.serverTimestamp());
+        map.put("position", getPosition());
+        map.put("gps", isGps());
+        return map;
     }
+
+
+
+
 
 }

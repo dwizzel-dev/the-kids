@@ -12,7 +12,7 @@ public class SignInUserActivity extends FacebookLoginActivity{
     private final static String TAG = "SignInUserActivity";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         Tracer.log(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in_user);

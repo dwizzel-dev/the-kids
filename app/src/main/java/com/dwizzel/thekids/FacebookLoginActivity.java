@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import com.dwizzel.Const;
-import com.dwizzel.models.UserModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.observers.BooleanObserver;
@@ -33,11 +32,7 @@ import com.facebook.login.widget.LoginButton;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
 
-/**
- * Created by Dwizzel on 09/11/2017.
- */
-
-public class FacebookLoginActivity extends AppCompatActivity {
+public abstract class FacebookLoginActivity extends AppCompatActivity {
 
     private final static String TAG = "FacebookLoginActivity";
     private CallbackManager mFacebookCallbackManager;
@@ -60,10 +55,6 @@ public class FacebookLoginActivity extends AppCompatActivity {
             mTrackerBinder = null;
         }
     };
-
-    public TrackerService.TrackerBinder getTrackerBinder(){
-        return mTrackerBinder;
-    }
 
     private void bindToAuthService(){
         if(!mServiceBoundObservable.get()) {
@@ -102,14 +93,14 @@ public class FacebookLoginActivity extends AppCompatActivity {
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         Tracer.log(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         bindToAuthService();
     }
 
     @Override
-    protected void onDestroy(){
+    public void onDestroy(){
         super.onDestroy();
        //clear le binder
         if(mTrackerBinder != null) {
@@ -122,7 +113,7 @@ public class FacebookLoginActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //to receive the result from the facebook callback
         mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);

@@ -19,8 +19,8 @@ public class LoginActivity extends AppCompatActivity {
         //view
         setContentView(R.layout.activity_login);
         //buttons
-        final Button buttCreate = (Button)findViewById(R.id.buttCreateWithEmail);
-        final Button buttSignIn = (Button)findViewById(R.id.buttSignIn);
+        final Button buttCreate = findViewById(R.id.buttCreateWithEmail);
+        final Button buttSignIn = findViewById(R.id.buttSignIn);
         //butt create
         buttCreate.setOnClickListener(
             new View.OnClickListener() {

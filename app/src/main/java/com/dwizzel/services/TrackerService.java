@@ -13,12 +13,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.dwizzel.Const;
-import com.dwizzel.objects.PositionObject;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.firestore.GeoPoint;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,17 +40,14 @@ import java.util.TimeZone;
  *
  * NOTES: vu que le service peut repartir sans l'application on va chercher les infos de base et on set
  * les infos du user dans le service
+ *
+ * TODO: il faut un triger dans la DB pour faire le cleanup de ceux qui ne ce sont pas deconnecte
+ * normalement, genre appli force stop, une pile morte, plus de reseaux, etc...
  */
 
 public class TrackerService extends Service implements ITrackerService{
 
     private final static String TAG = "TrackerService";
-
-    //timer
-    private HandlerThread mThTimer;
-    private Handler mHandlerTimer;
-    private Runnable mRunnableTimer;
-    private long mTimer = 0;
 
     private ITrackerBinderCallback mBinderCallback;
     private IAuthService mAuthService;
@@ -58,6 +55,11 @@ public class TrackerService extends Service implements ITrackerService{
     private IGpsService mGpsService;
     private UserObject mUser;
     private final IBinder mTrackerBinder = new TrackerBinder();
+    //timer
+    private HandlerThread mThTimer;
+    private Handler mHandlerTimer;
+    private Runnable mRunnableTimer;
+    private long mTimer = 0;
 
     @NonNull
     public static Intent getIntent(Context context) {
@@ -167,7 +169,7 @@ public class TrackerService extends Service implements ITrackerService{
         try {
             mUser.setActive(false);
             mUser.setGps(false);
-            mFirestoreService.activateUser();
+            mFirestoreService.deactivateUser();
         }catch (Exception e){
             Tracer.log(TAG, "deactivateUser.exception: ", e);
         }
@@ -175,7 +177,7 @@ public class TrackerService extends Service implements ITrackerService{
 
     private void setUser(){
         Tracer.log(TAG, "setUser");
-        //on va checker si est deja logue et on set les infos ou pas du UserModel
+        //on va checker si est deja logue et on set les infos ou pas
         //car peu etre un Restart de l'app ou comme un new signIn
         if(mAuthService.isSignedIn()){
             //on creer le user de base
@@ -227,15 +229,15 @@ public class TrackerService extends Service implements ITrackerService{
             if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.gps.NO_ERROR){
                 //NOTE: on va juste setter la derniere position
                 //pour avoir le tracking live il faudrait activer le mGpsService.startLocationUpdate()
-                PositionObject positionObject = mGpsService.getLastPosition();
-                if(positionObject != null){
-                    mUser.setPosition(positionObject);
+                GeoPoint position = mGpsService.getLastPosition();
+                if(position != null){
+                    mUser.setPosition(position);
                 }
                 mUser.setGps(true);
             }
             //update les infos de l'usager
             try {
-                mFirestoreService.updateUserInfos();
+                mFirestoreService.activateUser();
             }catch (Exception e){
                 Tracer.log(TAG, "activateUser.exception: ", e);
             }
@@ -270,15 +272,16 @@ public class TrackerService extends Service implements ITrackerService{
                 break;
             default:
                 //on check la derniere postion si possible
-                PositionObject positionObject = mGpsService.getLastPosition();
-                if(positionObject != null){
-                    mUser.setPosition(positionObject);
+                GeoPoint position = mGpsService.getLastPosition();
+                if(position != null){
+                    mUser.setPosition(position);
                 }
                 mUser.setGps(true);
                 break;
         }
         //on update les infos dans la DB
         mFirestoreService.updateUserInfos();
+        mFirestoreService.activateUser();
     }
 
     public void onUserSignedOut(ServiceResponseObject sro){
@@ -347,7 +350,7 @@ public class TrackerService extends Service implements ITrackerService{
     class TimerRunnable implements Runnable{
         private final static String TAG = "TimerRunnable";
         private boolean loop = true;
-        private int keepAliveDelay = 10;
+        private int keepAliveDelay = 60;
         private int sleepDelay = 1000;
         TimerRunnable(){}
         @Override

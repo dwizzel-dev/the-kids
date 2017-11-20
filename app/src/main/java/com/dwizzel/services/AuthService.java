@@ -7,7 +7,6 @@ package com.dwizzel.services;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import com.dwizzel.Const;
 import com.dwizzel.objects.PermissionObject;

@@ -9,9 +9,13 @@ import com.dwizzel.thekids.R;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.util.Patterns;
 import android.widget.Toast;
 
@@ -131,6 +135,29 @@ public class Utils {
 
     public Locale getLocale(Context context){
         return context.getResources().getConfiguration().locale;
+    }
+
+    public void showSettingsAlert(final Context context){
+        Tracer.log(TAG, "showSettingsAlert");
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+        alertDialog.setTitle(R.string.alert_gps_title);
+        alertDialog.setMessage(R.string.alert_gps_title);
+        // settings button
+        alertDialog.setPositiveButton(R.string.butt_settings, new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog,int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                context.startActivity(intent);
+            }
+        });
+        // cancel button
+        alertDialog.setNegativeButton(R.string.butt_cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        // show message
+        alertDialog.show();
     }
 
 }

@@ -16,7 +16,6 @@ import android.transition.TransitionSet;
 import android.view.Gravity;
 
 import com.dwizzel.Const;
-import com.dwizzel.models.UserModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.observers.BooleanObserver;
@@ -52,10 +51,6 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         }
     };
 
-    public TrackerService.TrackerBinder getTrackerBinder(){
-        return mTrackerBinder;
-    }
-
     private void bindToAuthService(){
         if(!mServiceBoundObservable.get()) {
             Intent intent = TrackerService.getIntent(this);
@@ -83,7 +78,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
                     userIsCreatedRoutine();
                     break;
                 case Const.error.ERROR_WEAK_PASSWORD:
-                    gotoFragmentAndShowErrors(0, R.string.psw_weak);
+                    gotoFragmentAndShowErrors(1, R.string.psw_weak);
                     break;
                 case Const.error.ERROR_EMAIL_EXIST:
                     gotoFragmentAndShowErrors(0, R.string.email_in_use);
@@ -225,14 +220,14 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         if(currFragmentNum!= null){
             //les multiples transitions
             TransitionSet transitionSet = new TransitionSet()
-                    .addTransition(new Slide(Gravity.LEFT))
+                    .addTransition(new Slide(Gravity.START))
                     .addTransition(new Fade(Fade.OUT));
             //le fragment precedent
             Fragment prevFragment = mFragmentManager.findFragmentById(R.id.fragment_container);
             prevFragment.setExitTransition(transitionSet);
         }
 
-        currFragmentNum = new Integer(fragNum);
+        currFragmentNum = fragNum;
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
         Fragment fragment;
 
@@ -243,13 +238,15 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
                 fragment.setArguments(bundle);
                 //fragment1.setArguments(getIntent().getExtras());
                 TransitionSet transitionSet = new TransitionSet()
-                        .addTransition(new Slide(Gravity.RIGHT))
+                        .addTransition(new Slide(Gravity.END))
                         .addTransition(new Fade(Fade.IN));
                 //la transition
                 fragment.setEnterTransition(transitionSet);
                 //on rajoute le fragment
                 fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
-                fragmentTransaction.addToBackStack(String.format("fragment%d", fragNum));
+                fragmentTransaction.addToBackStack(String.format(
+                        Utils.getInstance().getLocale(CreateUserWithEmailActivity.this),
+                        "fragment%d", fragNum));
                 break;
 
             default:

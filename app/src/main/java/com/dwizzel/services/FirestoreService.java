@@ -3,6 +3,7 @@ package com.dwizzel.services;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.dwizzel.datamodels.DataModel;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -12,7 +13,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.dwizzel.models.UserModel;
 
 /**
  * Created by Dwizzel on 09/11/2017.
@@ -41,12 +41,20 @@ class FirestoreService implements IFirestoreService{
         class Users {
             static final String collection = "users";
             class Field {
-                static final String active = "active";
+                static final String uid = "uid";
+                static final String email = "email";
+                static final String updateTime = "updateTime";
+                static final String createTime = "createTime";
+                static final String loginType = "loginType";
+            }
+        }
+        class Actives {
+            static final String collection = "actives";
+            class Field {
                 static final String updateTime = "updateTime";
                 static final String updateTimePosition = "updateTimePosition";
-                static final String position = "position";
                 static final String gps = "gps";
-                static final String loginType = "loginType";
+                static final String position = "position";
             }
         }
     }
@@ -69,7 +77,7 @@ class FirestoreService implements IFirestoreService{
         try{
             //add the new user collection with his id
             mDb.collection(DB.Users.collection).document(mUser.getUid())
-                    .set(mUser.toUserModel())
+                    .set(mUser.toUserData())
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
@@ -95,16 +103,11 @@ class FirestoreService implements IFirestoreService{
         try{
             // il faut que le user soit creer avant tout
             if(mUser.isCreated()) {
-                //
-                UserModel userModel = mUser.toUserModel();
                 //update juste le updateTime
                 mDb.collection(DB.Users.collection).document(mUser.getUid())
                         .update(
                                 DB.Users.Field.updateTime, FieldValue.serverTimestamp(),
-                                DB.Users.Field.gps, userModel.isGps(),
-                                DB.Users.Field.active, userModel.isActive(),
-                                DB.Users.Field.loginType, userModel.getLoginType(),
-                                DB.Users.Field.position, userModel.getPosition()
+                                DB.Users.Field.loginType, mUser.getLoginType()
                         )
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -130,12 +133,12 @@ class FirestoreService implements IFirestoreService{
     public void updateUserPosition(){
         Tracer.log(TAG, "updateUserPosition");
         try{
-            //update juste le updateTimePosition et position
-            mDb.collection(DB.Users.collection).document(mUser.getUid())
+            mDb.collection(DB.Actives.collection).document(mUser.getUid())
                     .update(
-                            DB.Users.Field.updateTimePosition, FieldValue.serverTimestamp(),
-                            DB.Users.Field.position, mUser.toUserModel().getPosition(),
-                            DB.Users.Field.gps, mUser.isGps()
+                            DB.Actives.Field.updateTimePosition, FieldValue.serverTimestamp(),
+                            DB.Actives.Field.position, mUser.getPosition(),
+                            DB.Actives.Field.gps, mUser.isGps(),
+                            DB.Actives.Field.updateTime, FieldValue.serverTimestamp()
                     )
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -160,33 +163,58 @@ class FirestoreService implements IFirestoreService{
         try{
             mDb.collection(DB.Users.collection).document(mUser.getUid())
                     .get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            Tracer.log(TAG, "getUserInfos.onComplete");
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                Tracer.log(TAG, "getUserInfos.document: " +  document.exists());
-                                if(document.exists()){
-                                    Tracer.log(TAG, "DATA: " + document.getData());
+                    /*
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    Tracer.log(TAG, "getUserInfos.onSuccess");
                                     //on set le data du user
-                                    mUser.setData(document.getData());
-                                    //il avait deja ete cree precedement
-                                    mUser.setCreated(true);
-                                    //on call le tracker pour dire qu'il est pret
-                                    mTrackerService.onUserCreated(null);
-                                }else{
-                                    Tracer.log(TAG, "no document, creating new user");
-                                    // si on a rien alors on a un nouveau user
-                                    // alors on l'enregistre dans la collection
-                                    // "thekids-dab99 > users"
-                                    setUserInfos();
+                                    if(documentSnapshot.exists()) {
+                                        Tracer.log(TAG, "onSuccess.DATA: " + documentSnapshot.getData());
+                                        try {
+                                            DataModel data = documentSnapshot.toObject(DataModel.class);
+                                            mUser.setData(data);
+                                        } catch (IllegalStateException ise) {
+                                            Tracer.log(TAG, "getUserInfos.mUser.setData.IllegalStateException: ", ise);
+                                        } catch (Exception e) {
+                                            Tracer.log(TAG, "getUserInfos.mUser.setData.Exception: ", e);
+                                        }
+                                    }
                                 }
-                            } else {
-                                Tracer.log(TAG, "getUserInfos.onComplete.exception: ", task.getException());
-                            }
-                        }
-                    });
+                            })
+                    */
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    Tracer.log(TAG, "getUserInfos.onComplete");
+                                    if (task.isSuccessful()) {
+                                        DocumentSnapshot document = task.getResult();
+                                        Tracer.log(TAG, "getUserInfos.document: " +  document.exists());
+                                        if(document.exists()){
+                                            Tracer.log(TAG, "onComplete.DATA: " + document.getData());
+                                            try {
+                                                mUser.setData(document.toObject(DataModel.class));
+                                            } catch (IllegalStateException ise) {
+                                                Tracer.log(TAG, "getUserInfos.mUser.setData.IllegalStateException: ", ise);
+                                            } catch (Exception e) {
+                                                Tracer.log(TAG, "getUserInfos.mUser.setData.Exception: ", e);
+                                            }
+                                            //il avait deja ete cree precedement
+                                            mUser.setCreated(true);
+                                            //on call le tracker pour dire qu'il est pret
+                                            mTrackerService.onUserCreated(null);
+                                        }else{
+                                            Tracer.log(TAG, "no document, creating new user");
+                                            // si on a rien alors on a un nouveau user
+                                            // alors on l'enregistre dans la collection
+                                            // "thekids-dab99 > users"
+                                            setUserInfos();
+                                        }
+                                    } else {
+                                        Tracer.log(TAG, "getUserInfos.onComplete.exception: ", task.getException());
+                                    }
+                                }
+                            });
         }catch (Exception e){
             Tracer.log(TAG, "getUserInfos.Exception: ", e);
         }
@@ -194,14 +222,10 @@ class FirestoreService implements IFirestoreService{
 
     public void activateUser(){
         Tracer.log(TAG, "activateUser");
-        //get a timestamp for activity timer pending
         try{
             //add the new user collection with his id
-            mDb.collection(DB.Users.collection).document(mUser.getUid())
-                    .update(
-                            DB.Users.Field.active, mUser.isActive(),
-                            DB.Users.Field.gps, mUser.isGps()
-                    )
+            mDb.collection(DB.Actives.collection).document(mUser.getUid())
+                    .set(mUser.toActiveData())
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
@@ -217,6 +241,31 @@ class FirestoreService implements IFirestoreService{
                     });
         }catch (Exception e){
             Tracer.log(TAG, "activateUser.Exception: ", e);
+        }
+
+    }
+
+    public void deactivateUser(){
+        Tracer.log(TAG, "deactivateUser");
+        try{
+            //add the new user collection with his id
+            mDb.collection(DB.Actives.collection).document(mUser.getUid())
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            //on set le dernier UID actif pour la verif au delete
+                            Tracer.log(TAG, "deactivateUser.addOnSuccessListener: " + mUser.getUid());
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG, "deactivateUser.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+        }catch (Exception e){
+            Tracer.log(TAG, "deactivateUser.Exception: ", e);
         }
 
     }

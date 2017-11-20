@@ -1,6 +1,5 @@
 package com.dwizzel.thekids;
 
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,13 +18,6 @@ public class CreateUserWithEmailFragment0 extends Fragment {
 
     public CreateUserWithEmailFragment0() {
         // Required empty public constructor
-    }
-
-    public static CreateUserWithEmailFragment0 newInstance() {
-        CreateUserWithEmailFragment0 fragment = new CreateUserWithEmailFragment0();
-        args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
