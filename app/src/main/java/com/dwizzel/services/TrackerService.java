@@ -226,7 +226,7 @@ public class TrackerService extends Service implements ITrackerService{
         if(mAuthService.isSignedIn()){
             //on va checke les permissions du gps si etait OFF, peut-etre maintenant il est ON
             //car quand on enleve des permissions il restart, mais si on les redonne il ne fait rien
-            if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.gps.NO_ERROR){
+            if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.error.NO_ERROR){
                 //NOTE: on va juste setter la derniere position
                 //pour avoir le tracking live il faudrait activer le mGpsService.startLocationUpdate()
                 GeoPoint position = mGpsService.getLastPosition();
@@ -289,6 +289,17 @@ public class TrackerService extends Service implements ITrackerService{
         //on update les infos dans la DB
         mFirestoreService.updateUserInfos();
         mFirestoreService.activateUser();
+        //pour test de bastch write
+        //mFirestoreService.batchUserWatcher();
+
+    }
+
+    public void onUserWatchersList(ServiceResponseObject sro){
+        Tracer.log(TAG, "onUserWatchersList");
+        //on tranmet la reponse au activy qui a caller si il y a
+        if(mBinderCallback != null) {
+            mBinderCallback.handleResponse(sro);
+        }
     }
 
     public void onUserSignedOut(ServiceResponseObject sro){
@@ -348,6 +359,18 @@ public class TrackerService extends Service implements ITrackerService{
             Tracer.log(TAG, "TrackerBinder.createUser");
             mAuthService.createUser(email, psw);
         }
+        public void getWatchersList(){
+            Tracer.log(TAG, "TrackerBinder.getWatchersList");
+            //on cherche la liste de nos watchers si la notre est a null
+            if(mUser.getWatchers() == null) {
+                mFirestoreService.getWatchersList();
+            }else{
+                //sinon il l'a deja alors on repond tout de suite
+                if(mBinderCallback != null) {
+                    mBinderCallback.handleResponse(new ServiceResponseObject());
+                }
+            }
+        }
 
     }
 
@@ -357,7 +380,7 @@ public class TrackerService extends Service implements ITrackerService{
     class TimerRunnable implements Runnable{
         private final static String TAG = "TimerRunnable";
         private boolean loop = true;
-        private int keepAliveDelay = 60;
+        private int keepAliveDelay = 300; //
         private int sleepDelay = 1000;
         TimerRunnable(){}
         @Override

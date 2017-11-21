@@ -12,5 +12,7 @@ public interface IFirestoreService {
     void getUserInfos();
     void updateUserPosition();
     void updateUserInfos();
+    void getWatchersList();
+    void batchUserWatcher();
 
 }

@@ -183,7 +183,7 @@ public class GpsService implements IGpsService{
             return Const.gps.NO_PROVIDER;
         }
         //good
-        return Const.gps.NO_ERROR;
+        return Const.error.NO_ERROR;
     }
 
     public GeoPoint getPosition(){

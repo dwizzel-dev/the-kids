@@ -16,6 +16,8 @@ public class WatchOverMeActivity extends BaseActivity {
         setContentView(R.layout.activity_watch_over_me);
         setTitle(R.string.watch_over_me_title);
         setButton();
+        //on cherche la list
+        getTrackerBinder().getWatchersList();
     }
 
     private void setButton(){

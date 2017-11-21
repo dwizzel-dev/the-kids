@@ -9,19 +9,13 @@ import com.google.firebase.auth.AuthCredential;
 public interface ITrackerBinder {
 
     long getCounter();
-
     void registerCallback(ITrackerBinderCallback callback);
-
     void unregisterCallback();
-
     boolean isSignedIn();
-
     void signOut();
-
     void signIn(String user, String psw);
-
     void signIn(AuthCredential authCredential);
-
     void createUser(String user, String psw);
+    void getWatchersList();
 
 }

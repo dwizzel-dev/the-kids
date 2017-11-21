@@ -3,6 +3,7 @@ package com.dwizzel.objects;
 import android.content.Context;
 
 import com.dwizzel.datamodels.DataModel;
+import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 import com.google.firebase.firestore.FieldValue;
@@ -30,13 +31,16 @@ public class UserObject{
     private DataModel data;
     private GeoPoint position = new GeoPoint(0.0,0.0);
     private int loginType = 0; //facebook, twitter, email, instagram, etc...
-    private HashMap<String, WatcherObject> watchers = new HashMap<>();
+    private HashMap<String, WatcherModel> watchers;
 
     private UserObject(){
         //default
     }
 
-    public boolean addWatcher(String uid, WatcherObject watcher) {
+    public boolean addWatcher(String uid, WatcherModel watcher) {
+        if (watchers == null) {
+            watchers = new HashMap<>();
+        }
         if (!watchers.containsKey(uid)){
             watchers.put(uid, watcher);
             return true;
@@ -45,15 +49,26 @@ public class UserObject{
     }
 
     public boolean removeWatcher(String uid) {
-        if (watchers.containsKey(uid)){
-            watchers.remove(uid);
-            return true;
+        if (watchers != null) {
+            if (watchers.containsKey(uid)) {
+                watchers.remove(uid);
+                return true;
+            }
         }
         return false;
     }
 
-    public HashMap<String, WatcherObject> getWatchers(){
+    public HashMap<String, WatcherModel> getWatchers(){
         return watchers;
+    }
+
+    public WatcherModel getWatcher(String uid){
+        if (watchers != null) {
+            if (watchers.containsKey(uid)) {
+                return watchers.get(uid);
+            }
+        }
+        return null;
     }
 
     public static UserObject getInstance(){
