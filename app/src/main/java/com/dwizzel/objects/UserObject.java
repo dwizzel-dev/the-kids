@@ -165,6 +165,7 @@ public class UserObject{
         position = new GeoPoint(0.0,0.0);
         loginType = 0;
         watchers = null;
+        invites = null;
         status = Const.status.OFFLINE;
     }
 
