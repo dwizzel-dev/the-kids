@@ -43,10 +43,10 @@ public final class Tracer {
     }
 
     public static void log(String tag, String msg, Object obj){
-        Log.d(TAG, msg + "+++++++++++++++++++++++++++++++");
+        Log.d(TAG, msg + ".....................................................................");
         Log.d(TAG, obj.getClass().getName());
         getFields(obj);
-        Log.d(TAG, msg + "-------------------------------");
+        Log.d(TAG, msg + ".....................................................................");
         if(logToFile){
             //write to file
         }

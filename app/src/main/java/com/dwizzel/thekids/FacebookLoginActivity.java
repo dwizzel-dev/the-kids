@@ -58,7 +58,7 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
 
     private void bindToAuthService(){
         if(!mServiceBoundObservable.get()) {
-            Intent intent = TrackerService.getIntent(this);
+            Intent intent = TrackerService.getIntent(FacebookLoginActivity.this);
             startService(intent);
             //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -162,7 +162,7 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
         //on va faire un listener sur le resultat
         if (mTrackerBinder != null) {
             //on met un loader
-            Utils.getInstance().showProgressDialog(this);
+            Utils.getInstance().showProgressDialog(FacebookLoginActivity.this);
             //on call le service
             mTrackerBinder.signIn(authCredential);
         }

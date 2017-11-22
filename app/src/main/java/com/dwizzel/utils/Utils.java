@@ -6,6 +6,7 @@ package com.dwizzel.utils;
 
 import com.dwizzel.thekids.R;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -45,50 +46,50 @@ public class Utils {
         return sInst;
     }
 
-    private static boolean hasPermission(Context context, String permission) {
+    private boolean hasPermission(Context context, String permission) {
         Tracer.log(TAG, "hasPermission");
-        int res = context.checkCallingOrSelfPermission(permission);
-        return res == PackageManager.PERMISSION_GRANTED;
+        try {
+            int res = context.checkCallingOrSelfPermission(permission);
+            return res == PackageManager.PERMISSION_GRANTED;
+        }catch (Exception e){
+            Tracer.log(TAG, "hasPermission.exception: ", e);
+        }
+        return false;
     }
 
     public boolean checkConnectivity(Context context){
         Tracer.log(TAG, "checkConnectivity");
         boolean bConnected = false;
-        if(context != null) {
-            if(hasPermission(context, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-                try {
-                    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-                    if (cm != null) {
-                        NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
-                        bConnected = activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
-                    }
-                }catch(Exception e) {
-                    Tracer.log(TAG, "checkConnectivity.exception: ", e);
+        try {
+            if (hasPermission(context, Manifest.permission.ACCESS_NETWORK_STATE) &&
+                    hasPermission(context, Manifest.permission.INTERNET)) {
+                ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                if (cm != null) {
+                    NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
+                    bConnected = activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
                 }
             }
+        }catch (Exception e){
+            Tracer.log(TAG, "checkConnectivity.exception: ", e);
         }
         return bConnected;
     }
 
     public void showToastMsg(Context context, int msgId){
         Tracer.log(TAG, "showToastMsg");
-        if(context != null) {
-            try {
-                Toast.makeText(context, context.getResources().getString(msgId), Toast.LENGTH_SHORT).show();
-            }catch(Exception e){
-                Tracer.log(TAG, "showToastMsg[0].exception: ", e);
-            }
+        try {
+            Toast.makeText(context, context.getResources().getString(msgId), Toast.LENGTH_SHORT).show();
+        }catch(Exception e){
+            Tracer.log(TAG, "showToastMsg[0].exception: ", e);
         }
     }
 
     public void showToastMsg(Context context, String msg){
         Tracer.log(TAG, "showToastMsg");
-        if(context != null) {
-            try {
-                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-            }catch(Exception e){
-                Tracer.log(TAG, "showToastMsg[1].exception: ", e);
-            }
+        try {
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Tracer.log(TAG, "showToastMsg[1].exception: ", e);
         }
     }
 
@@ -120,24 +121,37 @@ public class Utils {
 
     public void showProgressDialog(Context context) {
         Tracer.log(TAG, "showProgressDialog");
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(context);
-            mProgressDialog.setMessage(context.getString(R.string.dialog_loading));
-            mProgressDialog.setIndeterminate(true);
+        try {
+            if (mProgressDialog == null) {
+                mProgressDialog = new ProgressDialog(context);
+                mProgressDialog.setMessage(context.getString(R.string.dialog_loading));
+                mProgressDialog.setIndeterminate(true);
+            }
+            mProgressDialog.show();
+        }catch(Exception e){
+            Tracer.log(TAG, "showProgressDialog.exception: ", e);
         }
-        mProgressDialog.show();
     }
 
     public void hideProgressDialog() {
         Tracer.log(TAG, "hideProgressDialog");
-        if(mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
+        try {
+            if (mProgressDialog != null && mProgressDialog.isShowing()) {
+                mProgressDialog.dismiss();
+            }
             mProgressDialog = null;
+        }catch(Exception e){
+            Tracer.log(TAG, "hideProgressDialog.exception: ", e);
         }
     }
 
     public Locale getLocale(Context context){
-        return context.getResources().getConfiguration().locale;
+        try {
+            return context.getResources().getConfiguration().locale;
+        }catch (Exception e){
+            Tracer.log(TAG, "getLocale.exception: ", e);
+        }
+        return null;
     }
 
     public void showSettingsAlert(final Context context){
@@ -164,10 +178,16 @@ public class Utils {
     }
 
     public String formatDate(Context context, Date date){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-                Utils.getInstance().getLocale(context));
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return simpleDateFormat.format(date);
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                    Utils.getInstance().getLocale(context));
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return simpleDateFormat.format(date);
+        }catch(Exception e){
+            Tracer.log(TAG, "formatDate.exception: ", e);
+        }
+        return "0000-00-00 00:00:00";
+
     }
 
 }

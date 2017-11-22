@@ -1,8 +1,6 @@
 package com.dwizzel.services;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
-
 import com.dwizzel.Const;
 import com.dwizzel.datamodels.DataModel;
 import com.dwizzel.datamodels.WatcherModel;
@@ -14,10 +12,18 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by Dwizzel on 09/11/2017.
@@ -35,47 +41,74 @@ import com.google.firebase.firestore.WriteBatch;
  *  - sur le signIn pour les mettre dans la collection "active"
  *  - sur un signOut pour les enlever de la collection "active"
  *
- *  TODO: checker la connectivity
+ *
+ *
+ * TODO: mettre un listeners sur les watchers du users. si il change de position ou de status
+ * on sera notifie
  *
  */
 
-class FirestoreService implements IFirestoreService{
+class DatabaseService implements IDatabaseService{
 
-    //name of database collection and fields
-    class DB{
-        class Users {
-            static final String collection = "users";
-            class Field {
-                static final String uid = "uid";
-                static final String email = "email";
-                static final String updateTime = "updateTime";
-                static final String createTime = "createTime";
-                static final String loginType = "loginType";
-            }
-        }
-        class Actives {
-            static final String collection = "actives";
-            class Field {
-                static final String updateTime = "updateTime";
-                static final String updateTimePosition = "updateTimePosition";
-                static final String gps = "gps";
-                static final String position = "position";
-            }
-        }
-    }
-
-    private final static String TAG = "FirestoreService";
+    private final static String TAG = "DatabaseService";
     private FirebaseFirestore mDb;
     private UserObject mUser;
-    private Context mContext;
     private ITrackerService mTrackerService;
+    private Map<String, ListenerRegistration> mRegisteredListener
+            = new HashMap<String, ListenerRegistration>();
 
-    FirestoreService (Context context, ITrackerService trackerService) {
+    DatabaseService (ITrackerService trackerService) {
         mDb = FirebaseFirestore.getInstance();
         mUser = UserObject.getInstance();
         mTrackerService = trackerService;
-        mContext = context;
+        boolean useCache = true;
+        //on disable/enable la cache
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(useCache)
+                .build();
+        mDb.setFirestoreSettings(settings);
         }
+
+    private void addUsersCollectionListeners(){
+        Tracer.log(TAG, "addUsersCollectionListeners");
+        //trigger a chaque fois qu'il y aune modifications sur le serveur
+        mRegisteredListener.put("users",
+                mDb.collection("users").document(mUser.getUid())
+                    .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                        @Override
+                        //va surement cause une exception sur le deactivate vu
+                        // que l'on signout du FirebaseAuth donc plus de Uid
+                        public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                            //Tracer.log(TAG, "users.onEvent");
+                            if (e != null) {
+                                Tracer.log(TAG, "-------- users.onEvent.exception: ", e);
+                                return;
+                            }
+                            if(documentSnapshot.exists()) {
+                                Tracer.log(TAG, "-------- users.onEvent.DATA: " + documentSnapshot.getData());
+                            }else {
+                                Tracer.log(TAG, "-------- users.onEvent.NO_DATA");
+                            }
+                        }
+                    })
+        );
+    }
+
+    private void removeUsersCollectionListeners(){
+        Tracer.log(TAG, "removeUsersCollectionListeners");
+        if(mRegisteredListener != null) {
+            Iterator<Map.Entry<String, ListenerRegistration>> it = mRegisteredListener.entrySet().iterator();
+            while(it.hasNext()) {
+                Map.Entry<String, ListenerRegistration> entry = it.next();
+                ListenerRegistration listenerRegistration = entry.getValue();
+                if(listenerRegistration != null){
+                    listenerRegistration.remove();
+                }
+                it.remove();
+            }
+        }
+
+    }
 
     private void setUserInfos(){
         Tracer.log(TAG, "setUserInfos");
@@ -111,8 +144,8 @@ class FirestoreService implements IFirestoreService{
                 //update juste le updateTime
                 mDb.collection("users").document(mUser.getUid())
                         .update(
-                                DB.Users.Field.updateTime, FieldValue.serverTimestamp(),
-                                DB.Users.Field.loginType, mUser.getLoginType()
+                                "updateTime", FieldValue.serverTimestamp(),
+                                "loginType", mUser.getLoginType()
                         )
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -164,60 +197,62 @@ class FirestoreService implements IFirestoreService{
     }
 
     public void getUserInfos(){
-        Tracer.log(TAG, "getUserInfos");
+        Tracer.log(TAG, "getUserInfos: " +  mUser.getUid());
         try{
+            //IMPORTANT: la query est cache si on deconnecte et reconnecte (internet)
+            //il semble aller chercher les infos la au lieu de faire la query
+            //donc il doit considerer comme etant encore deconnecte, avant de refaire une connection
+            //ce qui peut prendre un certain temps on dirait et ce qui cause des problemes de login
+            //car ne va jamais caller le TrackerService pour dire qu'il est cree
+            //alors on va disable la cache pour certaine query
+            //les events listener sur ce que l'on veut
+            removeUsersCollectionListeners();
+            addUsersCollectionListeners();
+
             mDb.collection("users").document(mUser.getUid())
                     .get()
-                    /*
                     .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                @Override
-                                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                    Tracer.log(TAG, "getUserInfos.onSuccess");
-                                    //on set le data du user
-                                    if(documentSnapshot.exists()) {
-                                        Tracer.log(TAG, "getUserInfos.onSuccess.DATA: " + documentSnapshot.getData());
-                                        try {
-                                            DataModel data = documentSnapshot.toObject(DataModel.class);
-                                            mUser.setData(data);
-                                        } catch (IllegalStateException ise) {
-                                            Tracer.log(TAG, "getUserInfos.mUser.setData.IllegalStateException: ", ise);
-                                        } catch (Exception e) {
-                                            Tracer.log(TAG, "getUserInfos.mUser.setData.Exception: ", e);
-                                        }
-                                    }
-                                }
-                            })
-                    */
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            Tracer.log(TAG, "getUserInfos.onSuccess");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG, "getUserInfos.onFailure.exception: ", e);
+                        }
+                    })
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                    Tracer.log(TAG, "getUserInfos.onComplete");
-                                    if (task.isSuccessful()) {
-                                        DocumentSnapshot document = task.getResult();
-                                        Tracer.log(TAG, "getUserInfos.document: " +  document.exists());
-                                        if(document.exists()){
-                                            Tracer.log(TAG, "getUserInfos.onComplete.DATA: " + document.getData());
-                                            try {
-                                                mUser.setData(document.toObject(DataModel.class));
-                                            } catch (Exception e) {
-                                                Tracer.log(TAG, "getUserInfos.mUser.setData.Exception: ", e);
-                                            }
-                                            //il avait deja ete cree precedement
-                                            mUser.setCreated(true);
-                                            //on call le tracker pour dire qu'il est pret
-                                            mTrackerService.onUserCreated(new ServiceResponseObject());
-                                        }else{
-                                            Tracer.log(TAG, "no document, creating new user");
-                                            // si on a rien alors on a un nouveau user
-                                            // alors on l'enregistre dans la collection
-                                            // "thekids-dab99 > users"
-                                            setUserInfos();
-                                        }
-                                    } else {
-                                        Tracer.log(TAG, "getUserInfos.onComplete.exception: ", task.getException());
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            Tracer.log(TAG, "getUserInfos.onComplete");
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                Tracer.log(TAG, "getUserInfos.document: " +  document.exists());
+                                if(document.exists()){
+                                    Tracer.log(TAG, "getUserInfos.onComplete.DATA: " + document.getData());
+                                    try {
+                                        mUser.setData(document.toObject(DataModel.class));
+                                    } catch (Exception e) {
+                                        Tracer.log(TAG, "getUserInfos.mUser.setData.Exception: ", e);
                                     }
+                                    //il avait deja ete cree precedement
+                                    mUser.setCreated(true);
+                                    //on call le Trackerservice pour dire qu'il est pret
+                                    mTrackerService.onUserCreated(new ServiceResponseObject());
+                                }else{
+                                    Tracer.log(TAG, "no document, creating new user");
+                                    // si on a rien alors on a un nouveau user
+                                    // alors on l'enregistre dans la collection
+                                    // "thekids-dab99 > users"
+                                    setUserInfos();
                                 }
-                            });
+                            } else {
+                                Tracer.log(TAG, "getUserInfos.onComplete.exception: ", task.getException());
+                            }
+                        }
+                    });
         }catch (Exception e){
             Tracer.log(TAG, "getUserInfos.Exception: ", e);
         }
@@ -251,6 +286,8 @@ class FirestoreService implements IFirestoreService{
     public void deactivateUser(){
         Tracer.log(TAG, "deactivateUser");
         try{
+            //on enleve les listener
+            removeUsersCollectionListeners();
             //add the new user collection with his id
             mDb.collection("actives").document(mUser.getUid())
                     .delete()

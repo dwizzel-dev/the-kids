@@ -97,9 +97,9 @@ public class GpsService implements IGpsService{
                     location = mLocationManager
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     if (location == null) {
-                        Tracer.log(TAG, "getLastLocation.location: ----- Last Network Position");
+                        Tracer.log(TAG, "getLastLocation.location: No Last Network Position");
                     }else{
-                        Tracer.log(TAG, "getLastLocation.location: +++++ Last Network Position");
+                        Tracer.log(TAG, "getLastLocation.location: Last Network Position");
                     }
                 }
                 if (isGPSEnabled) {
@@ -107,9 +107,9 @@ public class GpsService implements IGpsService{
                         location = mLocationManager
                                     .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         if (location == null) {
-                            Tracer.log(TAG, "getLastLocation.location: ----- Last GPS Position");
+                            Tracer.log(TAG, "getLastLocation.location: No Last GPS Position");
                         }else{
-                            Tracer.log(TAG, "getLastLocation.location: +++++ Last GPS Position");
+                            Tracer.log(TAG, "getLastLocation.location: Last GPS Position");
                         }
                     }
                 }

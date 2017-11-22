@@ -51,7 +51,7 @@ public class TrackerService extends Service implements ITrackerService{
 
     private ITrackerBinderCallback mBinderCallback;
     private IAuthService mAuthService;
-    private IFirestoreService mFirestoreService;
+    private IDatabaseService mDatabaseService;
     private IGpsService mGpsService;
     private UserObject mUser;
     private final IBinder mTrackerBinder = new TrackerBinder();
@@ -102,7 +102,7 @@ public class TrackerService extends Service implements ITrackerService{
         try {
             mUser = UserObject.getInstance();
             mAuthService = new AuthService(TrackerService.this, TrackerService.this);
-            mFirestoreService = new FirestoreService(TrackerService.this, TrackerService.this);
+            mDatabaseService = new DatabaseService(TrackerService.this);
             mGpsService = new GpsService(TrackerService.this, TrackerService.this);
             //start running keep alive timer
             startRunningTime();
@@ -158,7 +158,7 @@ public class TrackerService extends Service implements ITrackerService{
         Tracer.log(TAG, "activateUser");
         try {
             mUser.setActive(true);
-            mFirestoreService.activateUser();
+            mDatabaseService.activateUser();
         }catch (Exception e){
             Tracer.log(TAG, "activateUser.exception: ", e);
         }
@@ -169,7 +169,7 @@ public class TrackerService extends Service implements ITrackerService{
         try {
             mUser.setActive(false);
             mUser.setGps(false);
-            mFirestoreService.deactivateUser();
+            mDatabaseService.deactivateUser();
         }catch (Exception e){
             Tracer.log(TAG, "deactivateUser.exception: ", e);
         }
@@ -185,8 +185,9 @@ public class TrackerService extends Service implements ITrackerService{
             mUser.setUid(mAuthService.getUserID());
             mUser.setSigned(true);
             mUser.setActive(true);
+            mUser.setStatus(Const.status.ONLINE);
             //on va chercher les infos du user sur la DB ou on les creer
-            mFirestoreService.getUserInfos();
+            mDatabaseService.getUserInfos();
         }
     }
 
@@ -237,7 +238,7 @@ public class TrackerService extends Service implements ITrackerService{
             }
             //update les infos de l'usager
             try {
-                mFirestoreService.activateUser();
+                mDatabaseService.activateUser();
             }catch (Exception e){
                 Tracer.log(TAG, "activateUser.exception: ", e);
             }
@@ -251,9 +252,7 @@ public class TrackerService extends Service implements ITrackerService{
         //on set le user de base du service si on a pas d'erreur sinon on les refill au caller
         if(sro.getErr() == 0) {
             setUser();
-        }else{
-            Tracer.log(TAG, "onUserSignedIn", sro);
-        }
+            }
         //on tranmet la reponse object au caller
         if(mBinderCallback != null) {
             mBinderCallback.onSignedIn(sro);
@@ -287,11 +286,11 @@ public class TrackerService extends Service implements ITrackerService{
             mBinderCallback.onCreated(sro);
         }
         //on update les infos dans la DB
-        mFirestoreService.updateUserInfos();
-        mFirestoreService.activateUser();
+        mDatabaseService.updateUserInfos();
+        //on met le user dans la table des connectes
+        mDatabaseService.activateUser();
         //pour test de bastch write
         //mFirestoreService.batchUserWatcher();
-
     }
 
     public void onUserWatchersList(ServiceResponseObject sro){
@@ -363,7 +362,7 @@ public class TrackerService extends Service implements ITrackerService{
             Tracer.log(TAG, "TrackerBinder.getWatchersList");
             //on cherche la liste de nos watchers si la notre est a null
             if(mUser.getWatchers() == null) {
-                mFirestoreService.getWatchersList();
+                mDatabaseService.getWatchersList();
             }else{
                 //sinon il l'a deja alors on repond tout de suite
                 if(mBinderCallback != null) {
@@ -380,7 +379,7 @@ public class TrackerService extends Service implements ITrackerService{
     class TimerRunnable implements Runnable{
         private final static String TAG = "TimerRunnable";
         private boolean loop = true;
-        private int keepAliveDelay = 300; //
+        private int keepAliveDelay = 300; //5 minutes
         private int sleepDelay = 1000;
         TimerRunnable(){}
         @Override

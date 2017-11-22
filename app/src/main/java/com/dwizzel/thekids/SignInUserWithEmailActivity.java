@@ -47,7 +47,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
 
     private void bindToAuthService(){
         if(!mServiceBoundObservable.get()) {
-            Intent intent = TrackerService.getIntent(this);
+            Intent intent = TrackerService.getIntent(SignInUserWithEmailActivity.this);
             startService(intent);
             //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -57,7 +57,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         private static final String TAG = "SignInUserWithEmailActivity.ITrackerBinder";
         public void handleResponse(ServiceResponseObject sro){
-            Tracer.log(TAG, String.format("handleResponse: %s", sro));
+            Tracer.log(TAG, "handleResponse", sro);
         }
         public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");
@@ -205,7 +205,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         //on va faire un listener sur le resultat
         if (mTrackerBinder != null) {
             //on met un loader
-            Utils.getInstance().showProgressDialog(this);
+            Utils.getInstance().showProgressDialog(SignInUserWithEmailActivity.this);
             //on call le service
             mTrackerBinder.signIn(email, psw);
         }

@@ -222,7 +222,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         //on va faire un listener sur le resultat
         if (mTrackerBinder != null) {
             //on met un loader
-            Utils.getInstance().showProgressDialog(this);
+            Utils.getInstance().showProgressDialog(CreateUserWithEmailActivity.this);
             //on call le service
             mTrackerBinder.createUser(email, psw);
         }

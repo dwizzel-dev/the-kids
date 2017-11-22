@@ -2,6 +2,7 @@ package com.dwizzel.objects;
 
 import android.content.Context;
 
+import com.dwizzel.Const;
 import com.dwizzel.datamodels.DataModel;
 import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.utils.Tracer;
@@ -27,6 +28,7 @@ public class UserObject{
     private boolean created = false;
     private boolean signed = false;
     private boolean active = false;
+    private int status = Const.status.OFFLINE;
     private boolean gps = false;
     private DataModel data;
     private GeoPoint position = new GeoPoint(0.0,0.0);
@@ -35,6 +37,14 @@ public class UserObject{
 
     private UserObject(){
         //default
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public boolean addWatcher(String uid, WatcherModel watcher) {
@@ -89,6 +99,8 @@ public class UserObject{
         data = null;
         position = new GeoPoint(0.0,0.0);
         loginType = 0;
+        watchers = null;
+        status = Const.status.OFFLINE;
     }
 
     public String getEmail(){
@@ -133,6 +145,11 @@ public class UserObject{
 
     public void setData(DataModel data){
         this.data = data;
+        try{
+            status = this.data.getStatus();
+        }catch (Exception e){
+           //
+        }
     }
 
     public void setUid(String uid){
@@ -187,6 +204,7 @@ public class UserObject{
         Map<String, Object> map = new HashMap<>(3);
         map.put("email", getEmail() );
         map.put("uid", getUid());
+        map.put("status", getStatus());
         map.put("createTime", FieldValue.serverTimestamp());
         map.put("updateTime", FieldValue.serverTimestamp());
         map.put("loginType", getLoginType());
@@ -195,6 +213,7 @@ public class UserObject{
 
     public Map<String, Object> toActiveData(){
         Map<String, Object> map = new HashMap<>(3);
+        map.put("status", getStatus());
         map.put("updateTime", FieldValue.serverTimestamp());
         map.put("position", getPosition());
         map.put("gps", isGps());

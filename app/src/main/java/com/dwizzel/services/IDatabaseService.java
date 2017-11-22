@@ -5,7 +5,7 @@ package com.dwizzel.services;
  */
 
 
-public interface IFirestoreService {
+public interface IDatabaseService {
 
     void activateUser();
     void deactivateUser();

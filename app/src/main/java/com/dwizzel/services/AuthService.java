@@ -13,6 +13,7 @@ import com.dwizzel.objects.PermissionObject;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
+import com.dwizzel.utils.Utils;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -47,35 +48,6 @@ class AuthService implements IAuthService {
             Tracer.log(TAG, "exception:", e);
             throw new Exception(e);
         }
-    }
-
-    private boolean checkConnectivity(){
-        Tracer.log(TAG, "checkConnectivity");
-        if(mContext != null) {
-            if(hasPermission()) {
-                try {
-                    ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-                    if (cm != null) {
-                        NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
-                        return (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting());
-                    }
-                }catch(Exception e) {
-                    Tracer.log(TAG, "checkConnectivity.Exception: ", e);
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean hasPermission() {
-        Tracer.log(TAG, "hasPermission");
-        if(mContext != null) {
-            PermissionObject perms = new PermissionObject(mContext);
-            Tracer.log(TAG, "Permissions[ACCESS_NETWORK_STATE]: " + perms.isAccessNetworkState());
-            Tracer.log(TAG, "Permissions[INTERNET]: " + perms.isInternet());
-            return (perms.isAccessNetworkState() && perms.isInternet());
-        }
-        return false;
     }
 
     public boolean isSignedIn(){
@@ -136,7 +108,7 @@ class AuthService implements IAuthService {
     public void signInUser(String email, String psw){
         Tracer.log(TAG, String.format("signInUser: \"%s\" | \"%s\"", email, psw));
         //avertir si pas connecte
-        if (checkConnectivity()) {
+        if (Utils.getInstance().checkConnectivity(mContext)) {
             try {
                 mFirebaseAuth.signInWithEmailAndPassword(email, psw)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -185,7 +157,7 @@ class AuthService implements IAuthService {
     public void createUser(String email, String psw) {
         Tracer.log(TAG, String.format("createUser: \"%s\" | \"%s\"", email, psw));
         //avertir si pas connecte
-        if (checkConnectivity()) {
+        if (Utils.getInstance().checkConnectivity(mContext)) {
             try {
                 mFirebaseAuth.createUserWithEmailAndPassword(email, psw)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -235,34 +207,42 @@ class AuthService implements IAuthService {
 
     public void signInUser(AuthCredential token){
         Tracer.log(TAG, String.format("signInCredential: \"%s\"", token));
-        try {
-            mFirebaseAuth.signInWithCredential(token)
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (!task.isSuccessful()) {
-                                try {
-                                    throw task.getException();
-                                } catch (NullPointerException npe) {
-                                    mTrackerService.onUserSignedIn(
-                                            new ServiceResponseObject(Const.except.NULL_POINTER));
-                                } catch (Exception e) {
-                                    mTrackerService.onUserSignedIn(
-                                            new ServiceResponseObject(Const.except.GENERIC));
-                                }
-                            } else {
-                                try {
-                                    mUser.setLoginType(Const.user.TYPE_FACEBOOK);
-                                    //pas erreur alors on continue
-                                    mTrackerService.onUserSignedIn(new ServiceResponseObject());
-                                }catch(NullPointerException npe){
-                                    Tracer.log(TAG, "signInCredential.onComplete.NullPointerException: ", npe);
+        if (Utils.getInstance().checkConnectivity(mContext)) {
+            try {
+                mFirebaseAuth.signInWithCredential(token)
+                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (!task.isSuccessful()) {
+                                    try {
+                                        throw task.getException();
+                                    } catch (NullPointerException npe) {
+                                        mTrackerService.onUserSignedIn(
+                                                new ServiceResponseObject(Const.except.NULL_POINTER));
+                                    } catch (Exception e) {
+                                        mTrackerService.onUserSignedIn(
+                                                new ServiceResponseObject(Const.except.GENERIC));
+                                    }
+                                } else {
+                                    try {
+                                        mUser.setLoginType(Const.user.TYPE_FACEBOOK);
+                                        //pas erreur alors on continue
+                                        mTrackerService.onUserSignedIn(new ServiceResponseObject());
+                                    } catch (NullPointerException npe) {
+                                        Tracer.log(TAG, "signInCredential.onComplete.NullPointerException: ", npe);
+                                    }
                                 }
                             }
-                        }
-                    });
-        }catch(Exception e){
-            Tracer.log(TAG, "signInCredential.Exception: ", e);
+                        });
+            } catch (Exception e) {
+                Tracer.log(TAG, "signInCredential.Exception: ", e);
+            }
+        }else{
+            try {
+                mTrackerService.onUserSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
+            }catch (NullPointerException npe){
+                Tracer.log(TAG, "signInUser.NullPointerException: ", npe);
+            }
         }
     }
 

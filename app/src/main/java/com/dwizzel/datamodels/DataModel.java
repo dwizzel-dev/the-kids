@@ -16,6 +16,7 @@ public class DataModel{
     private int loginType;
     private String email;
     private String uid;
+    private int status;
 
     DataModel(){
 
@@ -42,7 +43,15 @@ public class DataModel{
     }
 
     public void setLoginType(int loginType) {
-        this.loginType = loginType;
+        this.status = loginType;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public String getEmail() {

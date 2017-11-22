@@ -35,4 +35,9 @@ public final class Const {
     public static final class watchers {
         public static final int EMPTY_LIST = 601;
     }
+    public static final class status {
+        public static final int ONLINE = 700;
+        public static final int OFFLINE = 701;
+        public static final int OCCUPIED = 702;
+    }
 }
