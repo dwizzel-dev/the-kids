@@ -212,8 +212,16 @@ public class UserObject{
     }
 
     public Map<String, Object> toActiveData(){
-        Map<String, Object> map = new HashMap<>(3);
+        Map<String, Object> map = new HashMap<>(4);
         map.put("status", getStatus());
+        map.put("updateTime", FieldValue.serverTimestamp());
+        map.put("position", getPosition());
+        map.put("gps", isGps());
+        return map;
+    }
+    public Map<String, Object> toInactiveData(){
+        Map<String, Object> map = new HashMap<>(4);
+        map.put("status", Const.status.OFFLINE);
         map.put("updateTime", FieldValue.serverTimestamp());
         map.put("position", getPosition());
         map.put("gps", isGps());

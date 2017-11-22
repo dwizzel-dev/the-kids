@@ -54,7 +54,8 @@ class DatabaseService implements IDatabaseService{
     private FirebaseFirestore mDb;
     private UserObject mUser;
     private ITrackerService mTrackerService;
-    private Map<String, ListenerRegistration> mRegisteredListener
+    private ListenerRegistration mUserListener;
+    private Map<String, ListenerRegistration> mWatchersListener
             = new HashMap<String, ListenerRegistration>();
 
     DatabaseService (ITrackerService trackerService) {
@@ -69,35 +70,33 @@ class DatabaseService implements IDatabaseService{
         mDb.setFirestoreSettings(settings);
         }
 
-    private void addUsersCollectionListeners(){
-        Tracer.log(TAG, "addUsersCollectionListeners");
-        //trigger a chaque fois qu'il y aune modifications sur le serveur
-        mRegisteredListener.put("users",
-                mDb.collection("users").document(mUser.getUid())
-                    .addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                        @Override
-                        //va surement cause une exception sur le deactivate vu
-                        // que l'on signout du FirebaseAuth donc plus de Uid
-                        public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                            //Tracer.log(TAG, "users.onEvent");
-                            if (e != null) {
-                                Tracer.log(TAG, "-------- users.onEvent.exception: ", e);
-                                return;
+    private void addListenerOnWatchers(final String watcherUid){
+        Tracer.log(TAG, "addListenerOnWatchers: " + watcherUid);
+        //trigger a chaque fois qu'il y aune modifications sur le serveur du status ou position
+        mWatchersListener.put(watcherUid,
+                mDb.collection("actives").document(watcherUid)
+                        .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                            private final String uid = watcherUid;
+                            @Override
+                            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                                if (e != null) {
+                                    Tracer.log(TAG, "-------- watchers[" + uid + "].onEvent.exception: ", e);
+                                    return;
+                                }
+                                if(documentSnapshot.exists()) {
+                                    Tracer.log(TAG, "-------- watchers[" + uid + "].onEvent.DATA: " + documentSnapshot.getData());
+                                }else {
+                                    Tracer.log(TAG, "-------- watchers[" + uid + "].onEvent.NO_DATA");
+                                }
                             }
-                            if(documentSnapshot.exists()) {
-                                Tracer.log(TAG, "-------- users.onEvent.DATA: " + documentSnapshot.getData());
-                            }else {
-                                Tracer.log(TAG, "-------- users.onEvent.NO_DATA");
-                            }
-                        }
-                    })
+                        })
         );
     }
 
-    private void removeUsersCollectionListeners(){
-        Tracer.log(TAG, "removeUsersCollectionListeners");
-        if(mRegisteredListener != null) {
-            Iterator<Map.Entry<String, ListenerRegistration>> it = mRegisteredListener.entrySet().iterator();
+    private void removeListenersOnWatchers(){
+        Tracer.log(TAG, "removeListenersOnWatchers");
+        if(mWatchersListener != null) {
+            Iterator<Map.Entry<String, ListenerRegistration>> it = mWatchersListener.entrySet().iterator();
             while(it.hasNext()) {
                 Map.Entry<String, ListenerRegistration> entry = it.next();
                 ListenerRegistration listenerRegistration = entry.getValue();
@@ -110,16 +109,49 @@ class DatabaseService implements IDatabaseService{
 
     }
 
+    private void addListenerOnUser(){
+        Tracer.log(TAG, "addListenerOnUser");
+        //trigger a chaque fois qu'il y aune modifications sur le serveur
+        mUserListener = mDb.collection("users").document(mUser.getUid())
+                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    //va surement cause une exception sur le deactivate vu
+                    // que l'on signout du FirebaseAuth donc plus de Uid
+                    public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                        //Tracer.log(TAG, "users.onEvent");
+                        if (e != null) {
+                            Tracer.log(TAG, "-------- users.onEvent.exception: ", e);
+                            return;
+                        }
+                        if(documentSnapshot.exists()) {
+                            Tracer.log(TAG, "-------- users.onEvent.DATA: " + documentSnapshot.getData());
+                        }else {
+                            Tracer.log(TAG, "-------- users.onEvent.NO_DATA");
+                        }
+                    }
+                });
+
+    }
+
+    private void removeListenerOnUser(){
+        Tracer.log(TAG, "removeListenerOnUser");
+        if(mUserListener != null) {
+            mUserListener.remove();
+        }
+    }
+
     private void setUserInfos(){
         Tracer.log(TAG, "setUserInfos");
         try{
             //add the new user collection with his id
-            mDb.collection("users").document(mUser.getUid())
-                    .set(mUser.toUserData())
+            WriteBatch batch = mDb.batch();
+            batch.set(mDb.collection("users").document(mUser.getUid()), mUser.toUserData());
+            batch.set(mDb.collection("actives").document(mUser.getUid()), mUser.toActiveData());
+            batch.commit()
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
-                            Tracer.log(TAG, "createUser.addOnSuccessListener");
+                            Tracer.log(TAG, "setUserInfos.addOnSuccessListener");
                             //maintenant il est cree alors on set et cherche les infos
                             getUserInfos();
                         }
@@ -127,7 +159,7 @@ class DatabaseService implements IDatabaseService{
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Tracer.log(TAG, "createUser.addOnFailureListener.Exception: ", e);
+                            Tracer.log(TAG, "setUserInfos.addOnFailureListener.Exception: ", e);
                         }
                     });
         }catch (Exception e){
@@ -141,12 +173,10 @@ class DatabaseService implements IDatabaseService{
         try{
             // il faut que le user soit creer avant tout
             if(mUser.isCreated()) {
-                //update juste le updateTime
-                mDb.collection("users").document(mUser.getUid())
-                        .update(
-                                "updateTime", FieldValue.serverTimestamp(),
-                                "loginType", mUser.getLoginType()
-                        )
+                WriteBatch batch = mDb.batch();
+                batch.update(mDb.collection("users").document(mUser.getUid()), "updateTime", FieldValue.serverTimestamp(), "loginType", mUser.getLoginType());
+                batch.update(mDb.collection("actives").document(mUser.getUid()), mUser.toActiveData());
+                batch.commit()
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void avoid) {
@@ -206,8 +236,8 @@ class DatabaseService implements IDatabaseService{
             //car ne va jamais caller le TrackerService pour dire qu'il est cree
             //alors on va disable la cache pour certaine query
             //les events listener sur ce que l'on veut
-            removeUsersCollectionListeners();
-            addUsersCollectionListeners();
+            removeListenerOnUser();
+            addListenerOnUser();
 
             mDb.collection("users").document(mUser.getUid())
                     .get()
@@ -263,7 +293,7 @@ class DatabaseService implements IDatabaseService{
         try{
             //add the new user collection with his id
             mDb.collection("actives").document(mUser.getUid())
-                    .set(mUser.toActiveData())
+                    .update(mUser.toActiveData())
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
@@ -286,26 +316,34 @@ class DatabaseService implements IDatabaseService{
     public void deactivateUser(){
         Tracer.log(TAG, "deactivateUser");
         try{
-            //on enleve les listener
-            removeUsersCollectionListeners();
-            //add the new user collection with his id
+            //on enleve les listener sur le user
+            removeListenerOnUser();
+            // enleve les listener sur les watchers du user
+            removeListenersOnWatchers();
+            //  1. remove user collection with his id
+            //  OR
+            //  2. change the status only we will put a listener on the status for status changes
             mDb.collection("actives").document(mUser.getUid())
-                    .delete()
+                    //.delete()
+                    .update(mUser.toInactiveData())
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
                             //on set le dernier UID actif pour la verif au delete
                             Tracer.log(TAG, "deactivateUser.addOnSuccessListener: " + mUser.getUid());
+                            mTrackerService.onUserSignedOut(null);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Tracer.log(TAG, "deactivateUser.addOnFailureListener.Exception: ", e);
+                            mTrackerService.onUserSignedOut(null);
                         }
                     });
         }catch (Exception e){
             Tracer.log(TAG, "deactivateUser.Exception: ", e);
+            mTrackerService.onUserSignedOut(null);
         }
 
     }
@@ -326,7 +364,10 @@ class DatabaseService implements IDatabaseService{
                                         Tracer.log(TAG, "getWatchersList.onComplete.DATA: " +
                                                 document.getId() + " | " +  document.getData());
                                         try{
+                                            //rajoute la liste en interne a mUser
                                             mUser.addWatcher(document.getId(), document.toObject(WatcherModel.class));
+                                            //on mets un listener sur les changement de ceux qui peuvent nous watcher
+                                            addListenerOnWatchers(document.getId());
                                         }catch (Exception e){
                                             Tracer.log(TAG, "getWatchersList.onComplete.exception: ", e);
                                         }
@@ -349,23 +390,17 @@ class DatabaseService implements IDatabaseService{
 
     public void batchUserWatcher(){
         Tracer.log(TAG, "batchUserWatcher");
+        /*
         try{
             WriteBatch batch = mDb.batch();
-            batch.set(mDb.collection("users")
-                    .document(mUser.getUid())
-                    .collection("watchers")
-                    .document("Q0GRh3UAhYfnqgbhiDOOipC1QuA2"),
-                    new WatcherModel("Q0GRh3UAhYfnqgbhiDOOipC1QuA2", "d66666@d.ca", "666-666-6666", "olivier"));
-            batch.set(mDb.collection("users")
-                    .document(mUser.getUid())
-                    .collection("watchers")
+            batch.set(mDb.collection("watchers")
                     .document("ZKUzl5r39tOH9Q7DQNnv1YvZvJB3"),
-                    new WatcherModel("ZKUzl5r39tOH9Q7DQNnv1YvZvJB3", "dwizzel.dev@gmail.com", "666-666-6666", "devil"));
-            batch.set(mDb.collection("users")
-                    .document(mUser.getUid())
-                    .collection("watchers")
+                    new WatcherModel("ZKUzl5r39tOH9Q7DQNnv1YvZvJB3",
+                            "dwizzel.dev@gmail.com", "666-666-6666", "devil"));
+            batch.set(mDb.collection("watchers")
                     .document("vrLRgrYAqkhogHXCsftZL6w8kjP2"),
-                    new WatcherModel("vrLRgrYAqkhogHXCsftZL6w8kjP2", "dd@d.ca", "666-666-6666", "zed"));
+                    new WatcherModel("vrLRgrYAqkhogHXCsftZL6w8kjP2",
+                            "dd@d.ca", "666-666-6666", "zed"));
             //add the new user collection with his id
             batch.commit()
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -384,6 +419,7 @@ class DatabaseService implements IDatabaseService{
         }catch (Exception e){
             Tracer.log(TAG, "batchUserWatcher.Exception: ", e);
         }
+        */
     }
 
  }

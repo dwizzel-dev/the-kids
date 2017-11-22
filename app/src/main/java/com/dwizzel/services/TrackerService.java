@@ -154,24 +154,13 @@ public class TrackerService extends Service implements ITrackerService{
         }
     }
 
-    private void activateUser(){
-        Tracer.log(TAG, "activateUser");
+    private void changeUserStatus(int status){
+        Tracer.log(TAG, "changeUserStatus: " + status);
         try {
-            mUser.setActive(true);
+            mUser.setStatus(status);
             mDatabaseService.activateUser();
         }catch (Exception e){
             Tracer.log(TAG, "activateUser.exception: ", e);
-        }
-    }
-
-    private void deactivateUser(){
-        Tracer.log(TAG, "deactivateUser");
-        try {
-            mUser.setActive(false);
-            mUser.setGps(false);
-            mDatabaseService.deactivateUser();
-        }catch (Exception e){
-            Tracer.log(TAG, "deactivateUser.exception: ", e);
         }
     }
 
@@ -207,10 +196,16 @@ public class TrackerService extends Service implements ITrackerService{
     private void resetUser(){
         Tracer.log(TAG, "resetUser");
         // NOTE: est appele quand on fait un signOut
-        // on enleve de la table actif de la DB avant
-        deactivateUser();
+        mUser.setActive(false);
+        mUser.setGps(false);
+        mDatabaseService.deactivateUser();
         //on stop le gps
         mGpsService.stopLocationUpdate();
+
+        /*
+        //le probleme avec firestore c'est qu'il y a va par batch alors ce n'est pas vraiment live
+        //si on fait un signout du mauth alors on a un probleme car plus de droit de changer le status
+        //on va trigger le firestore pour appeler onUserSignout pour essayer
         // firebaseAuthentification
         mAuthService.signOut();
         //on reset les infos
@@ -219,6 +214,8 @@ public class TrackerService extends Service implements ITrackerService{
         if(mBinderCallback != null) {
             mBinderCallback.onSignedOut(null);
         }
+        */
+
         //NOTE: le OnUnbind va s'occuper de stopper le thread et clearer le mBinderCallback
     }
 
@@ -285,12 +282,9 @@ public class TrackerService extends Service implements ITrackerService{
         if(mBinderCallback != null) {
             mBinderCallback.onCreated(sro);
         }
-        //on update les infos dans la DB
+        //on update les infos dans la DB et on met active en meme temps avec un batch write
         mDatabaseService.updateUserInfos();
-        //on met le user dans la table des connectes
-        mDatabaseService.activateUser();
-        //pour test de bastch write
-        //mFirestoreService.batchUserWatcher();
+
     }
 
     public void onUserWatchersList(ServiceResponseObject sro){
@@ -303,7 +297,12 @@ public class TrackerService extends Service implements ITrackerService{
 
     public void onUserSignedOut(ServiceResponseObject sro){
         Tracer.log(TAG, "onUserSignedOut");
-        //on tranmet la reponse object au caller
+        //NOTE: est appele par databaseService quand le deactivate est fini
+        // firebaseAuthentification
+        mAuthService.signOut();
+        //on reset les infos
+        mUser.resetUser();
+        //on call l'activity appelante pour le signOut
         if(mBinderCallback != null) {
             mBinderCallback.onSignedOut(sro);
         }

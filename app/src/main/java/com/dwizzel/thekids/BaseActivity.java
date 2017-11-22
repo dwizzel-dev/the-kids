@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
@@ -65,6 +66,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
         public void onSignedOut(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedOut");
             //show le msg
+            Utils.getInstance().hideProgressDialog();
             Utils.getInstance().showToastMsg(BaseActivity.this, R.string.toast_signed_out);
             startLoginActivity();
         }
@@ -139,6 +141,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
 
     protected void signOutUser(){
         Tracer.log(TAGBASE, "signOutUser");
+        Utils.getInstance().showProgressDialog(BaseActivity.this);
         //on avretit le service que l'on sign out
         mTrackerBinder.signOut();
 
