@@ -295,6 +295,14 @@ public class TrackerService extends Service implements ITrackerService{
         }
     }
 
+    public void onUserInvitationsList(ServiceResponseObject sro){
+        Tracer.log(TAG, "onUserInvitationsList");
+        //on tranmet la reponse au activy qui a caller si il y a
+        if(mBinderCallback != null) {
+            mBinderCallback.handleResponse(sro);
+        }
+    }
+
     public void onUserSignedOut(ServiceResponseObject sro){
         Tracer.log(TAG, "onUserSignedOut");
         //NOTE: est appele par databaseService quand le deactivate est fini
@@ -326,11 +334,6 @@ public class TrackerService extends Service implements ITrackerService{
         public void registerCallback(ITrackerBinderCallback callback){
             Tracer.log(TAG, "TrackerBinder.registerCallback");
             mBinderCallback = callback;
-            //si il fait un rebind() en faisant un back dans l'application
-            //il ne passera pas par unbind() alors il faut stoper le thread precedent
-            //avant de le repartir, sinon il y aura autant de thread que de call
-            //a registerCallback() sans unregisterCallback()
-            //tant que le callstack n'est pas cleare quand il passe d'une activity a l'autre
         }
         public void unregisterCallback(){
             Tracer.log(TAG, "TrackerBinder.unregisterCallback");
@@ -342,7 +345,8 @@ public class TrackerService extends Service implements ITrackerService{
         }
         public void signOut(){
             Tracer.log(TAG,"TrackerBinder.signOut");
-            //on reset le user
+            //on reset le user et le service s'occupe du reste
+            // pour faire le callback quand c'est termine
             resetUser();
         }
         public void signIn(String email, String psw){
@@ -362,6 +366,18 @@ public class TrackerService extends Service implements ITrackerService{
             //on cherche la liste de nos watchers si la notre est a null
             if(mUser.getWatchers() == null) {
                 mDatabaseService.getWatchersList();
+            }else{
+                //sinon il l'a deja alors on repond tout de suite
+                if(mBinderCallback != null) {
+                    mBinderCallback.handleResponse(new ServiceResponseObject());
+                }
+            }
+        }
+        public void getInvitationsList(){
+            Tracer.log(TAG, "TrackerBinder.getInvitationsList");
+            //on cherche la liste de nos watchers si la notre est a null
+            if(mUser.getInvites() == null) {
+                mDatabaseService.getInvitationsList();
             }else{
                 //sinon il l'a deja alors on repond tout de suite
                 if(mBinderCallback != null) {

@@ -1,5 +1,6 @@
 package com.dwizzel.thekids;
 
+import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.Tracer;
 
 public class WatchOverMeActivity extends BaseActivity {
@@ -17,7 +18,12 @@ public class WatchOverMeActivity extends BaseActivity {
         setTitle(R.string.watch_over_me_title);
         setButton();
         //on cherche la list
-        getTrackerBinder().getWatchersList();
+        try {
+            getTrackerBinder().getWatchersList();
+            getTrackerBinder().getInvitationsList();
+        }catch (NullPointerException npe){
+            Tracer.log(TAG, "onSubCreate.NullPointerException: ", npe);
+        }
     }
 
     private void setButton(){

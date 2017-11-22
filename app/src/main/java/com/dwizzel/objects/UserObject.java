@@ -3,13 +3,16 @@ package com.dwizzel.objects;
 import android.content.Context;
 
 import com.dwizzel.Const;
+import com.dwizzel.datamodels.ActiveModel;
 import com.dwizzel.datamodels.DataModel;
+import com.dwizzel.datamodels.InvitationModel;
 import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +37,7 @@ public class UserObject{
     private GeoPoint position = new GeoPoint(0.0,0.0);
     private int loginType = 0; //facebook, twitter, email, instagram, etc...
     private HashMap<String, WatcherModel> watchers;
+    private HashMap<String, InvitationModel> invites;
 
     private UserObject(){
         //default
@@ -45,6 +49,20 @@ public class UserObject{
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public void updateWatchers(String uid, int state, boolean gps, GeoPoint position, Date updateTime) {
+        if (watchers != null) {
+            if (watchers.containsKey(uid)) {
+                WatcherModel watcherModel = watchers.get(uid);
+                watcherModel.setStatus(state);
+                watcherModel.setGps(gps);
+                watcherModel.setPosition(position);
+                watcherModel.setUpdateTime(updateTime);
+                //et on replace
+                watchers.put(uid, watcherModel);
+            }
+        }
     }
 
     public boolean addWatcher(String uid, WatcherModel watcher) {
@@ -76,6 +94,53 @@ public class UserObject{
         if (watchers != null) {
             if (watchers.containsKey(uid)) {
                 return watchers.get(uid);
+            }
+        }
+        return null;
+    }
+
+    public void updateInvite(String inviteId, int state, Date updateTime, Date createTime) {
+        if (invites != null) {
+            if (invites.containsKey(inviteId)) {
+                InvitationModel inviteModel = invites.get(inviteId);
+                inviteModel.setState(state);
+                inviteModel.setCreateTime(createTime);
+                inviteModel.setUpdateTime(updateTime);
+                //et on replace
+                invites.put(inviteId, inviteModel);
+            }
+        }
+    }
+
+    public boolean addInvite(String inviteId, InvitationModel invite) {
+        if (invites == null) {
+            invites = new HashMap<>();
+        }
+        if (!invites.containsKey(inviteId)){
+            invites.put(inviteId, invite);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeInvite(String inviteId) {
+        if (invites != null) {
+            if (invites.containsKey(inviteId)) {
+                invites.remove(inviteId);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public HashMap<String, InvitationModel> getInvites(){
+        return invites;
+    }
+
+    public InvitationModel getInvite(String inviteId){
+        if (invites != null) {
+            if (invites.containsKey(inviteId)) {
+                return invites.get(inviteId);
             }
         }
         return null;
@@ -219,6 +284,7 @@ public class UserObject{
         map.put("gps", isGps());
         return map;
     }
+
     public Map<String, Object> toInactiveData(){
         Map<String, Object> map = new HashMap<>(4);
         map.put("status", Const.status.OFFLINE);

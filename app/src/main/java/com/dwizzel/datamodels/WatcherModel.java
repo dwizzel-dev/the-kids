@@ -1,5 +1,10 @@
 package com.dwizzel.datamodels;
 
+import com.dwizzel.Const;
+import com.google.firebase.firestore.GeoPoint;
+
+import java.util.Date;
+
 /**
  * Created by Dwizzel on 20/11/2017.
  */
@@ -10,6 +15,10 @@ public class WatcherModel{
     private String uid;
     private String phone;
     private String name;
+    private boolean gps;
+    private GeoPoint position;
+    private int status = Const.status.OFFLINE;
+    private Date updateTime;
 
     public WatcherModel(){
 
@@ -38,9 +47,6 @@ public class WatcherModel{
         this.name = name;
     }
 
-
-
-
     public String getEmail() {
         return email;
     }
@@ -55,6 +61,38 @@ public class WatcherModel{
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public boolean isGps() {
+        return gps;
+    }
+
+    public void setGps(boolean gps) {
+        this.gps = gps;
+    }
+
+    public GeoPoint getPosition() {
+        return position;
+    }
+
+    public void setPosition(GeoPoint position) {
+        this.position = position;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 
 

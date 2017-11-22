@@ -11,6 +11,7 @@ public interface ITrackerService {
     void onUserSignedIn(ServiceResponseObject sro);
     void onUserCreated(ServiceResponseObject sro);
     void onUserWatchersList(ServiceResponseObject sro);
+    void onUserInvitationsList(ServiceResponseObject sro);
     void onGpsPositionUpdate();
     void onUserSignedOut(ServiceResponseObject sro);
 

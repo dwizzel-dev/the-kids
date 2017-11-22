@@ -17,5 +17,6 @@ public interface ITrackerBinder {
     void signIn(AuthCredential authCredential);
     void createUser(String user, String psw);
     void getWatchersList();
+    void getInvitationsList();
 
 }

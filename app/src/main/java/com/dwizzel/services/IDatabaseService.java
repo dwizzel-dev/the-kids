@@ -13,6 +13,6 @@ public interface IDatabaseService {
     void updateUserPosition();
     void updateUserInfos();
     void getWatchersList();
-    void batchUserWatcher();
+    void getInvitationsList();
 
 }
