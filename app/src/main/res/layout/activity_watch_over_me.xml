@@ -4,13 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.dwizzel.thekids.WatchOverMeActivity">
+    tools:context="com.dwizzel.thekids.WatchOverMeActivity"
+    android:id="@+id/mainView">
 
+    <!--
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvWatcher"
         android:scrollbars="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"></android.support.v7.widget.RecyclerView>
+    -->
+
+    <ProgressBar android:id="@+id/loading_spinner"
+        style="@style/AppTheme.ProgressBar"
+        android:layout_gravity="center"
+        />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floatingActionButtonAdd"
@@ -23,4 +31,6 @@
         app:backgroundTint="@color/bgButton"
         app:layout_anchorGravity="bottom|end"
         app:srcCompat="@drawable/ic_action_add" />
+
+
 </android.support.design.widget.CoordinatorLayout>

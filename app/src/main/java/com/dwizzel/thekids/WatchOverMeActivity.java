@@ -1,10 +1,12 @@
 package com.dwizzel.thekids;
 
-import android.support.v7.widget.DividerItemDecoration;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Layout;
+import android.view.View;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchersListAdapter;
@@ -15,7 +17,6 @@ import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.ListPaddingDecoration;
 import com.dwizzel.utils.Tracer;
-import com.dwizzel.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -66,7 +67,8 @@ public class WatchOverMeActivity extends BaseActivity {
                     Tracer.log(TAG, "handleResponse: " + sro.getMsg());
                     switch(sro.getMsg()){
                         case Const.response.ON_WATCHERS_LIST:
-                            setWatchersListView();
+                            contentListOnLoad();
+                            //showWatchersListView();
                             break;
                         case Const.response.ON_INVITES_LIST:
                             setInvitesListView();
@@ -88,8 +90,39 @@ public class WatchOverMeActivity extends BaseActivity {
         mTrackerBinder.registerCallback(serviceCallback);
     }
 
-    private void setWatchersListView() {
-        mRecyclerView = findViewById(R.id.rvWatcher);
+    private void contentListOnLoad() {
+        Tracer.log(TAG, "contentListOnLoad");
+        //on enleve le loader
+        final View loader = findViewById(R.id.loading_spinner);
+        Animation animLoader = AnimationUtils.loadAnimation(WatchOverMeActivity.this,
+                R.anim.loader_animation_from_center_to_top_fade);
+        animLoader.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                Tracer.log(TAG, "contentListOnLoad.onAnimationStart");
+            }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                Tracer.log(TAG, "contentListOnLoad.onAnimationEnd");
+                loader.setVisibility(View.INVISIBLE);
+                showWatchersListView2();
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+                Tracer.log(TAG, "contentListOnLoad.onAnimationRepeat");
+            }
+        });
+        loader.startAnimation(animLoader);
+
+    }
+
+    private void showWatchersListView2(){
+        Tracer.log(TAG, "showWatchersListView2");
+        mRecyclerView = new RecyclerView(WatchOverMeActivity.this);
+        mRecyclerView.setPaddingRelative(0,0,0,0);
+        mRecyclerView.setHorizontalScrollBarEnabled(true);
+        mRecyclerView.setLayoutParams(new RecyclerView.LayoutParams(
+                RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT));
         //mRecyclerView.setHasFixedSize(true);
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
@@ -101,10 +134,32 @@ public class WatchOverMeActivity extends BaseActivity {
         //le padding de 8px au dessus et dessous
         mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
         //l'aniamation
-        //int resId = R.anim.layout_animation_fall_down;
-        int resId = R.anim.layout_animation_slide_from_bottom;
-        LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(WatchOverMeActivity.this, resId);
-        mRecyclerView.setLayoutAnimation(animation);
+        mRecyclerView.setLayoutAnimation(
+                AnimationUtils.loadLayoutAnimation(WatchOverMeActivity.this,
+                        R.anim.layout_animation_slide_from_bottom));
+        //rajoute a la view principale
+        CoordinatorLayout layout = (CoordinatorLayout) findViewById(R.id.mainView);
+        layout.addView(mRecyclerView, layout.getChildCount()); //en dessous du floating button
+    }
+
+    private void showWatchersListView(){
+        Tracer.log(TAG, "showWatchersListView");
+        //mRecyclerView = findViewById(R.id.rvWatcher);
+        //mRecyclerView.setHasFixedSize(true);
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        // specify an adapter (see also next example)
+        mAdapter = new WatchersListAdapter(
+                new ArrayList<WatcherModel>(UserObject.getInstance().getWatchers().values()));
+        mRecyclerView.setAdapter(mAdapter);
+        //le padding de 8px au dessus et dessous
+        mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
+        //l'aniamation
+        mRecyclerView.setLayoutAnimation(
+                AnimationUtils.loadLayoutAnimation(WatchOverMeActivity.this,
+                        R.anim.layout_animation_slide_from_bottom));
+
 
 
     }

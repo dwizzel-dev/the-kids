@@ -18,6 +18,11 @@
     <style name="AppTheme.Toolbar" parent="@android:style/Widget.Toolbar">
         <item name="titleTextColor">@color/white</item>
     </style>
+    <style name="AppTheme.ProgressBar" parent="Base.Widget.AppCompat.ProgressBar">
+        <item name="android:indeterminateTint">@color/indeterminateTint</item>
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+    </style>
     <style name="AppTheme.FrameLayoutWhite">
         <item name="android:background">@color/white</item>
     </style>
