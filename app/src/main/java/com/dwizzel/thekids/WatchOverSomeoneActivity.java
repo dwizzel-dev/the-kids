@@ -15,24 +15,7 @@ public class WatchOverSomeoneActivity extends BaseActivity {
         Tracer.log(TAG, "onSubCreate");
         setContentView(R.layout.activity_watch_over_someone);
         setTitle(R.string.title_activity_watch_over_someone);
-        setButton();
     }
 
-    private void setButton(){
-        /*
-        Button buttWatchOverMe = findViewById(R.id.buttWatchOverSomeone);
-        //butt create
-        buttWatchOverMe.setOnClickListener(
-                new View.OnClickListener() {
-                    public void onClick(View v) {
-                        if(getTrackerBinder() != null) {
-                            Utils.getInstance().showToastMsg(WatchOverMeActivity.this,
-                                    String.format(Utils.getInstance().getLocale(WatchOverMeActivity.this),
-                                            "counter: %d", getTrackerBinder().getCounter()));
-                        }
-                    }
-                });
-        */
-    }
 
 }

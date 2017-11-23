@@ -7,12 +7,16 @@ package com.dwizzel.objects;
 //pour les retour du service
 public final class ServiceResponseObject{
 
-    private Object args;
+    private Object obj;
     private int err = 0;
     private String msg = "";
 
     public ServiceResponseObject() {
 
+    }
+
+    public ServiceResponseObject(String msg) {
+        this.msg = msg;
     }
 
     public ServiceResponseObject(int err, String msg) {
@@ -25,11 +29,11 @@ public final class ServiceResponseObject{
     }
 
     public ServiceResponseObject(Object obj) {
-        this.args = obj;
+        this.obj = obj;
     }
 
     public ServiceResponseObject(Object obj, String msg) {
-        this.args = obj;
+        this.obj = obj;
         this.msg = msg;
     }
 
@@ -41,8 +45,8 @@ public final class ServiceResponseObject{
         return msg;
     }
 
-    public Object getArgs(){
-        return args;
+    public Object getObj(){
+        return obj;
     }
 
 }

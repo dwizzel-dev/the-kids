@@ -369,7 +369,8 @@ public class TrackerService extends Service implements ITrackerService{
             }else{
                 //sinon il l'a deja alors on repond tout de suite
                 if(mBinderCallback != null) {
-                    mBinderCallback.handleResponse(new ServiceResponseObject());
+                    mBinderCallback.handleResponse(
+                            new ServiceResponseObject(Const.response.ON_WATCHERS_LIST));
                 }
             }
         }
@@ -381,7 +382,8 @@ public class TrackerService extends Service implements ITrackerService{
             }else{
                 //sinon il l'a deja alors on repond tout de suite
                 if(mBinderCallback != null) {
-                    mBinderCallback.handleResponse(new ServiceResponseObject());
+                    mBinderCallback.handleResponse(
+                            new ServiceResponseObject(Const.response.ON_INVITES_LIST));
                 }
             }
         }

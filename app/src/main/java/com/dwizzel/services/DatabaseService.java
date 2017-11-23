@@ -446,7 +446,8 @@ class DatabaseService implements IDatabaseService{
                                             Tracer.log(TAG, "getWatchersList.onComplete.exception: ", e);
                                         }
                                     }
-                                    mTrackerService.onUserWatchersList(new ServiceResponseObject());
+                                    mTrackerService.onUserWatchersList(
+                                            new ServiceResponseObject(Const.response.ON_WATCHERS_LIST));
                                 }else{
                                     Tracer.log(TAG, "getWatchersList.onComplete.NO_DATA");
                                     mTrackerService.onUserWatchersList(
@@ -487,7 +488,8 @@ class DatabaseService implements IDatabaseService{
                                             Tracer.log(TAG, "getInvitationsList.onComplete.exception: ", e);
                                         }
                                     }
-                                    mTrackerService.onUserInvitationsList(new ServiceResponseObject());
+                                    mTrackerService.onUserInvitationsList(
+                                            new ServiceResponseObject(Const.response.ON_INVITES_LIST));
                                 }else{
                                     Tracer.log(TAG, "getInvitationsList.onComplete.NO_DATA");
                                     mTrackerService.onUserWatchersList(
