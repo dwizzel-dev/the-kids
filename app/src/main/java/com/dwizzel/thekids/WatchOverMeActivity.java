@@ -1,7 +1,10 @@
 package com.dwizzel.thekids;
 
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchersListAdapter;
@@ -10,6 +13,7 @@ import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
+import com.dwizzel.utils.ListPaddingDecoration;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 
@@ -84,7 +88,7 @@ public class WatchOverMeActivity extends BaseActivity {
         mTrackerBinder.registerCallback(serviceCallback);
     }
 
-    private void setWatchersListView(){
+    private void setWatchersListView() {
         mRecyclerView = findViewById(R.id.rvWatcher);
         //mRecyclerView.setHasFixedSize(true);
         // use a linear layout manager
@@ -94,6 +98,15 @@ public class WatchOverMeActivity extends BaseActivity {
         mAdapter = new WatchersListAdapter(
                 new ArrayList<WatcherModel>(UserObject.getInstance().getWatchers().values()));
         mRecyclerView.setAdapter(mAdapter);
+        //le padding de 8px au dessus et dessous
+        mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
+        //l'aniamation
+        //int resId = R.anim.layout_animation_fall_down;
+        int resId = R.anim.layout_animation_slide_from_bottom;
+        LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(WatchOverMeActivity.this, resId);
+        mRecyclerView.setLayoutAnimation(animation);
+
+
     }
 
     private void setInvitesListView(){
