@@ -15,54 +15,53 @@ public final class Tracer {
     private static final String TAG = "TK.";
 
     public static void log(String tag, String msg){
-        Log.d(TAG + tag, msg);
+        Log.v(TAG + tag, msg);
         if(logToFile){
             //write to file
         }
     }
 
     public static void log(String tag, String msg, Exception e){
-        Log.d(TAG + tag, msg, e);
+        Log.e(TAG + tag, msg, e);
         if(logToFile){
             //write to file
         }
     }
 
     public static void tog(String tag, String msg){
-        Log.d(tag, msg);
+        Log.v(tag, msg);
         if(logToFile){
             //write to file
         }
     }
 
     public static void tog(String tag, String msg, Exception e){
-        Log.d(tag, msg, e);
+        Log.e(tag, msg, e);
         if(logToFile){
             //write to file
         }
     }
 
     public static void log(String tag, String msg, Object obj){
-        Log.d(TAG, msg + ".....................................................................");
-        Log.d(TAG, obj.getClass().getName());
+        Log.i(TAG, msg + ".....................................................................");
+        Log.i(TAG, obj.getClass().getName());
         getFields(obj);
-        Log.d(TAG, msg + ".....................................................................");
+        Log.i(TAG, msg + ".....................................................................");
         if(logToFile){
             //write to file
         }
     }
 
     private static void getFields(Object obj) {
-        for(Field field : obj.getClass().getDeclaredFields()){
+        for(Field field : obj.getClass().getDeclaredFields()) {
             try {
                 field.setAccessible(true);
                 String name = field.getName();
                 Object value = field.get(obj);
-                log(TAG, String.format("\t\t%s: %s", name, value));
-            }catch (IllegalAccessException iae){
-                log(TAG, "Tracer.IllegalAccessException: ", iae);
+                Log.i(TAG, String.format("\t%s: %s", name, value));
+            } catch (IllegalAccessException iae) {
+                //
             }
-
         }
     }
 

@@ -10,6 +10,7 @@ import android.view.animation.AnimationUtils;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchersListAdapter;
+import com.dwizzel.adapters.WatchersListAdapterV1;
 import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
@@ -26,6 +27,9 @@ public class WatchOverMeActivity extends BaseActivity {
     private TrackerService.TrackerBinder mTrackerBinder;
     private boolean isActivityCreated = false;
     private UserObject mUser = UserObject.getInstance();
+
+    private boolean isWatchersLoaded = false;
+    private boolean isInvitationsLoaded = false;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -67,11 +71,18 @@ public class WatchOverMeActivity extends BaseActivity {
                     Tracer.log(TAG, "handleResponse: " + sro.getMsg());
                     switch(sro.getMsg()){
                         case Const.response.ON_WATCHERS_LIST:
-                            contentListOnLoad();
-                            //showWatchersListView();
+                            isWatchersLoaded = true;
+                            //ca nous prend les 2, watchers et invitations
+                            if(isContentLoaded()) {
+                                contentListLoaded();
+                            }
                             break;
                         case Const.response.ON_INVITES_LIST:
-                            setInvitesListView();
+                            isInvitationsLoaded = true;
+                            //ca nous prend les 2, watchers et invitations
+                            if(isContentLoaded()) {
+                                contentListLoaded();
+                            }
                             break;
                         default:
                             break;
@@ -90,8 +101,12 @@ public class WatchOverMeActivity extends BaseActivity {
         mTrackerBinder.registerCallback(serviceCallback);
     }
 
-    private void contentListOnLoad() {
-        Tracer.log(TAG, "contentListOnLoad");
+    private boolean isContentLoaded(){
+        return (isInvitationsLoaded && isWatchersLoaded);
+    }
+
+    private void contentListLoaded() {
+        Tracer.log(TAG, "contentListLoaded");
         //on enleve le loader
         final View loader = findViewById(R.id.loading_spinner);
         Animation animLoader = AnimationUtils.loadAnimation(WatchOverMeActivity.this,
@@ -128,8 +143,12 @@ public class WatchOverMeActivity extends BaseActivity {
         mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         // specify an adapter (see also next example)
-        mAdapter = new WatchersListAdapter(
+        //version V1
+        /*
+        mAdapter = new WatchersListAdapterV1(
                 new ArrayList<WatcherModel>(UserObject.getInstance().getWatchers().values()));
+        */
+        mAdapter = new WatchersListAdapter(WatchOverMeActivity.this);
         mRecyclerView.setAdapter(mAdapter);
         //le padding de 8px au dessus et dessous
         mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
@@ -150,7 +169,7 @@ public class WatchOverMeActivity extends BaseActivity {
         mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         // specify an adapter (see also next example)
-        mAdapter = new WatchersListAdapter(
+        mAdapter = new WatchersListAdapterV1(
                 new ArrayList<WatcherModel>(UserObject.getInstance().getWatchers().values()));
         mRecyclerView.setAdapter(mAdapter);
         //le padding de 8px au dessus et dessous

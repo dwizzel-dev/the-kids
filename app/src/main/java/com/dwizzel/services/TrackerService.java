@@ -241,7 +241,7 @@ public class TrackerService extends Service implements ITrackerService{
             }
         }
         //for debug check user object
-        //Tracer.log(TAG, "User: ", mUser);
+        Tracer.log(TAG, "User: ", mUser);
     }
 
     public void onUserSignedIn(ServiceResponseObject sro){
@@ -377,7 +377,7 @@ public class TrackerService extends Service implements ITrackerService{
         public void getInvitationsList(){
             Tracer.log(TAG, "TrackerBinder.getInvitationsList");
             //on cherche la liste de nos watchers si la notre est a null
-            if(mUser.getInvites() == null) {
+            if(mUser.getInvitations() == null) {
                 mDatabaseService.getInvitationsList();
             }else{
                 //sinon il l'a deja alors on repond tout de suite
@@ -396,7 +396,7 @@ public class TrackerService extends Service implements ITrackerService{
     class TimerRunnable implements Runnable{
         private final static String TAG = "TimerRunnable";
         private boolean loop = true;
-        private int keepAliveDelay = 300; //5 minutes
+        private int keepAliveDelay = 60; //5 minutes
         private int sleepDelay = 1000;
         TimerRunnable(){}
         @Override

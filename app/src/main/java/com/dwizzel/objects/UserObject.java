@@ -6,13 +6,12 @@ import com.dwizzel.Const;
 import com.dwizzel.datamodels.ActiveModel;
 import com.dwizzel.datamodels.DataModel;
 import com.dwizzel.datamodels.InvitationModel;
+import com.dwizzel.datamodels.InviteModel;
 import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
-
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +36,7 @@ public class UserObject{
     private GeoPoint position = new GeoPoint(0.0,0.0);
     private int loginType = 0; //facebook, twitter, email, instagram, etc...
     private HashMap<String, WatcherModel> watchers;
-    private HashMap<String, InvitationModel> invites;
+    private HashMap<String, InvitationModel> invitations;
 
     private UserObject(){
         //default
@@ -51,16 +50,18 @@ public class UserObject{
         this.status = status;
     }
 
-    public void updateWatchers(String uid, int state, boolean gps, GeoPoint position, Date updateTime) {
+    public void updateWatchers(String uid, ActiveModel activeModel) {
+        //ces infos ne viennent pas de la meme collection et arrive apres
+        //du au limitation de firestore
         if (watchers != null) {
             if (watchers.containsKey(uid)) {
-                WatcherModel watcherModel = watchers.get(uid);
-                watcherModel.setStatus(state);
-                watcherModel.setGps(gps);
-                watcherModel.setPosition(position);
-                watcherModel.setUpdateTime(updateTime);
+                WatcherModel watcher = watchers.get(uid);
+                watcher.setStatus(activeModel.getStatus());
+                watcher.setGps(activeModel.isGps());
+                watcher.setPosition(activeModel.getPosition());
+                watcher.setUpdateTime(activeModel.getUpdateTime());
                 //et on replace
-                watchers.put(uid, watcherModel);
+                watchers.put(uid, watcher);
             }
         }
     }
@@ -99,48 +100,52 @@ public class UserObject{
         return null;
     }
 
-    public void updateInvite(String inviteId, int state, Date updateTime, Date createTime) {
-        if (invites != null) {
-            if (invites.containsKey(inviteId)) {
-                InvitationModel inviteModel = invites.get(inviteId);
-                inviteModel.setState(state);
-                inviteModel.setCreateTime(createTime);
-                inviteModel.setUpdateTime(updateTime);
+    public void updateInvitation(String inviteId, InviteModel inviteModel) {
+        //ces infos ne viennent pas de la meme collection et arrive apres
+        //du au limitation de firestore
+        if (invitations != null) {
+            if (invitations.containsKey(inviteId)) {
+                InvitationModel invitation = invitations.get(inviteId);
+                invitation.setState(inviteModel.getState());
+                invitation.setCreateTime(inviteModel.getCreateTime());
+                invitation.setUpdateTime(inviteModel.getUpdateTime());
+                invitation.setFrom(inviteModel.getFrom());
+                invitation.setTo(inviteModel.getTo());
                 //et on replace
-                invites.put(inviteId, inviteModel);
+                invitations.put(inviteId, invitation);
             }
         }
     }
 
-    public boolean addInvite(String inviteId, InvitationModel invite) {
-        if (invites == null) {
-            invites = new HashMap<>();
+    public boolean addInvitation(String inviteId, InvitationModel invite) {
+        if (invitations == null) {
+            invitations = new HashMap<>();
         }
-        if (!invites.containsKey(inviteId)){
-            invites.put(inviteId, invite);
+        if (!invitations.containsKey(inviteId)){
+            invitations.put(inviteId, invite);
             return true;
         }
         return false;
     }
 
-    public boolean removeInvite(String inviteId) {
-        if (invites != null) {
-            if (invites.containsKey(inviteId)) {
-                invites.remove(inviteId);
+    public boolean removeInvitation(String inviteId) {
+        if (invitations != null) {
+            if (invitations.containsKey(inviteId)) {
+                invitations.remove(inviteId);
                 return true;
             }
         }
         return false;
     }
 
-    public HashMap<String, InvitationModel> getInvites(){
-        return invites;
+    public HashMap<String, InvitationModel> getInvitations(){
+        return invitations;
     }
 
-    public InvitationModel getInvite(String inviteId){
-        if (invites != null) {
-            if (invites.containsKey(inviteId)) {
-                return invites.get(inviteId);
+    public InvitationModel getInvitation(String inviteId){
+        if (invitations != null) {
+            if (invitations.containsKey(inviteId)) {
+                return invitations.get(inviteId);
             }
         }
         return null;
@@ -165,7 +170,7 @@ public class UserObject{
         position = new GeoPoint(0.0,0.0);
         loginType = 0;
         watchers = null;
-        invites = null;
+        invitations = null;
         status = Const.status.OFFLINE;
     }
 

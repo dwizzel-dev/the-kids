@@ -15,12 +15,30 @@ public class InvitationModel{
     private String inviteId;
     private String phone;
     private String name;
+    private String from;
+    private String to;
     private Date updateTime;
     private Date createTime;
     private int state = Const.invites.PENDING;
 
     public InvitationModel(){
 
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
     }
 
     public int getState() {

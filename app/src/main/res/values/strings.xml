@@ -11,6 +11,10 @@
     <string name="watch_over_me_title">Watch Over Me</string>
     <string name="watch_over_someone_title">Watch Over Someone</string>
 
+    <!-- LIST HEADER -->
+    <string name="watchers_header">Watchers</string>
+    <string name="invitations_header">Invitations</string>
+
     <!-- DESCRIPTION -->
     <string name="create_user_description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
     <string name="create_user_with_email_description">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>

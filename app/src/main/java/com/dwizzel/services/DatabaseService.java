@@ -88,27 +88,26 @@ class DatabaseService implements IDatabaseService{
                             public void onEvent(DocumentSnapshot documentSnapshot,
                                                 FirebaseFirestoreException e) {
                                 if (e != null) {
-                                    Tracer.log(TAG, "-------- invites[" + documentSnapshot.getId()
+                                    Tracer.log(TAG, "invites[" + documentSnapshot.getId()
                                             + "].onEvent.exception[0]: ", e);
                                     return;
                                 }
                                 if(documentSnapshot.exists()) {
-                                    Tracer.log(TAG, "-------- invites[" + documentSnapshot.getId() +
-                                            "].onEvent.DATA: " + documentSnapshot.getData());
+                                    Tracer.log(TAG, "invites[" + documentSnapshot.getId() +
+                                            "].onEvent.DATA ------- : " + documentSnapshot.getData());
                                     //avec le data on va pouvoir updater le status de la liste
                                     //le invites
                                     try {
-                                        InviteModel inviteModel = documentSnapshot.toObject(InviteModel.class);
                                         //on tranforme en InvitationModel et on met dans mUser
-                                        mUser.updateInvite(documentSnapshot.getId(), inviteModel.getState(),
-                                                inviteModel.getUpdateTime(), inviteModel.getCreateTime());
+                                        mUser.updateInvitation(documentSnapshot.getId(),
+                                                documentSnapshot.toObject(InviteModel.class));
                                     }catch(Exception excpt){
-                                        Tracer.log(TAG, "-------- invites[" + documentSnapshot.getId()
+                                        Tracer.log(TAG, "invites[" + documentSnapshot.getId()
                                                 + "].onEvent.exception[1]: ", excpt);
                                     }
                                 }else {
-                                    Tracer.log(TAG, "-------- invites[" + documentSnapshot.getId() +
-                                            "].onEvent.NO_DATA");
+                                    Tracer.log(TAG, "invites[" + documentSnapshot.getId() +
+                                            "].onEvent.NO_DATA ------- ");
                                 }
                             }
                         })
@@ -140,25 +139,24 @@ class DatabaseService implements IDatabaseService{
                             @Override
                             public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
                                 if (e != null) {
-                                    Tracer.log(TAG, "-------- watchers[" + documentSnapshot.getId()
+                                    Tracer.log(TAG, "watchers[" + documentSnapshot.getId()
                                             + "].onEvent.exception: ", e);
                                     return;
                                 }
                                 if(documentSnapshot.exists()) {
-                                    Tracer.log(TAG, "-------- watchers[" + documentSnapshot.getId()
-                                            + "].onEvent.DATA: " + documentSnapshot.getData());
+                                    Tracer.log(TAG, "watchers[" + documentSnapshot.getId()
+                                            + "].onEvent.DATA ------- : " + documentSnapshot.getData());
                                     try {
-                                        ActiveModel activeModel = documentSnapshot.toObject(ActiveModel.class);
                                         //on tranforme en activeModel et on met dans mUser
-                                        mUser.updateWatchers(documentSnapshot.getId(), activeModel.getStatus(),
-                                                activeModel.isGps(), activeModel.getPosition(), activeModel.getUpdateTime());
+                                        mUser.updateWatchers(documentSnapshot.getId(),
+                                                documentSnapshot.toObject(ActiveModel.class));
                                     }catch(Exception excpt){
-                                        Tracer.log(TAG, "-------- watchers[" + documentSnapshot.getId()
+                                        Tracer.log(TAG, "watchers[" + documentSnapshot.getId()
                                                 + "].onEvent.exception[1]: ", excpt);
                                     }
                                 }else {
-                                    Tracer.log(TAG, "-------- watchers[" + documentSnapshot.getId()
-                                            + "].onEvent.NO_DATA");
+                                    Tracer.log(TAG, "watchers[" + documentSnapshot.getId()
+                                            + "].onEvent.NO_DATA ------- ");
                                 }
                             }
                         })
@@ -192,13 +190,13 @@ class DatabaseService implements IDatabaseService{
                     public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
                         //Tracer.log(TAG, "users.onEvent");
                         if (e != null) {
-                            Tracer.log(TAG, "-------- users.onEvent.exception: ", e);
+                            Tracer.log(TAG, " users.onEvent.exception: ", e);
                             return;
                         }
                         if(documentSnapshot.exists()) {
-                            Tracer.log(TAG, "-------- users.onEvent.DATA: " + documentSnapshot.getData());
+                            Tracer.log(TAG, " users.onEvent.DATA ------- : " + documentSnapshot.getData());
                         }else {
-                            Tracer.log(TAG, "-------- users.onEvent.NO_DATA");
+                            Tracer.log(TAG, " users.onEvent.NO_DATA ------- ");
                         }
                     }
                 });
@@ -333,7 +331,7 @@ class DatabaseService implements IDatabaseService{
                                 DocumentSnapshot document = task.getResult();
                                 Tracer.log(TAG, "getUserInfos.document: " +  document.exists());
                                 if(document.exists()){
-                                    Tracer.log(TAG, "getUserInfos.onComplete.DATA: " + document.getData());
+                                    Tracer.log(TAG, "getUserInfos.onComplete.DATA ------- : " + document.getData());
                                     try {
                                         mUser.setData(document.toObject(DataModel.class));
                                     } catch (Exception e) {
@@ -435,7 +433,7 @@ class DatabaseService implements IDatabaseService{
                                 QuerySnapshot querySnapshot = task.getResult();
                                 if(!querySnapshot.isEmpty()){
                                     for(DocumentSnapshot document : querySnapshot) {
-                                        Tracer.log(TAG, "getWatchersList.onComplete.DATA: " +
+                                        Tracer.log(TAG, "getWatchersList.onComplete.DATA ------- : " +
                                                 document.getId() + " | " +  document.getData());
                                         try{
                                             //rajoute la liste en interne a mUser
@@ -449,7 +447,7 @@ class DatabaseService implements IDatabaseService{
                                     mTrackerService.onUserWatchersList(
                                             new ServiceResponseObject(Const.response.ON_WATCHERS_LIST));
                                 }else{
-                                    Tracer.log(TAG, "getWatchersList.onComplete.NO_DATA");
+                                    Tracer.log(TAG, "getWatchersList.onComplete.NO_DATA ------- ");
                                     mTrackerService.onUserWatchersList(
                                             new ServiceResponseObject(Const.watchers.EMPTY_LIST));
                                 }
@@ -476,11 +474,11 @@ class DatabaseService implements IDatabaseService{
                                 QuerySnapshot querySnapshot = task.getResult();
                                 if(!querySnapshot.isEmpty()){
                                     for(DocumentSnapshot document : querySnapshot) {
-                                        Tracer.log(TAG, "getInvitationsList.onComplete.DATA: " +
+                                        Tracer.log(TAG, "getInvitationsList.onComplete.DATA ------- : " +
                                                 document.getId() + " | " +  document.getData());
                                         try{
                                             //rajoute la liste en interne a mUser
-                                            mUser.addInvite(document.getId(), document.toObject(InvitationModel.class));
+                                            mUser.addInvitation(document.getId(), document.toObject(InvitationModel.class));
                                             //on mets un listener sur les changement de ceux qui peuvent nous watcher
                                             //on recoit le event tout de suite apres
                                             addListenerOnInvites(document.getId());
@@ -491,7 +489,7 @@ class DatabaseService implements IDatabaseService{
                                     mTrackerService.onUserInvitationsList(
                                             new ServiceResponseObject(Const.response.ON_INVITES_LIST));
                                 }else{
-                                    Tracer.log(TAG, "getInvitationsList.onComplete.NO_DATA");
+                                    Tracer.log(TAG, "getInvitationsList.onComplete.NO_DATA ------- ");
                                     mTrackerService.onUserWatchersList(
                                             new ServiceResponseObject(Const.watchers.EMPTY_LIST));
                                 }
