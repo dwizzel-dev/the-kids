@@ -6,10 +6,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchOverMeListAdapter;
+import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.objects.ListItems;
 import com.dwizzel.objects.ObserverNotifObject;
 import com.dwizzel.objects.ServiceResponseObject;
@@ -99,6 +101,10 @@ public class WatchOverMeActivity extends BaseActivity {
                         default:
                             break;
                     }
+                }else if(sro.getErr() == Const.conn.NOT_CONNECTED){
+                    Tracer.log(TAG, "handleResponse: NOT_CONNECTED");
+                }else if(sro.getErr() == Const.conn.RECONNECTED){
+                    Tracer.log(TAG, "handleResponse: RECONNECTED");
                 }
             }
             public void onSignedIn(ServiceResponseObject sro){}
@@ -155,7 +161,7 @@ public class WatchOverMeActivity extends BaseActivity {
         mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         // specify an adapter (see also next example)
-        mAdapter = new WatchOverMeListAdapter(createWatchersList(), mUser);
+        mAdapter = new WatchOverMeListAdapter(createWatchersList());
         mRecyclerView.setAdapter(mAdapter);
         //le padding de 8px au dessus et dessous
         mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
@@ -202,6 +208,7 @@ public class WatchOverMeActivity extends BaseActivity {
     }
 
     private ArrayList<ListItems.Item> createWatchersList(){
+        Tracer.log(TAG, "createWatchersList");
         ArrayList<ListItems.Item> list = new ArrayList<>();
         mWatchersPair = new HashMap<>();
         mInvitationsPair = new HashMap<>();
@@ -233,15 +240,29 @@ public class WatchOverMeActivity extends BaseActivity {
 
 
     private void updateWatchersListSingleViewItem(String uid){
+        Tracer.log(TAG, "updateWatchersListSingleViewItem: " + uid);
         //get la position selon le uid avec le array ref/pos list
-        if(mWatchersPair.containsKey(uid)) {
+        WatcherModel watcherModel = mUser.getWatcher(uid);
+        if(mWatchersPair.containsKey(uid) && watcherModel != null) {
             int pos = mWatchersPair.get(uid);
             //avec la position on cherche la view
             View itemView = mRecyclerView.getLayoutManager().findViewByPosition(pos);
             if(itemView != null){
-                TextView name = itemView.findViewById(R.id.name);
-                if(name != null){
-                    name.setText("its alive");
+                //changer l'etat
+                ImageView image = itemView.findViewById(R.id.imageView);
+                switch(watcherModel.getStatus()){
+                    case Const.status.OFFLINE:
+                        image.setImageResource(R.drawable.icon_person_offline);
+                        break;
+                    case Const.status.ONLINE:
+                        image.setImageResource(R.drawable.icon_person_watcher);
+                        break;
+                    case Const.status.OCCUPIED:
+                        image.setImageResource(R.drawable.icon_person_occupied);
+                        break;
+                    default:
+                        image.setImageResource(R.drawable.icon_person_watcher);
+                        break;
                 }
             }
         }

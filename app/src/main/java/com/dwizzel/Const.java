@@ -52,7 +52,11 @@ public final class Const {
     public static final class notif {
         public static final int WATCHER_UPDATE = 900;
         public static final int INVITATION_UPDATE = 901;
-
-
+    }
+    public static final class conn {
+        public static final int CONNECTED = 1000;
+        public static final int RECONNECTED = 1001;
+        public static final int RECONNECTING = 1002;
+        public static final int NOT_CONNECTED = 1003;
     }
 }

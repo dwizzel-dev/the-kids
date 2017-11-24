@@ -4,8 +4,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.dwizzel.Const;
 import com.dwizzel.datamodels.InvitationModel;
 import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.objects.ListItems;
@@ -27,10 +29,10 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
     private UserObject mUser;
 
     // fill la liste avec les headers
-    public WatchOverMeListAdapter(ArrayList<ListItems.Item> list, UserObject userRef) {
+    public WatchOverMeListAdapter(ArrayList<ListItems.Item> list) {
         Tracer.log(TAG, "WatchOverMeListAdapter");
         mList = list;
-        mUser = userRef;
+        mUser = UserObject.getInstance();
     }
 
     // Create new views (invoked by the layout manager)
@@ -103,11 +105,13 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
     //-----------------------------------
     public class WatcherViewHolder extends ViewHolder {
         TextView name, phone, email;
+        ImageView image;
         WatcherViewHolder(View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.name);
             phone = itemView.findViewById(R.id.phone);
             email = itemView.findViewById(R.id.email);
+            image = itemView.findViewById(R.id.imageView);
         }
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             WatcherViewHolder holder = (WatcherViewHolder) viewholder;
@@ -116,6 +120,20 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
                 holder.name.setText(model.getName());
                 holder.phone.setText(model.getPhone());
                 holder.email.setText(model.getEmail());
+                switch(model.getStatus()){
+                    case Const.status.ONLINE:
+                        image.setImageResource(R.drawable.icon_person_watcher);
+                        break;
+                    case Const.status.OFFLINE:
+                        image.setImageResource(R.drawable.icon_person_offline);
+                        break;
+                    case Const.status.OCCUPIED:
+                        image.setImageResource(R.drawable.icon_person_occupied);
+                        break;
+                    default:
+                        image.setImageResource(R.drawable.icon_person_offline);
+                        break;
+                }
             }catch(Exception e){
                 Tracer.log(TAG, "WatcherViewHolder.exception: ", e);
             }

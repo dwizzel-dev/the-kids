@@ -60,6 +60,8 @@ public class TrackerService extends Service implements ITrackerService{
     private Handler mHandlerTimer;
     private Runnable mRunnableTimer;
     private long mTimer = 0;
+    //internet
+    private boolean mHasConnectivity;
 
     @NonNull
     public static Intent getIntent(Context context) {
@@ -100,6 +102,7 @@ public class TrackerService extends Service implements ITrackerService{
         Tracer.log(TAG, "onCreate");
         super.onCreate();
         try {
+            mHasConnectivity = Utils.getInstance().checkConnectivity(TrackerService.this);
             mUser = UserObject.getInstance();
             mAuthService = new AuthService(TrackerService.this, TrackerService.this);
             mDatabaseService = new DatabaseService(TrackerService.this);
@@ -322,6 +325,15 @@ public class TrackerService extends Service implements ITrackerService{
         setUserNewPosition();
     }
 
+    private void onConnectivityChange(ServiceResponseObject sro){
+        Tracer.log(TAG, "onConnectivityChange");
+        //on call Interface si jamais elle a besoin de connectivity elle le gerera
+        //on call l'activity appelante pour le signOut
+        if(mBinderCallback != null) {
+            mBinderCallback.handleResponse(sro);
+        }
+    }
+
 
     //--------------------------------------------------------------------------------------------
     //NESTED CLASS
@@ -396,7 +408,8 @@ public class TrackerService extends Service implements ITrackerService{
     class TimerRunnable implements Runnable{
         private final static String TAG = "TimerRunnable";
         private boolean loop = true;
-        private int keepAliveDelay = 6000; //5 minutes
+        private int keepAliveDelay = 6000; //10 minutes
+        private int checkConnectivityDelay = 30; //30 secondes
         private int sleepDelay = 1000;
         TimerRunnable(){}
         @Override
@@ -405,8 +418,19 @@ public class TrackerService extends Service implements ITrackerService{
                 while (loop) {
                     Thread.sleep(sleepDelay);
                     mTimer++;
+                    //keep alive on the server
                     if (mTimer % keepAliveDelay == 0) {
                         keepActive();
+                    }
+                    //check connectivity
+                    if (mTimer % checkConnectivityDelay == 0) {
+                        boolean conn = Utils.getInstance().checkConnectivity(TrackerService.this);
+                        if (mHasConnectivity && !conn){
+                            onConnectivityChange(new ServiceResponseObject(Const.conn.NOT_CONNECTED));
+                        }else if(!mHasConnectivity && conn){
+                            onConnectivityChange(new ServiceResponseObject(Const.conn.RECONNECTED));
+                        }
+                        mHasConnectivity = conn;
                     }
                     Tracer.tog("run: ", getTimer());
                 }
