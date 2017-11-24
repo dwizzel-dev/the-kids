@@ -14,13 +14,14 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Observable;
 
 
 /**
  * Created by Dwizzel on 15/11/2017.
  */
 
-public class UserObject{
+public class UserObject extends Observable{
 
     private static final String TAG = "UserObject";
     private static UserObject sInst;
@@ -56,8 +57,18 @@ public class UserObject{
         if (watchers != null) {
             if (watchers.containsKey(uid)) {
                 WatcherModel watcher = watchers.get(uid);
+                //on call les observers sur une modif de state
+                if(activeModel.getStatus() != watcher.getStatus()){
+                    setChanged();
+                    notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_STATUS, activeModel.getStatus()));
+                }
                 watcher.setStatus(activeModel.getStatus());
                 watcher.setGps(activeModel.isGps());
+                //on call les observers sur une modif de position
+                if(!watcher.getPosition().equals(activeModel.getPosition())){
+                    setChanged();
+                    notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_POSITION, activeModel.getPosition()));
+                }
                 watcher.setPosition(activeModel.getPosition());
                 watcher.setUpdateTime(activeModel.getUpdateTime());
                 //et on replace

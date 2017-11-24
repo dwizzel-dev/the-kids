@@ -49,4 +49,11 @@ public final class Const {
         public static final String ON_WATCHERS_LIST = "ON_WATCHERS_LIST";
         public static final String ON_INVITES_LIST = "ON_INVITES_LIST";
     }
+    public static final class notif {
+        public static final int WATCHER_STATUS = 901;
+        public static final int WATCHER_POSITION = 902;
+        public static final int WATCHER_UPDATE_TIME = 903;
+        public static final int INVITATION_STATE = 904;
+
+    }
 }

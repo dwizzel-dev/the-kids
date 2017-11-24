@@ -7,51 +7,93 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.dwizzel.Const;
 import com.dwizzel.datamodels.InvitationModel;
 import com.dwizzel.datamodels.WatcherModel;
+import com.dwizzel.objects.ObserverNotifObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.thekids.R;
 import com.dwizzel.utils.Tracer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by Dwizzel on 22/11/2017.
- *
+ * https://developer.android.com/reference/android/support/v7/widget/RecyclerView.Recycler.html#getViewForPosition(int)
  * TODO: trigger event on status change of the watchers with an observer ou autres
  */
 
-public class WatchersListAdapter extends RecyclerView.Adapter<WatchersListAdapter.ViewHolder> {
+public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeListAdapter.ViewHolder> {
 
-    private static final String TAG = "WatchersListAdapter";
+    private static final String TAG = "WatchOverMeListAdapter";
     private ArrayList<Item> mList;
-    private Context mContext;
+    //keep la liste des uid et inviteid et leur position
+    //pour le observer/observable sur les notifs
+    private HashMap<String, Integer> mKeyList;
+    private UserObject mUser;
 
     // fill la liste avec les headers
-    public WatchersListAdapter(Context context) {
-        mContext = context;
-        mList = new ArrayList<Item>();
+    public WatchOverMeListAdapter(Context context) {
+        mUser = UserObject.getInstance();
+        //on met un observer sur les possible modifs de watchers et invitations
+        mUser.addObserver(new Observer() {
+            @Override
+            public void update(Observable observable, Object o) {
+                ObserverNotifObject observerNotifObject = (ObserverNotifObject)o;
+                if(observerNotifObject != null){
+                    Tracer.log(TAG, String.format("mUser.update: %s = %s",
+                            observerNotifObject.getProp(),
+                            observerNotifObject.getValue()));
+                    //test case
+                    switch (observerNotifObject.getProp()){
+                        case Const.notif.WATCHER_STATUS:
+                            break;
+                        case Const.notif.WATCHER_POSITION:
+                            break;
+                        case Const.notif.WATCHER_UPDATE_TIME:
+                            break;
+                        case Const.notif.INVITATION_STATE:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
+
+        mList = new ArrayList<>();
+        mKeyList = new HashMap<>();
         try {
+            int pos = 0;
             //on met un header pour les watchers
-            mList.add(new HeaderItem(mContext.getResources().getString(R.string.watchers_header)));
+            mList.add(new HeaderItem(context.getResources().getString(R.string.watchers_header)));
+            pos++;
             //on fill la list avec les watchers
-            for(WatcherModel watcher : UserObject.getInstance().getWatchers().values()){
-                mList.add(new WatcherItem(watcher));
+            for(String uid : mUser.getWatchers().keySet()){
+                mList.add(new WatcherItem(uid));
+                mKeyList.put(uid, pos);
+                pos++;
             }
             //on met un header pour les invitations
-            mList.add(new HeaderItem(mContext.getResources().getString(R.string.invitations_header)));
+            mList.add(new HeaderItem(context.getResources().getString(R.string.invitations_header)));
+            pos++;
             //on fill la list avec les watchers
-            for(InvitationModel invitation : UserObject.getInstance().getInvitations().values()){
-                mList.add(new InvitationItem(invitation));
+            for(String inviteId : mUser.getInvitations().keySet()){
+                mList.add(new InvitationItem(inviteId));
+                mKeyList.put(inviteId, pos);
+                pos++;
             }
         }catch(Exception e){
-            Tracer.log(TAG, "WatchersListAdapter.exception: ", e);
+            Tracer.log(TAG, "WatchOverMeListAdapter.exception: ", e);
         }
     }
 
     // Create new views (invoked by the layout manager)
     @Override
-    public WatchersListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public WatchOverMeListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View mItemView;
         if (viewType == Item.TYPE_WATCHER) {
             mItemView = LayoutInflater.from(parent.getContext())
@@ -92,7 +134,6 @@ public class WatchersListAdapter extends RecyclerView.Adapter<WatchersListAdapte
     //NESTED CLASS
 
     abstract class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
         ViewHolder(View view) {
             super(view);
         }
@@ -105,7 +146,7 @@ public class WatchersListAdapter extends RecyclerView.Adapter<WatchersListAdapte
         static final int TYPE_WATCHER = 2;
         static final int TYPE_INVITATION = 3;
         public abstract int getItemType();
-        public abstract Object getItemValue();
+        public abstract String getItemValue();
     }
 
     //-----------------------------------
@@ -120,40 +161,36 @@ public class WatchersListAdapter extends RecyclerView.Adapter<WatchersListAdapte
             return Item.TYPE_HEADER;
         }
         @Override
-        public Object getItemValue() {
+        public String getItemValue() {
             return mTitle;
         }
     }
     //-----------------------------------
     class HeaderViewHolder extends ViewHolder {
         TextView headerName;
-
         HeaderViewHolder(View itemView) {
             super(itemView);
             headerName = itemView.findViewById(R.id.headerName);
         }
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             HeaderViewHolder holder = (HeaderViewHolder) viewholder;
-            HeaderItem item = (HeaderItem) mList.get(position);
-            holder.headerName.setText((String)item.getItemValue());
+            holder.headerName.setText(mList.get(position).getItemValue());
         }
     }
     //-----------------------------------
     class WatcherItem extends Item {
-
-        private WatcherModel mModel;
-
-        WatcherItem(WatcherModel watcherModel) {
+        private String uid;
+        WatcherItem(String uid) {
             super();
-            this.mModel = watcherModel;
+            this.uid = uid;
         }
         @Override
         public int getItemType() {
             return Item.TYPE_WATCHER;
         }
         @Override
-        public Object getItemValue() {
-            return mModel;
+        public String getItemValue() {
+            return uid;
         }
     }
     //-----------------------------------
@@ -167,29 +204,30 @@ public class WatchersListAdapter extends RecyclerView.Adapter<WatchersListAdapte
         }
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             WatcherViewHolder holder = (WatcherViewHolder) viewholder;
-            WatcherItem item = (WatcherItem) mList.get(position);
-            WatcherModel model = (WatcherModel) item.getItemValue();
-            holder.name.setText(model.getName());
-            holder.phone.setText(model.getPhone());
-            holder.email.setText(model.getEmail());
+            WatcherModel model = mUser.getWatcher(mList.get(position).getItemValue());
+            try {
+                holder.name.setText(model.getName());
+                holder.phone.setText(model.getPhone());
+                holder.email.setText(model.getEmail());
+            }catch(Exception e){
+                Tracer.log(TAG, "WatcherViewHolder.exception: ", e);
+            }
         }
     }
     //-----------------------------------
     class InvitationItem extends Item {
-
-        private InvitationModel mModel;
-
-        InvitationItem(InvitationModel invitationModel) {
+        private String uid;
+        InvitationItem(String uid) {
             super();
-            this.mModel = invitationModel;
+            this.uid = uid;
         }
         @Override
         public int getItemType() {
             return Item.TYPE_INVITATION;
         }
         @Override
-        public Object getItemValue() {
-            return mModel;
+        public String getItemValue() {
+            return uid;
         }
     }
     //-----------------------------------
@@ -203,15 +241,16 @@ public class WatchersListAdapter extends RecyclerView.Adapter<WatchersListAdapte
         }
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             InvitationViewHolder holder = (InvitationViewHolder) viewholder;
-            InvitationItem item = (InvitationItem) mList.get(position);
-            InvitationModel model = (InvitationModel) item.getItemValue();
-            holder.name.setText(model.getName());
-            holder.phone.setText(model.getPhone());
-            holder.email.setText(model.getEmail());
+            InvitationModel model = mUser.getInvitation(mList.get(position).getItemValue());
+            try {
+                holder.name.setText(model.getName());
+                holder.phone.setText(model.getPhone());
+                holder.email.setText(model.getEmail());
+            }catch(Exception e){
+                Tracer.log(TAG, "InvitationViewHolder.exception: ", e);
+            }
         }
     }
-
-
 
 
 }

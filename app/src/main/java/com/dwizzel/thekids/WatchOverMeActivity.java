@@ -9,6 +9,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.dwizzel.Const;
+import com.dwizzel.adapters.WatchOverMeListAdapter;
 import com.dwizzel.adapters.WatchersListAdapter;
 import com.dwizzel.adapters.WatchersListAdapterV1;
 import com.dwizzel.datamodels.WatcherModel;
@@ -26,8 +27,6 @@ public class WatchOverMeActivity extends BaseActivity {
     private static final String TAG = "WatchOverMeActivity";
     private TrackerService.TrackerBinder mTrackerBinder;
     private boolean isActivityCreated = false;
-    private UserObject mUser = UserObject.getInstance();
-
     private boolean isWatchersLoaded = false;
     private boolean isInvitationsLoaded = false;
 
@@ -120,7 +119,7 @@ public class WatchOverMeActivity extends BaseActivity {
             public void onAnimationEnd(Animation animation) {
                 Tracer.log(TAG, "contentListOnLoad.onAnimationEnd");
                 loader.setVisibility(View.INVISIBLE);
-                showWatchersListView2();
+                showWatchOverMeListView();
             }
             @Override
             public void onAnimationRepeat(Animation animation) {
@@ -131,8 +130,8 @@ public class WatchOverMeActivity extends BaseActivity {
 
     }
 
-    private void showWatchersListView2(){
-        Tracer.log(TAG, "showWatchersListView2");
+    private void showWatchOverMeListView(){
+        Tracer.log(TAG, "showWatchOverMeListView");
         mRecyclerView = new RecyclerView(WatchOverMeActivity.this);
         mRecyclerView.setPaddingRelative(0,0,0,0);
         mRecyclerView.setHorizontalScrollBarEnabled(true);
@@ -143,12 +142,7 @@ public class WatchOverMeActivity extends BaseActivity {
         mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         // specify an adapter (see also next example)
-        //version V1
-        /*
-        mAdapter = new WatchersListAdapterV1(
-                new ArrayList<WatcherModel>(UserObject.getInstance().getWatchers().values()));
-        */
-        mAdapter = new WatchersListAdapter(WatchOverMeActivity.this);
+        mAdapter = new WatchOverMeListAdapter(WatchOverMeActivity.this);
         mRecyclerView.setAdapter(mAdapter);
         //le padding de 8px au dessus et dessous
         mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
@@ -160,33 +154,6 @@ public class WatchOverMeActivity extends BaseActivity {
         CoordinatorLayout layout = (CoordinatorLayout) findViewById(R.id.mainView);
         layout.addView(mRecyclerView, layout.getChildCount()); //en dessous du floating button
     }
-
-    private void showWatchersListView(){
-        Tracer.log(TAG, "showWatchersListView");
-        //mRecyclerView = findViewById(R.id.rvWatcher);
-        //mRecyclerView.setHasFixedSize(true);
-        // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        // specify an adapter (see also next example)
-        mAdapter = new WatchersListAdapterV1(
-                new ArrayList<WatcherModel>(UserObject.getInstance().getWatchers().values()));
-        mRecyclerView.setAdapter(mAdapter);
-        //le padding de 8px au dessus et dessous
-        mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
-        //l'aniamation
-        mRecyclerView.setLayoutAnimation(
-                AnimationUtils.loadLayoutAnimation(WatchOverMeActivity.this,
-                        R.anim.layout_animation_slide_from_bottom));
-
-
-
-    }
-
-    private void setInvitesListView(){
-
-    }
-
 
 
 }
