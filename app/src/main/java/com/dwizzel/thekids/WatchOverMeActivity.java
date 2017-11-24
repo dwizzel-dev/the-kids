@@ -3,16 +3,15 @@ package com.dwizzel.thekids;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchOverMeListAdapter;
-import com.dwizzel.adapters.WatchersListAdapter;
-import com.dwizzel.adapters.WatchersListAdapterV1;
-import com.dwizzel.datamodels.WatcherModel;
+import com.dwizzel.objects.ListItems;
+import com.dwizzel.objects.ObserverNotifObject;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.services.ITrackerBinderCallback;
@@ -21,6 +20,15 @@ import com.dwizzel.utils.ListPaddingDecoration;
 import com.dwizzel.utils.Tracer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
+
+/*
+* NOTES:
+* https://developer.android.com/reference/android/support/v7/widget/RecyclerView.Recycler.html#getViewForPosition(int)
+*
+* */
 
 public class WatchOverMeActivity extends BaseActivity {
 
@@ -29,6 +37,10 @@ public class WatchOverMeActivity extends BaseActivity {
     private boolean isActivityCreated = false;
     private boolean isWatchersLoaded = false;
     private boolean isInvitationsLoaded = false;
+    private UserObject mUser;
+
+    private HashMap<String, Integer> mWatchersPair;
+    private HashMap<String, Integer> mInvitationsPair;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -55,6 +67,7 @@ public class WatchOverMeActivity extends BaseActivity {
             } catch (NullPointerException npe) {
                 Tracer.log(TAG, "onSubCreate.NullPointerException: ", npe);
             }
+            mUser = UserObject.getInstance();
         }
         isActivityCreated = true;
     }
@@ -142,7 +155,7 @@ public class WatchOverMeActivity extends BaseActivity {
         mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         // specify an adapter (see also next example)
-        mAdapter = new WatchOverMeListAdapter(WatchOverMeActivity.this);
+        mAdapter = new WatchOverMeListAdapter(createWatchersList(), mUser);
         mRecyclerView.setAdapter(mAdapter);
         //le padding de 8px au dessus et dessous
         mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
@@ -151,8 +164,91 @@ public class WatchOverMeActivity extends BaseActivity {
                 AnimationUtils.loadLayoutAnimation(WatchOverMeActivity.this,
                         R.anim.layout_animation_slide_from_bottom));
         //rajoute a la view principale
-        CoordinatorLayout layout = (CoordinatorLayout) findViewById(R.id.mainView);
+        CoordinatorLayout layout = findViewById(R.id.mainView);
         layout.addView(mRecyclerView, layout.getChildCount()); //en dessous du floating button
+        //observer sur le user
+        setUserObserver();
+    }
+
+    private void setUserObserver(){
+        Tracer.log(TAG, "setUserObserver");
+        //on enleve ceux deja mis avant au cas ou
+        if(mUser.countObservers() > 0) {
+            mUser.deleteObservers();
+        }
+        //on met un observer sur les possible modifs de watchers et invitations
+        mUser.addObserver(new Observer() {
+            @Override
+            public void update(Observable observable, Object o) {
+                ObserverNotifObject observerNotifObject = (ObserverNotifObject)o;
+                if(observerNotifObject != null){
+                    Tracer.log(TAG, String.format("mUser.update: %s = %s",
+                            observerNotifObject.getType(),
+                            observerNotifObject.getValue()));
+                    //test case
+                    switch (observerNotifObject.getType()){
+                        case Const.notif.WATCHER_UPDATE:
+                            updateWatchersListSingleViewItem((String)observerNotifObject.getValue());
+                            break;
+                        case Const.notif.INVITATION_UPDATE:
+                            updateInvitationsListSingleViewItem((String)observerNotifObject.getValue());
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
+    }
+
+    private ArrayList<ListItems.Item> createWatchersList(){
+        ArrayList<ListItems.Item> list = new ArrayList<>();
+        mWatchersPair = new HashMap<>();
+        mInvitationsPair = new HashMap<>();
+        try {
+            int pos = 0;
+            //on met un header pour les watchers
+            list.add(new ListItems.HeaderItem(getResources().getString(R.string.watchers_header)));
+            pos++;
+            //on fill la list avec les watchers
+            for(String uid : mUser.getWatchers().keySet()){
+                list.add(new ListItems.WatcherItem(uid));
+                mWatchersPair.put(uid, pos);
+                pos++;
+            }
+            //on met un header pour les invitations
+            list.add(new ListItems.HeaderItem(getResources().getString(R.string.invitations_header)));
+            pos++;
+            //on fill la list avec les watchers
+            for(String inviteId : mUser.getInvitations().keySet()){
+                list.add(new ListItems.InvitationItem(inviteId));
+                mInvitationsPair.put(inviteId, pos);
+                pos++;
+            }
+        }catch(Exception e){
+            Tracer.log(TAG, "createWatchersList.exception: ", e);
+        }
+        return list;
+    }
+
+
+    private void updateWatchersListSingleViewItem(String uid){
+        //get la position selon le uid avec le array ref/pos list
+        if(mWatchersPair.containsKey(uid)) {
+            int pos = mWatchersPair.get(uid);
+            //avec la position on cherche la view
+            View itemView = mRecyclerView.getLayoutManager().findViewByPosition(pos);
+            if(itemView != null){
+                TextView name = itemView.findViewById(R.id.name);
+                if(name != null){
+                    name.setText("its alive");
+                }
+            }
+        }
+    }
+
+    private void updateInvitationsListSingleViewItem(String inviteId){
+
     }
 
 

@@ -396,7 +396,7 @@ public class TrackerService extends Service implements ITrackerService{
     class TimerRunnable implements Runnable{
         private final static String TAG = "TimerRunnable";
         private boolean loop = true;
-        private int keepAliveDelay = 60; //5 minutes
+        private int keepAliveDelay = 6000; //5 minutes
         private int sleepDelay = 1000;
         TimerRunnable(){}
         @Override

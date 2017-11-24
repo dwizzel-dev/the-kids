@@ -51,6 +51,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
             Intent intent = TrackerService.getIntent(BaseActivity.this);
             startService(intent);
             //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
+            //TODO: leaked connection check
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         }
     }

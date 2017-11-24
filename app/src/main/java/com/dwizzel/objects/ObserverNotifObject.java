@@ -7,17 +7,17 @@ package com.dwizzel.objects;
 //pour les retour du service
 public final class ObserverNotifObject{
 
-    private int prop;
+    private int type;
     private Object value;
     private String msg = "";
 
-    public ObserverNotifObject(int property, Object value) {
-        this.prop = property;
+    ObserverNotifObject(int type, Object value) {
+        this.type = type;
         this.value = value;
     }
 
-    public ObserverNotifObject(int property, Object value, String msg) {
-        this.prop = property;
+    ObserverNotifObject(int type, Object value, String msg) {
+        this.type = type;
         this.value = value;
         this.msg = msg;
     }
@@ -26,8 +26,8 @@ public final class ObserverNotifObject{
         return value;
     }
 
-    public int getProp(){
-        return prop;
+    public int getType(){
+        return type;
     }
 
     public String getMsg(){

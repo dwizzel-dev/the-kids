@@ -56,23 +56,21 @@ public class UserObject extends Observable{
         //du au limitation de firestore
         if (watchers != null) {
             if (watchers.containsKey(uid)) {
-                WatcherModel watcher = watchers.get(uid);
-                //on call les observers sur une modif de state
-                if(activeModel.getStatus() != watcher.getStatus()){
+                try {
+                    WatcherModel watcher = watchers.get(uid);
                     setChanged();
-                    notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_STATUS, activeModel.getStatus()));
-                }
-                watcher.setStatus(activeModel.getStatus());
-                watcher.setGps(activeModel.isGps());
-                //on call les observers sur une modif de position
-                if(!watcher.getPosition().equals(activeModel.getPosition())){
+                    watcher.setGps(activeModel.isGps());
+                    watcher.setStatus(activeModel.getStatus());
+                    watcher.setPosition(activeModel.getPosition());
+                    watcher.setUpdateTime(activeModel.getUpdateTime());
+                    //et on replace
+                    watchers.put(uid, watcher);
+                    //on notifie les observers
                     setChanged();
-                    notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_POSITION, activeModel.getPosition()));
+                    notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_UPDATE, uid));
+                }catch(Exception e){
+                    // null pointer
                 }
-                watcher.setPosition(activeModel.getPosition());
-                watcher.setUpdateTime(activeModel.getUpdateTime());
-                //et on replace
-                watchers.put(uid, watcher);
             }
         }
     }
