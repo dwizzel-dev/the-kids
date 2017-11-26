@@ -48,6 +48,8 @@ public final class Const {
     public static final class response {
         public static final String ON_WATCHERS_LIST = "ON_WATCHERS_LIST";
         public static final String ON_INVITES_LIST = "ON_INVITES_LIST";
+        public static final String ON_EMPTY_WATCHERS_LIST = "ON_EMPTY_WATCHERS_LIST";
+        public static final String ON_EMPTY_INVITES_LIST = "ON_EMPTY_INVITES_LIST";
     }
     public static final class notif {
         public static final int WATCHER_UPDATE = 900;

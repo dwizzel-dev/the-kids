@@ -7,7 +7,6 @@ package com.dwizzel.utils;
 import com.dwizzel.thekids.R;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;

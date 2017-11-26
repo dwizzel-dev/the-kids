@@ -101,6 +101,7 @@ public class WatchOverMeActivity extends BaseActivity {
                     Tracer.log(TAG, "handleResponse: " + sro.getMsg());
                     switch(sro.getMsg()){
                         case Const.response.ON_WATCHERS_LIST:
+                        case Const.response.ON_EMPTY_WATCHERS_LIST:
                             isWatchersLoaded = true;
                             //ca nous prend les 2, watchers et invitations
                             if(isContentLoaded()) {
@@ -108,6 +109,7 @@ public class WatchOverMeActivity extends BaseActivity {
                             }
                             break;
                         case Const.response.ON_INVITES_LIST:
+                        case Const.response.ON_EMPTY_INVITES_LIST:
                             isInvitationsLoaded = true;
                             //ca nous prend les 2, watchers et invitations
                             if(isContentLoaded()) {
@@ -233,18 +235,28 @@ public class WatchOverMeActivity extends BaseActivity {
             //on met un header pour les watchers
             list.add(new ListItems.HeaderItem(getResources().getString(R.string.watchers_header)));
             pos++;
-            //on fill la list avec les watchers
-            for(String uid : mUser.getWatchers().keySet()){
-                list.add(new ListItems.WatcherItem(uid));
-                mWatchersPair.put(uid, pos++);
+            if(mUser.getWatchers() != null && !mUser.getWatchers().isEmpty()) {
+                //on fill la list avec les watchers
+                for (String uid : mUser.getWatchers().keySet()) {
+                    list.add(new ListItems.WatcherItem(uid));
+                    mWatchersPair.put(uid, pos++);
+                }
+            }else{
+                list.add(new ListItems.TextItem(getResources().getString(R.string.watchers_list_empty)));
+                pos++;
             }
             //on met un header pour les invitations
             list.add(new ListItems.HeaderItem(getResources().getString(R.string.invitations_header)));
             pos++;
             //on fill la list avec les invitationa
-            for(String inviteId : mUser.getInvitations().keySet()){
-                list.add(new ListItems.InvitationItem(inviteId));
-                mInvitationsPair.put(inviteId, pos++);
+            if(mUser.getInvitations() != null && !mUser.getInvitations().isEmpty()) {
+                for (String inviteId : mUser.getInvitations().keySet()) {
+                    list.add(new ListItems.InvitationItem(inviteId));
+                    mInvitationsPair.put(inviteId, pos++);
+                }
+            }else{
+                list.add(new ListItems.TextItem(getResources().getString(R.string.invitations_list_empty)));
+                pos++;
             }
         }catch(Exception e){
             Tracer.log(TAG, "createWatchersList.exception: ", e);

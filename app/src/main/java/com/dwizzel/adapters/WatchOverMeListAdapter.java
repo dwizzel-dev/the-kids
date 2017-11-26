@@ -52,6 +52,10 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
             mItemView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.recycler_list_header, parent, false);
             return new HeaderViewHolder(mItemView);
+        } else if (viewType == ListItems.Type.TYPE_TEXT) {
+            mItemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.recycler_list_text, parent, false);
+            return new TextViewHolder(mItemView);
         }
         return null;
     }
@@ -99,6 +103,19 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             HeaderViewHolder holder = (HeaderViewHolder) viewholder;
             holder.headerName.setText(mList.get(position).getItemValue());
+        }
+    }
+
+    //-----------------------------------
+    public class TextViewHolder extends ViewHolder {
+        TextView mText;
+        TextViewHolder(View itemView) {
+            super(itemView);
+            mText = itemView.findViewById(R.id.txt);
+        }
+        public void bindToViewHolder(ViewHolder viewholder, int position) {
+            TextViewHolder holder = (TextViewHolder) viewholder;
+            holder.mText.setText(mList.get(position).getItemValue());
         }
     }
 

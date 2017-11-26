@@ -11,6 +11,7 @@ public class ListItems {
         public static final int TYPE_HEADER = 1;
         public static final int TYPE_WATCHER = 2;
         public static final int TYPE_INVITATION = 3;
+        public static final int TYPE_TEXT = 4;
     }
 
     //-----------------------------------
@@ -33,6 +34,23 @@ public class ListItems {
         @Override
         public String getItemValue() {
             return mTitle;
+        }
+    }
+
+    //-----------------------------------
+    public static class TextItem extends Item {
+        private String mText = "";
+        public TextItem(String title) {
+            super();
+            this.mText = title;
+        }
+        @Override
+        public int getItemType() {
+            return Type.TYPE_TEXT;
+        }
+        @Override
+        public String getItemValue() {
+            return mText;
         }
     }
 

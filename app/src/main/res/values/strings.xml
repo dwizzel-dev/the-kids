@@ -15,6 +15,8 @@
     <!-- LIST HEADER -->
     <string name="watchers_header">Watchers</string>
     <string name="invitations_header">Pending Invitations</string>
+    <string name="watchers_list_empty">Your watchers list is empty, start by sending an invitation to someone you know to had him to your list of watchers. Untill he accept, the invitation will remain in the "<i>pending invitations</i>" list below</string>
+    <string name="invitations_list_empty">You have no pending invitation.</string>
 
     <!-- DESCRIPTION -->
     <string name="create_user_description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
