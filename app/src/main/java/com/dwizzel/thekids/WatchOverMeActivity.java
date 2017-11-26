@@ -1,6 +1,8 @@
 package com.dwizzel.thekids;
 
+import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.TextView;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchOverMeListAdapter;
+import com.dwizzel.datamodels.InvitationModel;
 import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.objects.ListItems;
 import com.dwizzel.objects.ObserverNotifObject;
@@ -59,6 +62,7 @@ public class WatchOverMeActivity extends BaseActivity {
         if(!isActivityCreated) {
             setContentView(R.layout.activity_watch_over_me);
             setTitle(R.string.watch_over_me_title);
+            setFloatingActionButton();
             //set un nouveau callback au lieu de celui de BaseActivity
             //vu qu'il va recevoir une notif quand aura ca liste de Watchers et de Invites
             setTrackerBinderCallback();
@@ -72,6 +76,18 @@ public class WatchOverMeActivity extends BaseActivity {
             mUser = UserObject.getInstance();
         }
         isActivityCreated = true;
+    }
+
+    private void setFloatingActionButton(){
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Click action
+                Intent intent = new Intent(WatchOverMeActivity.this, SendInvitationForWatchingActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void setTrackerBinderCallback(){
@@ -160,12 +176,12 @@ public class WatchOverMeActivity extends BaseActivity {
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        // specify an adapter (see also next example)
+        // specify an adapter
         mAdapter = new WatchOverMeListAdapter(createWatchersList());
         mRecyclerView.setAdapter(mAdapter);
         //le padding de 8px au dessus et dessous
         mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
-        //l'aniamation
+        //l'animation
         mRecyclerView.setLayoutAnimation(
                 AnimationUtils.loadLayoutAnimation(WatchOverMeActivity.this,
                         R.anim.layout_animation_slide_from_bottom));
@@ -220,17 +236,15 @@ public class WatchOverMeActivity extends BaseActivity {
             //on fill la list avec les watchers
             for(String uid : mUser.getWatchers().keySet()){
                 list.add(new ListItems.WatcherItem(uid));
-                mWatchersPair.put(uid, pos);
-                pos++;
+                mWatchersPair.put(uid, pos++);
             }
             //on met un header pour les invitations
             list.add(new ListItems.HeaderItem(getResources().getString(R.string.invitations_header)));
             pos++;
-            //on fill la list avec les watchers
+            //on fill la list avec les invitationa
             for(String inviteId : mUser.getInvitations().keySet()){
                 list.add(new ListItems.InvitationItem(inviteId));
-                mInvitationsPair.put(inviteId, pos);
-                pos++;
+                mInvitationsPair.put(inviteId, pos++);
             }
         }catch(Exception e){
             Tracer.log(TAG, "createWatchersList.exception: ", e);
@@ -244,9 +258,9 @@ public class WatchOverMeActivity extends BaseActivity {
         //get la position selon le uid avec le array ref/pos list
         WatcherModel watcherModel = mUser.getWatcher(uid);
         if(mWatchersPair.containsKey(uid) && watcherModel != null) {
-            int pos = mWatchersPair.get(uid);
             //avec la position on cherche la view
-            View itemView = mRecyclerView.getLayoutManager().findViewByPosition(pos);
+            View itemView = mRecyclerView.getLayoutManager()
+                    .findViewByPosition(mWatchersPair.get(uid));
             if(itemView != null){
                 //changer l'etat
                 ImageView image = itemView.findViewById(R.id.imageView);
@@ -268,8 +282,28 @@ public class WatchOverMeActivity extends BaseActivity {
         }
     }
 
-    private void updateInvitationsListSingleViewItem(String inviteId){
-
+    private void updateInvitationsListSingleViewItem(String invitationId){
+        Tracer.log(TAG, "updateInvitationsListSingleViewItem: " + invitationId);
+        //get la position selon le uid avec le array ref/pos list
+        InvitationModel invitationModel = mUser.getInvitation(invitationId);
+        if(mInvitationsPair.containsKey(invitationId) && invitationModel != null) {
+            //avec la position on cherche la view
+            View itemView = mRecyclerView.getLayoutManager()
+                    .findViewByPosition(mInvitationsPair.get(invitationId));
+            if(itemView != null){
+                //changer l'etat
+                switch(invitationModel.getState()){
+                    case Const.invitation.ACCEPTED:
+                        break;
+                    case Const.invitation.PENDING:
+                        break;
+                    case Const.invitation.REFUSED:
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
 

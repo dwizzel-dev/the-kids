@@ -1,0 +1,50 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/AppTheme.FrameLayoutWhite"
+    tools:context="com.dwizzel.thekids.SendInvitationForWatchingFragment0">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.dwizzel.thekids.SendInvitationForWatchingActivity">
+
+        <Button
+            android:id="@+id/buttSelectFromContact"
+            style="@style/AppTheme.ButtonFull"
+            android:layout_width="match_parent"
+            android:layout_marginEnd="@dimen/butt_big_button_margin"
+            android:layout_marginStart="@dimen/butt_big_button_margin"
+            android:layout_marginTop="32dp"
+            android:text="@string/butt_select_from_contacts"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/or"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttSelectFromContact" />
+
+        <Button
+            android:id="@+id/buttEnterNewPhoneNumber"
+            style="@style/AppTheme.ButtonFull"
+            android:layout_width="match_parent"
+            android:layout_marginEnd="@dimen/butt_big_button_margin"
+            android:layout_marginStart="@dimen/butt_big_button_margin"
+            android:layout_marginTop="8dp"
+            android:text="@string/butt_enter_phone_numnber"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+    </android.support.constraint.ConstraintLayout>
+
+</FrameLayout>

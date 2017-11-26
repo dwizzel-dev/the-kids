@@ -9,6 +9,8 @@
     android:focusable="true"
     android:orientation="vertical">
 
+    <!--android:layout_alignParentEnd="true"-->
+
     <TextView
         android:id="@+id/name"
         android:layout_width="match_parent"
@@ -17,8 +19,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="14dp"
-        android:textColor="@color/grey"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/lightgrey"
         android:textSize="16sp"
         android:textStyle="bold"
         tools:text="Olivier Renaldin" />
@@ -31,7 +33,7 @@
         android:layout_below="@+id/name"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:textColor="@color/lightgrey"
+        android:textColor="@color/verylightgrey"
         android:textSize="14sp"
         tools:text="514-666-6666" />
 
@@ -43,7 +45,7 @@
         android:layout_below="@+id/phone"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:textColor="@color/lightgrey"
+        android:textColor="@color/verylightgrey"
         android:textSize="14sp"
         tools:text="super.dwizzel@gmail.com" />
 

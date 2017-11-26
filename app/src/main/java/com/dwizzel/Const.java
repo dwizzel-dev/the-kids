@@ -40,7 +40,7 @@ public final class Const {
         public static final int OFFLINE = 701;
         public static final int OCCUPIED = 702;
     }
-    public static final class invites {
+    public static final class invitation {
         public static final int ACCEPTED = 800;
         public static final int REFUSED = 801;
         public static final int PENDING = 802;

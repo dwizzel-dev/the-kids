@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="com.dwizzel.permission.SERVICE" />
 
-    <!-- TODO: android:launchMode="singleTask" -->
+    <!-- NOTES: android:launchMode="singleTask" -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -101,9 +101,11 @@
             android:parentActivityName=".HomeActivity" />
         <activity
             android:name=".WatchOverSomeoneActivity"
-            android:label="@string/title_activity_watch_over_someone"
-            android:parentActivityName=".HomeActivity">
-        </activity>
+            android:parentActivityName=".HomeActivity" />
+        <activity
+            android:name=".SendInvitationForWatchingActivity"
+            android:parentActivityName=".WatchOverMeActivity"
+            />
     </application>
 
 </manifest>

@@ -7,8 +7,8 @@
             <solid
                 android:color="@color/verylightgrey"/>
             <size
-                android:width="36dp"
-                android:height="36dp"/>
+                android:width="40dp"
+                android:height="40dp"/>
         </shape>
     </item>
     <item android:drawable="@drawable/ic_person"

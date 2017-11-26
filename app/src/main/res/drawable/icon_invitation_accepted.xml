@@ -7,11 +7,11 @@
             <solid
                 android:color="@color/colorPrimary"/>
             <size
-                android:width="40dp"
-                android:height="40dp"/>
+                android:width="24dp"
+                android:height="24dp"/>
         </shape>
     </item>
-    <item android:drawable="@drawable/ic_person"
+    <item android:drawable="@drawable/ic_accepted"
         android:top="8dp"
         android:bottom="8dp"
         android:left="8dp"

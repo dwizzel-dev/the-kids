@@ -19,7 +19,7 @@ public class InvitationModel{
     private String to;
     private Date updateTime;
     private Date createTime;
-    private int state = Const.invites.PENDING;
+    private int state = Const.invitation.PENDING;
 
     public InvitationModel(){
 

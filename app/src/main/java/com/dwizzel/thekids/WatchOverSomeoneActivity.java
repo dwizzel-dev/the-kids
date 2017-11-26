@@ -14,7 +14,7 @@ public class WatchOverSomeoneActivity extends BaseActivity {
     public void onSubCreate(){
         Tracer.log(TAG, "onSubCreate");
         setContentView(R.layout.activity_watch_over_someone);
-        setTitle(R.string.title_activity_watch_over_someone);
+        setTitle(R.string.watch_over_someone_title);
     }
 
 

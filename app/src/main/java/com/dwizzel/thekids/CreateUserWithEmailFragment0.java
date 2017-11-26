@@ -45,7 +45,7 @@ public class CreateUserWithEmailFragment0 extends Fragment {
         //check si pas deja entrer un email pour le reafficher
         String email  = ((CreateUserWithEmailActivity)getActivity()).getEmail();
         if(!email.isEmpty()) {
-            ((EditText)fragmentView.findViewById(R.id.userEmail)).setText(String.format("%s", email));
+            ((EditText)fragmentView.findViewById(R.id.userEmail)).setText(email);
         }
         //
         final Button buttNextToPsw = fragmentView.findViewById(R.id.buttNextToPsw);
