@@ -63,7 +63,9 @@ public class HomeActivity extends BaseActivity {
                         if (getTrackerBinder() != null) {
                             Utils.getInstance().showToastMsg(HomeActivity.this,
                                     String.format(Utils.getInstance().getLocale(HomeActivity.this),
-                                            "counter: %d", getTrackerBinder().getCounter()));
+                                            "%d / %d",
+                                            getTrackerBinder().getCounter(),
+                                            getTrackerBinder().getTimeDiff()));
                         }
                     }
                 });

@@ -64,6 +64,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/errMsg" />
 
+    <ProgressBar
+        android:id="@+id/loading_spinner"
+        style="@style/AppTheme.ProgressBar"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/errMsg" />
+
 
 
 

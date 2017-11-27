@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.dwizzel.Const;
 import com.dwizzel.utils.Tracer;
 
 
@@ -35,44 +36,33 @@ public class SendInvitationForWatchingFragment2 extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_send_invitation_for_watching_2, container, false);
 
-        /*
-        getResources().getString(R.string.toast_connected_as_and_last,
-                UserObject.getInstance().getEmail(),
-                UserObject.getInstance().getLastConnection(SignInUserWithEmailActivity.this))
-        */
-
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         //le view du fragment
         fragmentView = view;
-        boolean hasProfile = false;
         //check si on avait des erreur ou un phone et name a ajouter
         if(args != null && !args.isEmpty()){
             try {
+                //si erreur
+                if(args.containsKey("msg")){
+                    displayErrMsg(args.getInt("msg"));
+                }
+                //le reste
                 String phone = "";
                 String message = "";
-                String inviteId = "";
                 if(args.containsKey("phone")){
                     phone = args.getString("phone");
                 }
                 if(args.containsKey("message")){
                     message = args.getString("message");
                 }
-                if(args.containsKey("inviteId")){
-                    inviteId = args.getString("inviteId");
-                }
                 //on fait le tittre
-                String completeTitle = getResources().getString(R.string.sms_invitation_title,
-                        phone);
-                //on fait le long message
-                String completeMessage = getResources().getString(R.string.sms_invitation_message,
-                        message, inviteId);
+                String completeTitle = getResources().getString(R.string.sms_invitation_title, phone);
                 //on show le message
                 ((TextView)fragmentView.findViewById(R.id.textTitle)).setText(completeTitle);
-                ((TextView)fragmentView.findViewById(R.id.textDescription)).setText(completeMessage);
-
+                ((TextView)fragmentView.findViewById(R.id.textDescription)).setText(message);
 
             }catch(Exception e){
                 Tracer.log(TAG, "onViewCreated.ARGS.exception: ", e);
@@ -86,9 +76,28 @@ public class SendInvitationForWatchingFragment2 extends Fragment {
         buttSend.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
-                        //TODO: send Sms
+                        sendMessage();
                     }
                 });
+
+    }
+
+    private void displayErrMsg(int msgId){
+        showSpinner(false);
+        TextView txtView = fragmentView.findViewById(R.id.errMsg);
+        if(msgId != 0) {
+            txtView.setText(msgId);
+        }else {
+            txtView.setText("");
+        }
+    }
+
+    private void sendMessage(){
+        Tracer.log(TAG, "sendMessage");
+        displayErrMsg(Const.error.NO_ERROR);
+        showSpinner(true);
+        //on a le tout allors on creer l'invitation
+        ((SendInvitationForWatchingActivity) getActivity()).sendSMSMessage();
 
     }
 

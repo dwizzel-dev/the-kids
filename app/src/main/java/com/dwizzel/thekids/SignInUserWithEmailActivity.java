@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.dwizzel.Const;
@@ -64,7 +65,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
             //on enleve le loader
             if(sro.getErr() != Const.error.NO_ERROR){
                 //ppour aficher les erreurs sinon il continue au created
-                Utils.getInstance().hideProgressDialog();
+                showSpinner(false);
             }
             switch(sro.getErr()){
                 case Const.error.NO_ERROR:
@@ -110,7 +111,6 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        Utils.getInstance().hideProgressDialog();
     }
 
     @Override
@@ -205,9 +205,22 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         //on va faire un listener sur le resultat
         if (mTrackerBinder != null) {
             //on met un loader
-            Utils.getInstance().showProgressDialog(SignInUserWithEmailActivity.this);
+            showSpinner(true);
             //on call le service
             mTrackerBinder.signIn(email, psw);
+        }
+    }
+
+    private void showSpinner(boolean show){
+        //le bouton et le spinner
+        ProgressBar progressBar = findViewById(R.id.loading_spinner);
+        Button buttSignIn = findViewById(R.id.buttSignIn);
+        if(show){
+            progressBar.setVisibility(View.VISIBLE);
+            buttSignIn.setVisibility(View.INVISIBLE);
+        }else{
+            progressBar.setVisibility(View.INVISIBLE);
+            buttSignIn.setVisibility(View.VISIBLE);
         }
     }
 

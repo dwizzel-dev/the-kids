@@ -15,5 +15,7 @@ public interface ITrackerService {
     void onGpsPositionUpdate();
     void onUserSignedOut(ServiceResponseObject sro);
     void onInviteIdCreated(ServiceResponseObject sro);
+    void onInvitationCreated(ServiceResponseObject sro);
+
 
 }

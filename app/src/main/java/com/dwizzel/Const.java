@@ -12,6 +12,7 @@ public final class Const {
         public static final int ERROR_INVALID_EMAIL = 205;
         public static final int ERROR_EMAIL_EXIST = 206;
         public static final int ERROR_WEAK_PASSWORD = 207;
+        public static final int ERROR_SMS_NOT_SENT = 208;
     }
     public static final class except {
         public static final int GENERIC = 301;

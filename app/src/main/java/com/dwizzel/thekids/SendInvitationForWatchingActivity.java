@@ -1,5 +1,6 @@
 package com.dwizzel.thekids;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -41,8 +42,9 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
 
     private String mPhone = "";
     private String mName = "";
+    private String mEmail = "";
     private String mMessage = "";
-    private String mInviteId = "";
+    private String mInviteId;
 
     public void onSubDestroy(){
         Tracer.log(TAG, "onSubDestroy");
@@ -79,14 +81,14 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
                     Tracer.log(TAG, "handleResponse: " + sro.getMsg());
                     switch(sro.getMsg()){
                         case Const.response.ON_INVITE_ID_CREATED:
+                            mInviteId = sro.getArg();
                             //on a le inviteId genere par le serveur
-                            //on enleve le loader et on change de fragment pour l'envoi final
-                            Bundle bundle = new Bundle();
-                            bundle.putString("inviteId", sro.getArg());
-                            bundle.putString("phone", mPhone);
-                            bundle.putString("message", mMessage);
-                            gotoFragment(2, bundle);
-                             break;
+                            createBundleAndGotoFragment(Const.error.NO_ERROR);
+                            break;
+                        case Const.response.ON_INVITATION_CREATED:
+                            //on a l'invitation dans la DB alors on retourne a la liste des watchers
+                            gotoWatchersList();
+                            break;
                         default:
                             break;
                     }
@@ -109,48 +111,115 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
     }
 
     protected void createInviteId(String phone, String name, String message) {
+        Tracer.log(TAG, "createInviteId");
         mPhone = phone;
         mName = name;
         mMessage = message;
-        //on change de fragment avec un loader comme quooi il va creer le invitation au serveur
-        //gotoFragment(2, null);
         //on call le service pour qu'il fassse la demande de numero d'invitation
-        //on met un loader ple temps d'avoir le inviteId
-        mTrackerBinder.createInviteId();
+        if(mInviteId != null) {
+            //on en a deja un alors on utilise le meme au lieu d'en creer un
+            createBundleAndGotoFragment(Const.error.NO_ERROR);
+        }else{
+            mTrackerBinder.createInviteId();
+        }
     }
 
-    private void sendSMSMessage() {
+    protected void gotoWatchersList(){
+        Tracer.log(TAG, "gotoWatchersList");
+        //on fait un toat pour dire que c'est ok
+        Utils.getInstance().showToastMsg(SendInvitationForWatchingActivity.this, R.string.toast_sms_sent);
+        //start activity
+        Intent intent = new Intent(SendInvitationForWatchingActivity.this,
+                WatchOverMeActivity.class);
+        startActivity(intent);
+    }
+
+    protected void createBundleAndGotoFragment(int err){
+        Tracer.log(TAG, "createBundleAndGotoFragment: " + err);
+        mMessage = getResources().getString(R.string.sms_invitation_message,
+                mMessage, mInviteId);
+        //on enleve le loader et on change de fragment pour l'envoi final
+        Bundle bundle = new Bundle();
+        bundle.putString("phone", mPhone);
+        bundle.putString("message", mMessage);
+        //si on a une erreur la rajouter
+        if(err != Const.error.NO_ERROR){
+            bundle.putInt("msg", R.string.err_sms_not_sent);
+        }
+
+        gotoFragment(2, bundle);
+    }
+
+    protected void sendSMSMessage() {
+        Tracer.log(TAG, "sendSMSMessage");
         if (ContextCompat.checkSelfPermission(
                 SendInvitationForWatchingActivity.this,
                 Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            Tracer.log(TAG, "sendSMSMessage.checkSelfPermission: FAILED");
             if(ActivityCompat.shouldShowRequestPermissionRationale(
                     SendInvitationForWatchingActivity.this,
                     Manifest.permission.SEND_SMS)) {
-                //TODO: ask for permission to send message
+                Tracer.log(TAG, "sendSMSMessage.shouldShowRequestPermissionRationale");
             }else{
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.SEND_SMS},
                         PERMISSION_REQUEST_SEND_SMS);
+                Tracer.log(TAG, "sendSMSMessage.requestPermissions");
+            }
+        }else{
+            Tracer.log(TAG, "sendSMSMessage.checkSelfPermission: OK");
+            //send the sms
+            sendSMSMessageToInvites();
+        }
+    }
+
+    private void sendSMSMessageToInvites(){
+        Tracer.log(TAG, "sendSMSMessageToInvites");
+        SmsManager smsManager = SmsManager.getDefault();
+        smsManager.sendTextMessage(mPhone, null, mMessage, null, null);
+        createInvitation(Const.error.NO_ERROR);
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        Tracer.log(TAG, "onRequestPermissionsResult");
+        switch (requestCode){
+            case PERMISSION_REQUEST_SEND_SMS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    sendSMSMessageToInvites();
+                } else {
+                    Utils.getInstance().showToastMsg(
+                            SendInvitationForWatchingActivity.this, R.string.toast_sms_not_sent);
+                    //TODO: on affiche l'erreur et enleve le loader
+                    createInvitation(Const.error.ERROR_SMS_NOT_SENT);
+                }
             }
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode){
-            case PERMISSION_REQUEST_SEND_SMS: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage(mPhone, null, mMessage, null, null);
-                    Utils.getInstance().showToastMsg(
-                            SendInvitationForWatchingActivity.this, R.string.toast_sms_sent
-                            );
-                } else {
-                    Utils.getInstance().showToastMsg(
-                            SendInvitationForWatchingActivity.this, R.string.toast_sms_not_sent);
-                }
-            }
+    protected void createInvitation(int err){
+        Tracer.log(TAG, "createInvitation: " + err);
+        //Utils.getInstance().showToastMsg(SendInvitationForWatchingActivity.this, R.string.toast_sms_sent);
+        // et on revient a la liste avec le pending ajoute
+        switch(err){
+            case Const.error.NO_ERROR:
+                //on creer l'invitation du user dans la DB
+                //le retour du service fera le reste
+                mTrackerBinder.createInvitation(mInviteId, mName, mPhone, mEmail);
+                break;
+            case Const.error.ERROR_SMS_NOT_SENT:
+                //on set le message et on dit que l'on a eu un probleme
+                createBundleAndGotoFragment(err);
+                break;
+            default:
+                break;
+
         }
+
+
+
     }
 
     public void gotoFragment(int fragNum, Bundle bundle){

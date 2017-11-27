@@ -15,5 +15,6 @@ public interface IDatabaseService {
     void getWatchersList();
     void getInvitationsList();
     void createInviteId();
+    void createInvitation(String inviteId, String name, String phone, String email);
 
 }

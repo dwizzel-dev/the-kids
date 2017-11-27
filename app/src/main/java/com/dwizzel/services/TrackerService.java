@@ -21,6 +21,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -60,6 +61,7 @@ public class TrackerService extends Service implements ITrackerService{
     private Handler mHandlerTimer;
     private Runnable mRunnableTimer;
     private long mTimer = 0;
+    private long mStartTime;
     //internet
     private boolean mHasConnectivity;
 
@@ -326,7 +328,15 @@ public class TrackerService extends Service implements ITrackerService{
         if(mBinderCallback != null) {
             mBinderCallback.handleResponse(sro);
         }
+    }
 
+    public void onInvitationCreated(ServiceResponseObject sro){
+        Tracer.log(TAG, "onInvitationCreated");
+        //NOTE: est appele par databaseService quand un id de invite est cree
+        //on tranmet la reponse object au caller
+        if(mBinderCallback != null) {
+            mBinderCallback.handleResponse(sro);
+        }
     }
 
     public void onGpsPositionUpdate(){
@@ -350,8 +360,10 @@ public class TrackerService extends Service implements ITrackerService{
 
     public class TrackerBinder extends Binder implements ITrackerBinder {
         public long getCounter() {
-            Tracer.log(TAG, "TrackerBinder.getCounter");
             return mTimer;
+        }
+        public long getTimeDiff() {
+            return ((System.currentTimeMillis()/1000) - mStartTime);
         }
         public void registerCallback(ITrackerBinderCallback callback){
             Tracer.log(TAG, "TrackerBinder.registerCallback");
@@ -387,9 +399,9 @@ public class TrackerService extends Service implements ITrackerService{
             Tracer.log(TAG, "TrackerBinder.createInvite");
             mDatabaseService.createInviteId();
         }
-        public void createInvitation(String inviteId){
+        public void createInvitation(String inviteId, String name, String phone, String email){
             Tracer.log(TAG, "TrackerBinder.createInvitation: " + inviteId);
-            //mDatabaseService.createInvitation();
+            mDatabaseService.createInvitation(inviteId, name, phone, email);
         }
         public void getWatchersList(){
             Tracer.log(TAG, "TrackerBinder.getWatchersList");
@@ -426,13 +438,17 @@ public class TrackerService extends Service implements ITrackerService{
     class TimerRunnable implements Runnable{
         private final static String TAG = "TimerRunnable";
         private boolean loop = true;
-        private int keepAliveDelay = 300; //5 minutes
-        private int checkConnectivityDelay = 30; //30 secondes
+        //les secondes ne sont plus vraiment des secondes
+        // car le thread est plus lent
+        // si l'application n'a pas le focus
+        private int keepAliveDelay = 300;
+        private int checkConnectivityDelay = 60; //1 minutes
         private int sleepDelay = 1000;
         TimerRunnable(){}
         @Override
         public void run() {
             try {
+                mStartTime = System.currentTimeMillis()/1000;
                 while (loop) {
                     Thread.sleep(sleepDelay);
                     mTimer++;

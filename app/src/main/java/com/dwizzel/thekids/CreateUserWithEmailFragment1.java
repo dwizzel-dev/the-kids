@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
@@ -52,6 +53,7 @@ public class CreateUserWithEmailFragment1 extends Fragment {
         buttRegister.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
+                        showSpinner(true);
                         //get the email entered
                         String[] psw = new String[2];
                         psw[0] = String.format("%s", ((EditText)fragmentView.findViewById(R.id.userPsw0)).getText());
@@ -61,6 +63,8 @@ public class CreateUserWithEmailFragment1 extends Fragment {
                                     .setPswFromFragment(psw));
                         //go to the next fragment for psw
 
+
+
                     }
                 });
     }
@@ -68,6 +72,7 @@ public class CreateUserWithEmailFragment1 extends Fragment {
     private void displayErrMsg(int msgId){
         TextView txtView = fragmentView.findViewById(R.id.errMsg);
         if(msgId != 0) {
+            showSpinner(false);
             txtView.setText(msgId);
         }else {
             txtView.setText("");
@@ -83,6 +88,19 @@ public class CreateUserWithEmailFragment1 extends Fragment {
     public void onDetach() {
         super.onDetach();
 
+    }
+
+    private void showSpinner(boolean show){
+        //le bouton et le spinner
+        ProgressBar progressBar = fragmentView.findViewById(R.id.loading_spinner);
+        Button buttRegister = fragmentView.findViewById(R.id.buttRegister);
+        if(show){
+            progressBar.setVisibility(View.VISIBLE);
+            buttRegister.setVisibility(View.INVISIBLE);
+        }else{
+            progressBar.setVisibility(View.INVISIBLE);
+            buttRegister.setVisibility(View.VISIBLE);
+        }
     }
 
 

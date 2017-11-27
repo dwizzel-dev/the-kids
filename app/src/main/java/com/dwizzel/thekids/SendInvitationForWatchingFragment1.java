@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.dwizzel.Const;
 import com.dwizzel.utils.Tracer;
 
 public class SendInvitationForWatchingFragment1 extends Fragment {
@@ -83,6 +84,7 @@ public class SendInvitationForWatchingFragment1 extends Fragment {
 
     private void checkMandatoryFieldsAndCreate(){
         showSpinner(true);
+        displayErrMsg(Const.error.NO_ERROR);
         //on va chercher les infos et on les sets
         String name = String.format("%s",((EditText)fragmentView.findViewById(R.id.userName)).getText());
         String phone = String.format("%s",((EditText)fragmentView.findViewById(R.id.userPhone)).getText());

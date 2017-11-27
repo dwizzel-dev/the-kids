@@ -535,4 +535,42 @@ class DatabaseService implements IDatabaseService{
 
     }
 
+    public void createInvitation(final String inviteId, final String name, final String phone, final String email){
+        Tracer.log(TAG, "createInvitation: " + inviteId);
+        try{
+            //add the new user collection with his id
+            WriteBatch batch = mDb.batch();
+            batch.update(mDb.collection("invites").document(inviteId),
+                    "state", Const.invitation.PENDING,
+                    "updateTime", FieldValue.serverTimestamp()
+                    );
+            batch.set(mDb.collection("users").document(mUser.getUid())
+                            .collection("invitations").document(inviteId),
+                    mUser.toInvitationData(inviteId, name, phone, email)
+                    );
+            batch.commit()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "createInvitation.addOnSuccessListener");
+                            //maintenant il est cree alors on set les infos
+                            //invitaion du user
+                            mUser.addInvitation(inviteId, new InvitationModel(inviteId, name, phone, email));
+                            //on call le service commeq quoi c'est fait
+                            mTrackerService.onInvitationCreated(new ServiceResponseObject(
+                                    Const.response.ON_INVITATION_CREATED));
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG, "createInvitation.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+        }catch (Exception e){
+            Tracer.log(TAG, "createInvitation.Exception: ", e);
+        }
+
+    }
+
  }

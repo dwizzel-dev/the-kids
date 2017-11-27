@@ -41,15 +41,26 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textTitle"/>
 
+        <TextView
+            android:id="@+id/errMsg"
+            style="@style/AppTheme.P.error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textDescription" />
+
         <Button
             android:id="@+id/buttSend"
             style="@style/AppTheme.ButtonFull"
             android:layout_width="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:text="@string/butt_send_invitation"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textDescription" />
+            app:layout_constraintTop_toBottomOf="@+id/errMsg" />
 
         <ProgressBar
             android:id="@+id/loading_spinner"
@@ -58,7 +69,7 @@
             android:layout_marginTop="16dp"
             android:visibility="invisible"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textDescription" />
+            app:layout_constraintTop_toBottomOf="@+id/errMsg" />
 
 
     </android.support.constraint.ConstraintLayout>

@@ -62,6 +62,7 @@
     <string name="err_no_name">You need to provide a nickname</string>
     <string name="err_no_phone">You need to provide a phone number</string>
     <string name="err_no_message">You need to provide a little welcomme message</string>
+    <string name="err_sms_not_sent">The message was not sent, please try again!...</string>
 
     <!-- TEXT -->
     <string name="or"> OR </string>

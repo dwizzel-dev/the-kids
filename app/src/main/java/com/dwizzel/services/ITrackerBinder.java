@@ -9,6 +9,7 @@ import com.google.firebase.auth.AuthCredential;
 public interface ITrackerBinder {
 
     long getCounter();
+    long getTimeDiff();
     void registerCallback(ITrackerBinderCallback callback);
     void unregisterCallback();
     boolean isSignedIn();
@@ -19,6 +20,6 @@ public interface ITrackerBinder {
     void getWatchersList();
     void getInvitationsList();
     void createInviteId();
-    void createInvitation(String inviteId);
+    void createInvitation(String inviteId, String name, String phone, String email);
 
 }

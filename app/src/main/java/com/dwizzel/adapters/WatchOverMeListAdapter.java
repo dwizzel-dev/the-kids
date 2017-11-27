@@ -164,7 +164,7 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
             super(itemView);
             name = itemView.findViewById(R.id.name);
             phone = itemView.findViewById(R.id.phone);
-            email = itemView.findViewById(R.id.email);
+            //email = itemView.findViewById(R.id.email);
         }
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             InvitationViewHolder holder = (InvitationViewHolder) viewholder;
@@ -172,7 +172,7 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
             try {
                 holder.name.setText(model.getName());
                 holder.phone.setText(model.getPhone());
-                holder.email.setText(model.getEmail());
+                //holder.email.setText(model.getEmail());
             }catch(Exception e){
                 Tracer.log(TAG, "InvitationViewHolder.exception: ", e);
             }

@@ -25,6 +25,13 @@ public class InvitationModel{
 
     }
 
+    public InvitationModel(String inviteId, String name, String phone, String email){
+        this.inviteId = inviteId;
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+    }
+
     public String getFrom() {
         return from;
     }

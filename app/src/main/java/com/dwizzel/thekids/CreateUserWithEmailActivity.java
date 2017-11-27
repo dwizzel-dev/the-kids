@@ -70,7 +70,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
             //on enleve le loader
             if(sro.getErr() != Const.error.NO_ERROR){
                 //ppour aficher les erreurs sinon il continue au created
-                Utils.getInstance().hideProgressDialog();
+                //Utils.getInstance().hideProgressDialog();
             }
             switch(sro.getErr()){
                 case Const.error.NO_ERROR:
@@ -97,7 +97,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         }
         public void onCreated(ServiceResponseObject sro){
             Tracer.log(TAG, "onCreated");
-            Utils.getInstance().hideProgressDialog();
+            //Utils.getInstance().hideProgressDialog();
             //tout est beau on peut starter
             switch(sro.getErr()) {
                 case Const.error.NO_ERROR:
@@ -130,7 +130,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        Utils.getInstance().hideProgressDialog();
+        //Utils.getInstance().hideProgressDialog();
     }
 
     @Override
@@ -222,7 +222,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         //on va faire un listener sur le resultat
         if (mTrackerBinder != null) {
             //on met un loader
-            Utils.getInstance().showProgressDialog(CreateUserWithEmailActivity.this);
+            //Utils.getInstance().showProgressDialog(CreateUserWithEmailActivity.this);
             //on call le service
             mTrackerBinder.createUser(email, psw);
         }
