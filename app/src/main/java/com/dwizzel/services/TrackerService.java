@@ -319,6 +319,16 @@ public class TrackerService extends Service implements ITrackerService{
         }
     }
 
+    public void onInviteIdCreated(ServiceResponseObject sro){
+        Tracer.log(TAG, "onInviteIdCreated");
+        //NOTE: est appele par databaseService quand un id de invite est cree
+        //on tranmet la reponse object au caller
+        if(mBinderCallback != null) {
+            mBinderCallback.handleResponse(sro);
+        }
+
+    }
+
     public void onGpsPositionUpdate(){
         Tracer.log(TAG, "onGpsPositionUpdate");
         //on fait un update du user et celui de la DB
@@ -372,6 +382,14 @@ public class TrackerService extends Service implements ITrackerService{
         public void createUser(String email, String psw){
             Tracer.log(TAG, "TrackerBinder.createUser");
             mAuthService.createUser(email, psw);
+        }
+        public void createInviteId(){
+            Tracer.log(TAG, "TrackerBinder.createInvite");
+            mDatabaseService.createInviteId();
+        }
+        public void createInvitation(String inviteId){
+            Tracer.log(TAG, "TrackerBinder.createInvitation: " + inviteId);
+            //mDatabaseService.createInvitation();
         }
         public void getWatchersList(){
             Tracer.log(TAG, "TrackerBinder.getWatchersList");

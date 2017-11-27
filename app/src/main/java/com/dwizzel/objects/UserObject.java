@@ -281,7 +281,7 @@ public class UserObject extends Observable{
 
 
     public Map<String, Object> toUserData(){
-        Map<String, Object> map = new HashMap<>(3);
+        Map<String, Object> map = new HashMap<>(6);
         map.put("email", getEmail() );
         map.put("uid", getUid());
         map.put("status", getStatus());
@@ -306,6 +306,25 @@ public class UserObject extends Observable{
         map.put("updateTime", FieldValue.serverTimestamp());
         map.put("position", getPosition());
         map.put("gps", isGps());
+        return map;
+    }
+
+    public Map<String, Object> toInviteData(){
+        Map<String, Object> map = new HashMap<>(5);
+        map.put("from", getUid());
+        map.put("updateTime", FieldValue.serverTimestamp());
+        map.put("createTime", FieldValue.serverTimestamp());
+        map.put("to", ""); //since we don't know yet
+        map.put("state", Const.invitation.INNACTIVE);
+        return map;
+    }
+
+    public Map<String, Object> toInvitationData(String inviteId, String name, String phone, String email){
+        Map<String, Object> map = new HashMap<>(4);
+        map.put("email", email);
+        map.put("name", name);
+        map.put("phone", phone);
+        map.put("inviteId", inviteId);
         return map;
     }
 

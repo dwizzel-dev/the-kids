@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
@@ -501,6 +502,37 @@ class DatabaseService implements IDatabaseService{
         }catch (Exception e){
             Tracer.log(TAG, "getInvitationsList.Exception: ", e);
         }
+    }
+
+    public void createInviteId(){
+        Tracer.log(TAG, "createInviteId");
+        try{
+            //add the new invites to the collection and retrieve de inviteId
+            mDb.collection("invites")
+            .add(mUser.toInviteData())
+            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Tracer.log(TAG, "createInviteId.addOnSuccessListener");
+                            //maintenant il est cree alors on cherche le ID du invites
+                            mTrackerService.onInviteIdCreated(
+                                    new ServiceResponseObject(
+                                            Const.response.ON_INVITE_ID_CREATED,
+                                            documentReference.getId()
+                                            ));
+                        }
+                    })
+            .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG, "createInviteId.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+
+        }catch (Exception e){
+            Tracer.log(TAG, "createInviteId.Exception: ", e);
+        }
+
     }
 
  }

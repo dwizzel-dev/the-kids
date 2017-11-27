@@ -14,5 +14,6 @@ public interface IDatabaseService {
     void updateUserInfos();
     void getWatchersList();
     void getInvitationsList();
+    void createInviteId();
 
 }

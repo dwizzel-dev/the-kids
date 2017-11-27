@@ -18,5 +18,7 @@ public interface ITrackerBinder {
     void createUser(String user, String psw);
     void getWatchersList();
     void getInvitationsList();
+    void createInviteId();
+    void createInvitation(String inviteId);
 
 }

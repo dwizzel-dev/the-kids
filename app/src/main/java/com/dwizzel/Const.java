@@ -44,12 +44,7 @@ public final class Const {
         public static final int ACCEPTED = 800;
         public static final int REFUSED = 801;
         public static final int PENDING = 802;
-    }
-    public static final class response {
-        public static final String ON_WATCHERS_LIST = "ON_WATCHERS_LIST";
-        public static final String ON_INVITES_LIST = "ON_INVITES_LIST";
-        public static final String ON_EMPTY_WATCHERS_LIST = "ON_EMPTY_WATCHERS_LIST";
-        public static final String ON_EMPTY_INVITES_LIST = "ON_EMPTY_INVITES_LIST";
+        public static final int INNACTIVE = 803;
     }
     public static final class notif {
         public static final int WATCHER_UPDATE = 900;
@@ -61,4 +56,13 @@ public final class Const {
         public static final int RECONNECTING = 1002;
         public static final int NOT_CONNECTED = 1003;
     }
+    public static final class response {
+        public static final String ON_WATCHERS_LIST = "ON_WATCHERS_LIST";
+        public static final String ON_INVITES_LIST = "ON_INVITES_LIST";
+        public static final String ON_EMPTY_WATCHERS_LIST = "ON_EMPTY_WATCHERS_LIST";
+        public static final String ON_EMPTY_INVITES_LIST = "ON_EMPTY_INVITES_LIST";
+        public static final String ON_INVITE_ID_CREATED = "ON_INVITE_ID_CREATED";
+        public static final String ON_INVITATION_CREATED = "ON_INVITATION_CREATED";
+    }
+
 }

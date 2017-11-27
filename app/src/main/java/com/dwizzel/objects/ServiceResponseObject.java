@@ -10,6 +10,7 @@ public final class ServiceResponseObject{
     private Object obj;
     private int err = 0;
     private String msg = "";
+    private String arg = "";
 
     public ServiceResponseObject() {
 
@@ -37,12 +38,21 @@ public final class ServiceResponseObject{
         this.msg = msg;
     }
 
+    public ServiceResponseObject(String msg, String arg) {
+        this.msg = msg;
+        this.arg = arg;
+    }
+
     public int getErr(){
         return err;
     }
 
     public String getMsg(){
         return msg;
+    }
+
+    public String getArg(){
+        return arg;
     }
 
     public Object getObj(){

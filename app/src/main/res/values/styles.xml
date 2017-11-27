@@ -43,6 +43,12 @@
         <item name="android:textColor">@color/h3</item>
         <item name="android:gravity">left</item>
     </style>
+    <style name="AppTheme.H4" parent="@android:style/Widget.TextView">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/h3</item>
+        <item name="android:gravity">left</item>
+    </style>
     <style name="AppTheme.P" parent="@android:style/Widget.TextView">
         <item name="android:textSize">13sp</item>
         <item name="android:textStyle">normal</item>
@@ -104,6 +110,18 @@
         <item name="android:capitalize">sentences</item>
         <item name="android:elevation">2dp</item>
     </style>
+    <style name="AppTheme.EditTextMultiLine" parent="@android:style/Widget.EditText">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/p</item>
+        <item name="android:gravity">left|top</item>
+        <item name="android:ems">10</item>
+        <item name="android:inputType">textMultiLine</item>
+        <item name="android:scrollbars">vertical</item>
+
+
+    </style>
+
 
 
 
