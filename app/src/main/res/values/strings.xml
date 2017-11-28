@@ -84,6 +84,7 @@
 
     <!-- DIALOG MESSAGE -->
     <string name="dialog_loading">in progress</string>
+    <string name="dialog_login_out">Please wait! Login Out...</string>
 
     <!-- TOAST MESSAGE -->
     <string name="toast_connected_as">connected as %1$s</string>

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
@@ -142,7 +143,17 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
 
     protected void signOutUser(){
         Tracer.log(TAGBASE, "signOutUser");
-        Utils.getInstance().showProgressDialog(BaseActivity.this);
+        //Utils.getInstance().showProgressDialog(BaseActivity.this);
+        //on effce le menu
+        ConstraintLayout constraintLayout;
+        constraintLayout = findViewById(R.id.LayoutButtons);
+        if(constraintLayout != null) {
+            constraintLayout.setVisibility(View.GONE);
+        }
+        constraintLayout = findViewById(R.id.LayoutLoader);
+        if(constraintLayout != null) {
+            constraintLayout.setVisibility(View.VISIBLE);
+        }
         //on avretit le service que l'on sign out
         mTrackerBinder.signOut();
 
