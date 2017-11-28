@@ -50,6 +50,7 @@ public final class Const {
     public static final class notif {
         public static final int WATCHER_UPDATE = 900;
         public static final int INVITATION_UPDATE = 901;
+        public static final int WATCHING_UPDATE = 902;
     }
     public static final class conn {
         public static final int CONNECTED = 1000;
@@ -64,6 +65,9 @@ public final class Const {
         public static final String ON_EMPTY_INVITES_LIST = "ON_EMPTY_INVITES_LIST";
         public static final String ON_INVITE_ID_CREATED = "ON_INVITE_ID_CREATED";
         public static final String ON_INVITATION_CREATED = "ON_INVITATION_CREATED";
+        public static final String ON_WATCHINGS_LIST = "ON_WATCHINGS_LIST";
+        public static final String ON_EMPTY_WATCHINGS_LIST = "ON_EMPTY_WATCHINGS_LIST";
+
     }
 
 }

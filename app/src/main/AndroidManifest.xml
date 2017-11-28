@@ -104,8 +104,10 @@
             android:parentActivityName=".HomeActivity" />
         <activity
             android:name=".SendInvitationForWatchingActivity"
-            android:parentActivityName=".WatchOverMeActivity"
-            />
+            android:parentActivityName=".WatchOverMeActivity" />
+        <activity
+            android:name=".ActivateInvitationActivity"
+            android:parentActivityName=".WatchOverSomeoneActivity" />
     </application>
 
 </manifest>

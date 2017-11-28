@@ -11,18 +11,23 @@
     <string name="watch_over_me_title">Watch Over Me</string>
     <string name="watch_over_someone_title">Watch Over Someone</string>
     <string name="watch_over_me_send_invitation">Send An Invitation</string>
+    <string name="activate_invitation">Activate Invitation</string>
 
     <!-- LIST HEADER -->
     <string name="watchers_header">Watchers</string>
+    <string name="watchers_list_empty">Your list is empty, start by sending an invitation to someone you know to had him to your list of watchers. Untill he accept, the invitation will remain in the "<i>pending invitations</i>" list below</string>
     <string name="invitations_header">Pending Invitations</string>
-    <string name="watchers_list_empty">Your watchers list is empty, start by sending an invitation to someone you know to had him to your list of watchers. Untill he accept, the invitation will remain in the "<i>pending invitations</i>" list below</string>
     <string name="invitations_list_empty">You have no pending invitation.</string>
+    <string name="watchings_header">Watching On</string>
+    <string name="watchings_list_empty">Your list is empty, if you have received a code by SMS press the plus sign button below and enter it in the appropriate field when asked.</string>
+
 
     <!-- DESCRIPTION -->
     <string name="create_user_description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
     <string name="create_user_with_email_description">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
     <string name="signin_user_description">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
     <string name="send_invitation_description">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
+    <string name="activate_invitation_description">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
 
     <!-- COPYRIGHT -->
     <string name="txt_copyright">TheKidsLove @ 2017</string>
@@ -41,7 +46,8 @@
     <string name="butt_cancel">Cancel</string>
     <string name="butt_send_invitation">Send Sms Invitation</string>
     <string name="butt_select_from_contacts">Select From Your Contacts</string>
-    <string name="butt_enter_phone_numnber">Enter Phone Number</string>
+    <string name="butt_enter_phone_number">Enter Phone Number</string>
+    <string name="butt_activate">Activate</string>
 
     <!-- INPUT FIELD HINT -->
     <string name="email_hint">Email</string>
@@ -49,6 +55,7 @@
     <string name="psw_hint_2">Retype Password</string>
     <string name="name_hint">Name</string>
     <string name="phone_hint">Phone number</string>
+    <string name="activate_hint">Invitation ID</string>
     <string name="invitation_message_hint">Your invitation message here</string>
 
     <!-- ERR MESSAGE -->

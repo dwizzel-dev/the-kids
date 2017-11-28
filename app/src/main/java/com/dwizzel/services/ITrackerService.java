@@ -16,6 +16,6 @@ public interface ITrackerService {
     void onUserSignedOut(ServiceResponseObject sro);
     void onInviteIdCreated(ServiceResponseObject sro);
     void onInvitationCreated(ServiceResponseObject sro);
-
+    void onUserWatchingsList(ServiceResponseObject sro);
 
 }

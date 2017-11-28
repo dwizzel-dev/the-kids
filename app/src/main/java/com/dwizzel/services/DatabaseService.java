@@ -7,6 +7,7 @@ import com.dwizzel.datamodels.DataModel;
 import com.dwizzel.datamodels.InvitationModel;
 import com.dwizzel.datamodels.InviteModel;
 import com.dwizzel.datamodels.WatcherModel;
+import com.dwizzel.datamodels.WatchingModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
@@ -40,15 +41,14 @@ import java.util.Map;
  *  sur les documents avec FireStore
  *  https://firebase.google.com/docs/firestore/query-data/listen
  *
- *
- *  TODO: on va faire des triggers avec le CloudFunction
+ * TODO: on va faire des triggers avec le CloudFunction
  *  - sur le signIn pour les mettre dans la collection "active"
  *  - sur un signOut pour les enlever de la collection "active"
  *
- *
- *
  * TODO: mettre un listeners sur les watchers du users. si il change de position ou de status
  * on sera notifie
+ *
+ * TODO: mettre un listener sur les invites une fois celle-ci nouvellement cree
  *
  *
  * NOTES: les onEvent sur les docuements sont trigger tout de suite apres avoir ete rajoute
@@ -62,22 +62,76 @@ class DatabaseService implements IDatabaseService{
     private UserObject mUser;
     private ITrackerService mTrackerService;
     private ListenerRegistration mUserListener;
-    private Map<String, ListenerRegistration> mWatchersListener
-            = new HashMap<String, ListenerRegistration>();
-    private Map<String, ListenerRegistration> mInvitesListener
-            = new HashMap<String, ListenerRegistration>();
+    private Map<String, ListenerRegistration> mWatchersListener = new HashMap<>();
+    private Map<String, ListenerRegistration> mInvitesListener = new HashMap<>();
+    private Map<String, ListenerRegistration> mWatchingsListener = new HashMap<>();
 
     DatabaseService (ITrackerService trackerService) {
         mDb = FirebaseFirestore.getInstance();
         mUser = UserObject.getInstance();
         mTrackerService = trackerService;
-        boolean useCache = true;
         //on disable/enable la cache
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(useCache)
+                .setPersistenceEnabled(true)
                 .build();
         mDb.setFirestoreSettings(settings);
         }
+
+
+    private void addListenerOnWatchings(String watchingUid){
+        Tracer.log(TAG, "addListenerOnWatchings: " + watchingUid);
+        //trigger a chaque fois qu'il y aune modifications sur le serveur du status ou position
+        mWatchingsListener.put(watchingUid,
+                mDb.collection("actives").document(watchingUid)
+                        .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                            @Override
+                            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                                if (e != null) {
+                                    Tracer.log(TAG, "watchings[" + documentSnapshot.getId()
+                                            + "].onEvent.exception: ", e);
+                                    return;
+                                }
+                                if(documentSnapshot.exists()) {
+                                    Tracer.log(TAG, "watchings[" + documentSnapshot.getId()
+                                            + "].onEvent.DATA ------- : " + documentSnapshot.getData());
+                                    try {
+                                        //on tranforme en activeModel et on met dans mUser
+                                        mUser.updateWatchings(documentSnapshot.getId(),
+                                                documentSnapshot.toObject(ActiveModel.class));
+                                    }catch(Exception excpt){
+                                        Tracer.log(TAG, "watchings[" + documentSnapshot.getId()
+                                                + "].onEvent.exception[1]: ", excpt);
+                                    }
+                                }else {
+                                    Tracer.log(TAG, "watchings[" + documentSnapshot.getId()
+                                            + "].onEvent.NO_DATA ------- ");
+                                }
+                            }
+                        })
+        );
+    }
+
+    private void removeListenersOnWatchings(){
+        Tracer.log(TAG, "removeListenersOnWatchings");
+        if(mWatchingsListener != null) {
+            Iterator<Map.Entry<String, ListenerRegistration>> it = mWatchingsListener.entrySet().iterator();
+            while(it.hasNext()) {
+                Map.Entry<String, ListenerRegistration> entry = it.next();
+                ListenerRegistration listenerRegistration = entry.getValue();
+                if(listenerRegistration != null){
+                    listenerRegistration.remove();
+                }
+                it.remove();
+            }
+        }
+
+    }
+
+
+
+
+
+
 
     private void addListenerOnInvites(String inviteId){
         Tracer.log(TAG, "addListenerOnInvites: " + inviteId);
@@ -393,6 +447,8 @@ class DatabaseService implements IDatabaseService{
             removeListenersOnWatchers();
             //on enleve les listener sur les invites
             removeListenersOnInvites();
+            //on enleve les listener sur les watchings
+            removeListenersOnWatchings();
             //  1. remove user collection with his id
             //  OR
             //  2. change the status only we will put a listener on the status for status changes
@@ -571,6 +627,50 @@ class DatabaseService implements IDatabaseService{
             Tracer.log(TAG, "createInvitation.Exception: ", e);
         }
 
+    }
+
+    public void getWatchingsList(){
+        Tracer.log(TAG, "getWatchingsList");
+        try{
+            mDb.collection("users").document(mUser.getUid()).collection("watchings")
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            Tracer.log(TAG, "getWatchingsList.onComplete");
+                            if (task.isSuccessful()) {
+                                QuerySnapshot querySnapshot = task.getResult();
+                                if(!querySnapshot.isEmpty()){
+                                    for(DocumentSnapshot document : querySnapshot) {
+                                        Tracer.log(TAG, "getWatchingsList.onComplete.DATA ------- : " +
+                                                document.getId() + " | " +  document.getData());
+                                        try{
+                                            //rajoute la liste en interne a mUser
+                                            mUser.addWatching(document.getId(), document.toObject(WatchingModel.class));
+                                            //on mets un listener sur les changement de state du watchings
+                                            //si n'est pas deja dans la liste des watchers, car c'est mUser
+                                            //qui va trigger un observer
+                                            //TODO: le listener sur les watchings state
+                                            addListenerOnWatchings(document.getId());
+                                        }catch (Exception e){
+                                            Tracer.log(TAG, "getWatchingsList.onComplete.exception: ", e);
+                                        }
+                                    }
+                                    mTrackerService.onUserWatchingsList(
+                                            new ServiceResponseObject(Const.response.ON_WATCHINGS_LIST));
+                                }else{
+                                    Tracer.log(TAG, "getWatchingsList.onComplete.NO_DATA ------- ");
+                                    mTrackerService.onUserWatchingsList(
+                                            new ServiceResponseObject(Const.response.ON_EMPTY_WATCHINGS_LIST));
+                                }
+                            } else {
+                                Tracer.log(TAG, "getWatchingsList.onComplete.exception: ", task.getException());
+                            }
+                        }
+                    });
+        }catch (Exception e){
+            Tracer.log(TAG, "getWatchingsList.Exception: ", e);
+        }
     }
 
  }

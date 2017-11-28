@@ -8,6 +8,7 @@ import com.dwizzel.datamodels.DataModel;
 import com.dwizzel.datamodels.InvitationModel;
 import com.dwizzel.datamodels.InviteModel;
 import com.dwizzel.datamodels.WatcherModel;
+import com.dwizzel.datamodels.WatchingModel;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 import com.google.firebase.firestore.FieldValue;
@@ -38,6 +39,7 @@ public class UserObject extends Observable{
     private int loginType = 0; //facebook, twitter, email, instagram, etc...
     private HashMap<String, WatcherModel> watchers;
     private HashMap<String, InvitationModel> invitations;
+    private HashMap<String, WatchingModel> watchings;
 
     private UserObject(){
         //default
@@ -104,6 +106,64 @@ public class UserObject extends Observable{
         if (watchers != null) {
             if (watchers.containsKey(uid)) {
                 return watchers.get(uid);
+            }
+        }
+        return null;
+    }
+
+    public void updateWatchings(String uid, ActiveModel activeModel) {
+        //ces infos ne viennent pas de la meme collection et arrive apres
+        //du au limitation de firestore
+        if (watchings != null) {
+            if (watchings.containsKey(uid)) {
+                try {
+                    WatchingModel watching = watchings.get(uid);
+                    setChanged();
+                    watching.setGps(activeModel.isGps());
+                    watching.setStatus(activeModel.getStatus());
+                    watching.setPosition(activeModel.getPosition());
+                    watching.setUpdateTime(activeModel.getUpdateTime());
+                    //et on replace
+                    watchings.put(uid, watching);
+                    //on notifie les observers
+                    setChanged();
+                    notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_UPDATE, uid));
+                }catch(Exception e){
+                    // null pointer
+                }
+            }
+        }
+    }
+
+    public boolean addWatching(String uid, WatchingModel watching) {
+        if (watchings == null) {
+            watchings = new HashMap<>();
+        }
+        if (!watchings.containsKey(uid)){
+            watchings.put(uid, watching);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeWatching(String uid) {
+        if (watchings != null) {
+            if (watchings.containsKey(uid)) {
+                watchings.remove(uid);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public HashMap<String, WatchingModel> getWatchings(){
+        return watchings;
+    }
+
+    public WatchingModel getWatching(String uid){
+        if (watchings != null) {
+            if (watchings.containsKey(uid)) {
+                return watchings.get(uid);
             }
         }
         return null;
@@ -180,15 +240,12 @@ public class UserObject extends Observable{
         loginType = 0;
         watchers = null;
         invitations = null;
+        watchings = null;
         status = Const.status.OFFLINE;
     }
 
     public String getEmail(){
         return email;
-    }
-
-    public String getUserId(){
-        return uid;
     }
 
     public Object getData(){

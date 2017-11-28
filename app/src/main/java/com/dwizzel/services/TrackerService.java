@@ -300,6 +300,14 @@ public class TrackerService extends Service implements ITrackerService{
         }
     }
 
+    public void onUserWatchingsList(ServiceResponseObject sro){
+        Tracer.log(TAG, "onUserWatchingsList");
+        //on tranmet la reponse au activy qui a caller si il y a
+        if(mBinderCallback != null) {
+            mBinderCallback.handleResponse(sro);
+        }
+    }
+
     public void onUserInvitationsList(ServiceResponseObject sro){
         Tracer.log(TAG, "onUserInvitationsList");
         //on tranmet la reponse au activy qui a caller si il y a
@@ -426,6 +434,19 @@ public class TrackerService extends Service implements ITrackerService{
                 if(mBinderCallback != null) {
                     mBinderCallback.handleResponse(
                             new ServiceResponseObject(Const.response.ON_INVITES_LIST));
+                }
+            }
+        }
+        public void getWatchingsList(){
+            Tracer.log(TAG, "TrackerBinder.getWatchingsList");
+            //on cherche la liste de nos watchings si la notre est a null
+            if(mUser.getWatchings() == null) {
+                mDatabaseService.getWatchingsList();
+            }else{
+                //sinon il l'a deja alors on repond tout de suite
+                if(mBinderCallback != null) {
+                    mBinderCallback.handleResponse(
+                            new ServiceResponseObject(Const.response.ON_WATCHINGS_LIST));
                 }
             }
         }

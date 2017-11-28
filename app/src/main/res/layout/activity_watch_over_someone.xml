@@ -4,15 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.dwizzel.thekids.WatchOverSomeoneActivity">
+    tools:context="com.dwizzel.thekids.WatchOverSomeoneActivity"
+    android:id="@+id/mainView">
 
-    <ListView
-        android:id="@+id/lvWatchers"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
+    <ProgressBar android:id="@+id/loading_spinner"
+        style="@style/AppTheme.ProgressBar"
+        android:layout_gravity="center"
+        />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingActionButtonAdd"
+        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

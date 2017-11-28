@@ -40,7 +40,7 @@
             android:layout_marginEnd="@dimen/butt_big_button_margin"
             android:layout_marginStart="@dimen/butt_big_button_margin"
             android:layout_marginTop="8dp"
-            android:text="@string/butt_enter_phone_numnber"
+            android:text="@string/butt_enter_phone_number"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView4" />

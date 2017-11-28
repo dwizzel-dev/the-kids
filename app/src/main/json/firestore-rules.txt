@@ -5,6 +5,9 @@ service cloud.firestore {
             match /watchers/{document=**} {
                 allow read, write;
             }
+            match /watchings/{document=**} {
+                allow read, write;
+            }
             match /invitations/{document=**} {
                 allow read, write;
             }

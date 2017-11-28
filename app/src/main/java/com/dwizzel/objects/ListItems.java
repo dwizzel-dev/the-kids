@@ -12,6 +12,7 @@ public class ListItems {
         public static final int TYPE_WATCHER = 2;
         public static final int TYPE_INVITATION = 3;
         public static final int TYPE_TEXT = 4;
+        public static final int TYPE_WATCHING = 5;
     }
 
     //-----------------------------------
@@ -81,6 +82,23 @@ public class ListItems {
         @Override
         public int getItemType() {
             return Type.TYPE_INVITATION;
+        }
+        @Override
+        public String getItemValue() {
+            return uid;
+        }
+    }
+
+    //-----------------------------------
+    public static class WatchingItem extends Item {
+        private String uid;
+        public WatchingItem(String uid) {
+            super();
+            this.uid = uid;
+        }
+        @Override
+        public int getItemType() {
+            return Type.TYPE_WATCHING;
         }
         @Override
         public String getItemValue() {

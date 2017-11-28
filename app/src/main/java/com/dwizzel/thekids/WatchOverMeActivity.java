@@ -38,18 +38,13 @@ import java.util.Observer;
 public class WatchOverMeActivity extends BaseActivity {
 
     private static final String TAG = "WatchOverMeActivity";
-    private TrackerService.TrackerBinder mTrackerBinder;
     private boolean isActivityCreated = false;
     private boolean isWatchersLoaded = false;
     private boolean isInvitationsLoaded = false;
     private UserObject mUser;
-
     private HashMap<String, Integer> mWatchersPair;
     private HashMap<String, Integer> mInvitationsPair;
-
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     public void onSubDestroy(){
         Tracer.log(TAG, "onSubDestroy");
@@ -130,11 +125,11 @@ public class WatchOverMeActivity extends BaseActivity {
             public void onCreated(ServiceResponseObject sro){}
         };
         //get le binder
-        mTrackerBinder = getTrackerBinder();
+        TrackerService.TrackerBinder trackerBinder = getTrackerBinder();
         //on enleve le precedenet callback de BaseActivity
-        mTrackerBinder.unregisterCallback();
+        trackerBinder.unregisterCallback();
         //set le nouveau callback qui overwrite celui de BaseActivity
-        mTrackerBinder.registerCallback(serviceCallback);
+        trackerBinder.registerCallback(serviceCallback);
     }
 
     private boolean isContentLoaded(){
@@ -176,11 +171,11 @@ public class WatchOverMeActivity extends BaseActivity {
                 RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT));
         //mRecyclerView.setHasFixedSize(true);
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
+        mRecyclerView.setLayoutManager(layoutManager);
+        RecyclerView.Adapter adapter = new WatchOverMeListAdapter(createWatchersList());
         // specify an adapter
-        mAdapter = new WatchOverMeListAdapter(createWatchersList());
-        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setAdapter(adapter);
         //le padding de 8px au dessus et dessous
         mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
         //l'animation
@@ -256,7 +251,6 @@ public class WatchOverMeActivity extends BaseActivity {
                 }
             }else{
                 list.add(new ListItems.TextItem(getResources().getString(R.string.invitations_list_empty)));
-                pos++;
             }
         }catch(Exception e){
             Tracer.log(TAG, "createWatchersList.exception: ", e);
