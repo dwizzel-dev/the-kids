@@ -100,6 +100,6 @@
 
     <!-- SMS INVIATATION TEMPLATE -->
     <string name="sms_invitation_title">The message below will be sent to %1$s</string>
-    <string name="sms_invitation_message">%1$s\n\nYou have receive an invitation to watch on this person to help her being secured. Enter this id: \n\n<b>%2$s</b>\n\n in "The Kids Watcher" mobile application to activate and start helping her. Thx!</string>
+    <string name="sms_invitation_message">%1$s. You have receive an invitation. Enter this id: %2$s in the mobile application to start helping.</string>
 
 </resources>

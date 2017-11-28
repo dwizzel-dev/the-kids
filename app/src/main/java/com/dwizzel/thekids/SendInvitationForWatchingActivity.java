@@ -131,6 +131,8 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
         //start activity
         Intent intent = new Intent(SendInvitationForWatchingActivity.this,
                 WatchOverMeActivity.class);
+        //start activity and clear the backStack
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
 
@@ -175,9 +177,13 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
 
     private void sendSMSMessageToInvites(){
         Tracer.log(TAG, "sendSMSMessageToInvites");
-        SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(mPhone, null, mMessage, null, null);
-        createInvitation(Const.error.NO_ERROR);
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(mPhone, null, mMessage, null, null);
+            createInvitation(Const.error.NO_ERROR);
+        }catch(Exception e){
+            Tracer.log(TAG, "sendSMSMessageToInvites.Exception: ", e);
+        }
     }
 
 
@@ -192,7 +198,7 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
                 } else {
                     Utils.getInstance().showToastMsg(
                             SendInvitationForWatchingActivity.this, R.string.toast_sms_not_sent);
-                    //TODO: on affiche l'erreur et enleve le loader
+                    //on affiche l'erreur et enleve le loader
                     createInvitation(Const.error.ERROR_SMS_NOT_SENT);
                 }
             }
