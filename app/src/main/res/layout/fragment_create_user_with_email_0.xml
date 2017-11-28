@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:ems="10"
             android:hint="@string/email_hint"
             android:inputType="textEmailAddress"
@@ -39,13 +39,15 @@
         <TextView
             android:id="@+id/errMsg"
             style="@style/AppTheme.P.error"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/userEmail" />
+            app:layout_constraintStart_toEndOf="@+id/buttNextToPsw"
+            app:layout_constraintTop_toBottomOf="@+id/userEmail"
+            tools:text="@string/medium_text" />
 
         <Button
             android:id="@+id/buttNextToPsw"
@@ -55,7 +57,7 @@
             android:layout_marginTop="8dp"
             android:text="@string/butt_next"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/errMsg" />
+            app:layout_constraintTop_toBottomOf="@+id/userEmail" />
 
 
 

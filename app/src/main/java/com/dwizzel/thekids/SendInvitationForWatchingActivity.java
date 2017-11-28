@@ -37,6 +37,7 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
     private TrackerService.TrackerBinder mTrackerBinder;
     private static final int PERMISSION_REQUEST_SEND_SMS = 28400;
     private Integer currFragmentNum;
+    private Fragment mCurrFragment;
     private boolean isActivityCreated = false;
     private FragmentManager mFragmentManager;
 
@@ -138,17 +139,17 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
 
     protected void createBundleAndGotoFragment(int err){
         Tracer.log(TAG, "createBundleAndGotoFragment: " + err);
-        mMessage = getResources().getString(R.string.sms_invitation_message,
-                mMessage, mInviteId);
-        //on enleve le loader et on change de fragment pour l'envoi final
+        //le message complet avec inviteID
+        mMessage = getResources().getString(R.string.sms_invitation_message, mMessage, mInviteId);
+        //les args a passer
         Bundle bundle = new Bundle();
         bundle.putString("phone", mPhone);
         bundle.putString("message", mMessage);
         //si on a une erreur la rajouter
         if(err != Const.error.NO_ERROR){
-            bundle.putInt("msg", R.string.err_sms_not_sent);
+            bundle.putInt("msg", err); //will be an string id instead
         }
-
+        //on change de fragment pour l'envoi final
         gotoFragment(2, bundle);
     }
 
@@ -162,6 +163,7 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
                     SendInvitationForWatchingActivity.this,
                     Manifest.permission.SEND_SMS)) {
                 Tracer.log(TAG, "sendSMSMessage.shouldShowRequestPermissionRationale");
+                createInvitation(Const.error.ERROR_SMS_SEND_PERMISSION);
             }else{
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.SEND_SMS},
@@ -205,11 +207,11 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
         }
     }
 
-    protected void createInvitation(int err){
+    protected void createInvitation(int err) {
         Tracer.log(TAG, "createInvitation: " + err);
         //Utils.getInstance().showToastMsg(SendInvitationForWatchingActivity.this, R.string.toast_sms_sent);
         // et on revient a la liste avec le pending ajoute
-        switch(err){
+        switch (err) {
             case Const.error.NO_ERROR:
                 //on creer l'invitation du user dans la DB
                 //le retour du service fera le reste
@@ -217,73 +219,79 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
                 break;
             case Const.error.ERROR_SMS_NOT_SENT:
                 //on set le message et on dit que l'on a eu un probleme
-                createBundleAndGotoFragment(err);
+                if(mCurrFragment != null){
+                    ((ISendInvitationForWatchingFragment)mCurrFragment).displayErrMsg(R.string.err_sms_not_sent);
+                }
+                break;
+            case Const.error.ERROR_SMS_SEND_PERMISSION:
+                //on set le message et on dit que l'on a eu un probleme
+                if(mCurrFragment != null){
+                    ((ISendInvitationForWatchingFragment)mCurrFragment).displayErrMsg(R.string.err_sms_send_permission);
+                }
                 break;
             default:
                 break;
 
         }
-
-
-
     }
 
     public void gotoFragment(int fragNum, Bundle bundle){
         Tracer.log(TAG, "gotoFragment: " + fragNum);
+        //
+        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        TransitionSet transitionSet;
+
         //si active on remove celui qui est visible
-        if(currFragmentNum!= null){
+        if(currFragmentNum != null){
             //les multiples transitions
-            TransitionSet transitionSet = new TransitionSet()
+            transitionSet = new TransitionSet()
                     .addTransition(new Slide(Gravity.START))
                     .addTransition(new Fade(Fade.OUT));
             //le fragment precedent
             Fragment prevFragment = mFragmentManager.findFragmentById(R.id.fragment_container);
             prevFragment.setExitTransition(transitionSet);
         }
-
         currFragmentNum = fragNum;
-        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-        Fragment fragment;
 
         switch(fragNum){
             case 1:
-                fragment = new SendInvitationForWatchingFragment1();
-                fragment.setArguments(bundle);
-                TransitionSet transitionSet = new TransitionSet()
+                mCurrFragment = new SendInvitationForWatchingFragment1();
+                mCurrFragment.setArguments(bundle);
+                transitionSet = new TransitionSet()
                         .addTransition(new Slide(Gravity.END))
                         .addTransition(new Fade(Fade.IN));
                 //la transition
-                fragment.setEnterTransition(transitionSet);
+                mCurrFragment.setEnterTransition(transitionSet);
                 //on rajoute le fragment
-                fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
+                fragmentTransaction.replace(R.id.fragment_container, mCurrFragment).commit();
                 fragmentTransaction.addToBackStack(String.format(
                         Utils.getInstance().getLocale(SendInvitationForWatchingActivity.this),
                         "fragment%d", fragNum));
                 break;
 
             case 2:
-                fragment = new SendInvitationForWatchingFragment2();
-                fragment.setArguments(bundle);
-                TransitionSet transitionSet2 = new TransitionSet()
+                //TODO: check si c'est le meme fragment que celui deja loade sinon crash
+                mCurrFragment = new SendInvitationForWatchingFragment2();
+                mCurrFragment.setArguments(bundle);
+                transitionSet = new TransitionSet()
                         .addTransition(new Slide(Gravity.END))
                         .addTransition(new Fade(Fade.IN));
                 //la transition
-                fragment.setEnterTransition(transitionSet2);
+                mCurrFragment.setEnterTransition(transitionSet);
                 //on rajoute le fragment
-                fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
+                fragmentTransaction.replace(R.id.fragment_container, mCurrFragment).commit();
                 fragmentTransaction.addToBackStack(String.format(
-                        Utils.getInstance().getLocale(SendInvitationForWatchingActivity.this),
-                        "fragment%d", fragNum));
-                //TODO: peut etre un back stack de moins
+                            Utils.getInstance().getLocale(SendInvitationForWatchingActivity.this),
+                            "fragment%d", fragNum));
                 break;
 
             default:
                 //le fragment du ask pour contact direct ou liste des contacts
-                fragment = new SendInvitationForWatchingFragment0();
+                mCurrFragment = new SendInvitationForWatchingFragment0();
                 //les arguments si il y a
-                fragment.setArguments(bundle);
+                mCurrFragment.setArguments(bundle);
                 //on rajoute le fragment
-                fragmentTransaction.add(R.id.fragment_container, fragment).commit();
+                fragmentTransaction.add(R.id.fragment_container, mCurrFragment).commit();
                 break;
         }
     }

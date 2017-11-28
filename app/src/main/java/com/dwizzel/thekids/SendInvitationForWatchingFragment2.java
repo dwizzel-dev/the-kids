@@ -17,7 +17,7 @@ import com.dwizzel.utils.Tracer;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class SendInvitationForWatchingFragment2 extends Fragment {
+public class SendInvitationForWatchingFragment2 extends Fragment implements ISendInvitationForWatchingFragment {
 
     private static final String TAG = "SendInvitationForWatchingFragment2";
     private View fragmentView;
@@ -82,7 +82,7 @@ public class SendInvitationForWatchingFragment2 extends Fragment {
 
     }
 
-    private void displayErrMsg(int msgId){
+    public void displayErrMsg(int msgId){
         showSpinner(false);
         TextView txtView = fragmentView.findViewById(R.id.errMsg);
         if(msgId != 0) {

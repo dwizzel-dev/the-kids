@@ -55,7 +55,7 @@ public class TrackerService extends Service implements ITrackerService{
     private IDatabaseService mDatabaseService;
     private IGpsService mGpsService;
     private UserObject mUser;
-    private final IBinder mTrackerBinder = new TrackerBinder();
+    private IBinder mTrackerBinder = new TrackerBinder();
     //timer
     private HandlerThread mThTimer;
     private Handler mHandlerTimer;

@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.dwizzel.Const;
 import com.dwizzel.utils.Tracer;
 
-public class SendInvitationForWatchingFragment1 extends Fragment {
+public class SendInvitationForWatchingFragment1 extends Fragment implements ISendInvitationForWatchingFragment {
 
     private static final String TAG = "SendInvitationForWatchingFragment1";
     private View fragmentView;
@@ -108,7 +108,7 @@ public class SendInvitationForWatchingFragment1 extends Fragment {
 
     }
 
-    private void displayErrMsg(int msgId){
+    public void displayErrMsg(int msgId){
         showSpinner(false);
         TextView txtView = fragmentView.findViewById(R.id.errMsg);
         if(msgId != 0) {

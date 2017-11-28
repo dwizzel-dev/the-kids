@@ -46,7 +46,7 @@ public class WatchOverSomeoneActivity extends BaseActivity {
         if(!isActivityCreated) {
             setContentView(R.layout.activity_watch_over_someone);
             setTitle(R.string.watch_over_someone_title);
-            setFloatingActionButton();
+            //setFloatingActionButton();
             //set un nouveau callback au lieu de celui de BaseActivity
             //vu qu'il va recevoir une notif quand aura ca liste de Watchers et de Invites
             setTrackerBinderCallback();
@@ -157,7 +157,7 @@ public class WatchOverSomeoneActivity extends BaseActivity {
                 AnimationUtils.loadLayoutAnimation(WatchOverSomeoneActivity.this,
                         R.anim.layout_animation_slide_from_bottom));
         //rajoute a la view principale
-        CoordinatorLayout layout = findViewById(R.id.mainView);
+        CoordinatorLayout layout = findViewById(R.id.bottomView);
         layout.addView(mRecyclerView, layout.getChildCount()); //en dessous du floating button
         //observer sur le user
         setUserObserver();

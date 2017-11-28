@@ -19,7 +19,7 @@ import com.dwizzel.utils.Tracer;
 
 import static android.app.Activity.RESULT_OK;
 
-public class SendInvitationForWatchingFragment0 extends Fragment {
+public class SendInvitationForWatchingFragment0 extends Fragment implements ISendInvitationForWatchingFragment {
 
     private static final String TAG = "SendInvitationForWatchingFragment0";
     private View fragmentView;
@@ -147,7 +147,7 @@ public class SendInvitationForWatchingFragment0 extends Fragment {
     }
 
 
-    private void displayErrMsg(int msgId){
+    public void displayErrMsg(int msgId){
         Tracer.log(TAG, "displayErrMsg: " + msgId);
     }
 
