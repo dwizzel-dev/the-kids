@@ -347,6 +347,14 @@ public class TrackerService extends Service implements ITrackerService{
         }
     }
 
+    public void onActivateInvites(ServiceResponseObject sro){
+        Tracer.log(TAG, "onActivateInvites");
+        //on tranmet la reponse object au caller
+        if(mBinderCallback != null) {
+            mBinderCallback.handleResponse(sro);
+        }
+    }
+
     public void onGpsPositionUpdate(){
         Tracer.log(TAG, "onGpsPositionUpdate");
         //on fait un update du user et celui de la DB
@@ -367,50 +375,67 @@ public class TrackerService extends Service implements ITrackerService{
     //NESTED CLASS
 
     public class TrackerBinder extends Binder implements ITrackerBinder {
+
         public long getCounter() {
             return mTimer;
         }
+
         public long getTimeDiff() {
             return ((System.currentTimeMillis()/1000) - mStartTime);
         }
+
         public void registerCallback(ITrackerBinderCallback callback){
             Tracer.log(TAG, "TrackerBinder.registerCallback");
             mBinderCallback = callback;
         }
+
         public void unregisterCallback(){
             Tracer.log(TAG, "TrackerBinder.unregisterCallback");
             mBinderCallback = null;
         }
+
         public boolean isSignedIn(){
             Tracer.log(TAG, "TrackerBinder.isSignedIn");
             return mAuthService.isSignedIn();
         }
+
         public void signOut(){
             Tracer.log(TAG,"TrackerBinder.signOut");
             //on reset le user et le service s'occupe du reste
             // pour faire le callback quand c'est termine
             resetUser();
         }
+
         public void signIn(String email, String psw){
             Tracer.log(TAG, "TrackerBinder.signIn[email]");
             mAuthService.signInUser(email, psw);
         }
+
         public void signIn(AuthCredential authCredential){
             Tracer.log(TAG, "TrackerBinder.signIn[credentials]");
             mAuthService.signInUser(authCredential);
         }
+
         public void createUser(String email, String psw){
             Tracer.log(TAG, "TrackerBinder.createUser");
             mAuthService.createUser(email, psw);
         }
+
         public void createInviteId(){
             Tracer.log(TAG, "TrackerBinder.createInvite");
             mDatabaseService.createInviteId();
         }
+
         public void createInvitation(String inviteId, String name, String phone, String email){
             Tracer.log(TAG, "TrackerBinder.createInvitation: " + inviteId);
             mDatabaseService.createInvitation(inviteId, name, phone, email);
         }
+
+        public void activateInvites(String inviteId){
+            Tracer.log(TAG, "TrackerBinder.activateInvites: " + inviteId);
+            mDatabaseService.activateInvites(inviteId);
+        }
+
         public void getWatchersList(){
             Tracer.log(TAG, "TrackerBinder.getWatchersList");
             //on cherche la liste de nos watchers si la notre est a null
@@ -424,6 +449,7 @@ public class TrackerService extends Service implements ITrackerService{
                 }
             }
         }
+
         public void getInvitationsList(){
             Tracer.log(TAG, "TrackerBinder.getInvitationsList");
             //on cherche la liste de nos watchers si la notre est a null
@@ -437,6 +463,7 @@ public class TrackerService extends Service implements ITrackerService{
                 }
             }
         }
+
         public void getWatchingsList(){
             Tracer.log(TAG, "TrackerBinder.getWatchingsList");
             //on cherche la liste de nos watchings si la notre est a null
@@ -462,7 +489,7 @@ public class TrackerService extends Service implements ITrackerService{
         //les secondes ne sont plus vraiment des secondes
         // car le thread est plus lent
         // si l'application n'a pas le focus
-        private int keepAliveDelay = 300;
+        private int keepAliveDelay = 600; //10 minutes
         private int checkConnectivityDelay = 60; //1 minutes
         private int sleepDelay = 1000;
         TimerRunnable(){}
@@ -487,7 +514,7 @@ public class TrackerService extends Service implements ITrackerService{
                         }
                         mHasConnectivity = conn;
                     }
-                    Tracer.tog("run: ", getTimer());
+                    //Tracer.tog("run: ", getTimer());
                 }
             } catch (InterruptedException ie) {
                 Tracer.log(TAG, "run.InterruptedException");

@@ -14,6 +14,7 @@ public final class Const {
         public static final int ERROR_WEAK_PASSWORD = 207;
         public static final int ERROR_SMS_NOT_SENT = 208;
         public static final int ERROR_SMS_SEND_PERMISSION = 209;
+        public static final int ERROR_INVITE_ID_FAILURE = 210;
     }
     public static final class except {
         public static final int GENERIC = 301;
@@ -44,9 +45,9 @@ public final class Const {
     }
     public static final class invitation {
         public static final int ACCEPTED = 800;
-        public static final int REFUSED = 801;
         public static final int PENDING = 802;
         public static final int INNACTIVE = 803;
+        public static final int REMOVE = 804;
     }
     public static final class notif {
         public static final int WATCHER_UPDATE = 900;
@@ -68,6 +69,7 @@ public final class Const {
         public static final String ON_INVITATION_CREATED = "ON_INVITATION_CREATED";
         public static final String ON_WATCHINGS_LIST = "ON_WATCHINGS_LIST";
         public static final String ON_EMPTY_WATCHINGS_LIST = "ON_EMPTY_WATCHINGS_LIST";
+        public static final String ON_INVITE_ID_ACTIVATED = "ON_INVITE_ID_ACTIVATED";
 
     }
 

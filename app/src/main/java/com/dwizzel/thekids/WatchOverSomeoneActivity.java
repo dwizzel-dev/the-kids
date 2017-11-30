@@ -8,7 +8,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchOverSomeoneListAdapter;
@@ -21,19 +25,23 @@ import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.ListPaddingDecoration;
 import com.dwizzel.utils.Tracer;
+import com.dwizzel.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
-public class WatchOverSomeoneActivity extends BaseActivity {
+public class WatchOverSomeoneActivity extends BaseActivity{
 
     private static final String TAG = "WatchOverSomeoneActivity";
     private boolean isActivityCreated = false;
     private UserObject mUser;
     private HashMap<String, Integer> mWatchingsPair;
     private RecyclerView mRecyclerView;
+    private String mInviteId;
+    TrackerService.TrackerBinder mTrackerBinder;
+
 
     public void onSubDestroy(){
         Tracer.log(TAG, "onSubDestroy");
@@ -46,13 +54,13 @@ public class WatchOverSomeoneActivity extends BaseActivity {
         if(!isActivityCreated) {
             setContentView(R.layout.activity_watch_over_someone);
             setTitle(R.string.watch_over_someone_title);
-            //setFloatingActionButton();
+            setButton();
             //set un nouveau callback au lieu de celui de BaseActivity
             //vu qu'il va recevoir une notif quand aura ca liste de Watchers et de Invites
             setTrackerBinderCallback();
             //on cherche la list des Watching On
             try {
-                getTrackerBinder().getWatchingsList();
+                mTrackerBinder.getWatchingsList();
             } catch (NullPointerException npe) {
                 Tracer.log(TAG, "onSubCreate.NullPointerException: ", npe);
             }
@@ -61,17 +69,32 @@ public class WatchOverSomeoneActivity extends BaseActivity {
         isActivityCreated = true;
     }
 
-    private void setFloatingActionButton(){
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Click action
-                Intent intent = new Intent(WatchOverSomeoneActivity.this,
-                        ActivateInvitationActivity.class);
-                startActivity(intent);
-            }
-        });
+    private void setButton() {
+        Button buttActivate = findViewById(R.id.buttActivate);
+        //butt create
+        buttActivate.setOnClickListener(
+                new View.OnClickListener() {
+                    public void onClick(View v) {
+                        //on call la function et on met le loader
+                        checkMandatoryFieldsAndActivate();
+                    }
+                });
+
+    }
+
+    private void checkMandatoryFieldsAndActivate(){
+        showSpinner(true);
+        displayErrMsg(Const.error.NO_ERROR);
+        //on va chercher les infos et on les sets
+        mInviteId = String.format("%s",((EditText)findViewById(R.id.txtInviteId)).getText());
+        //minor check
+        if(mInviteId.isEmpty()){
+            displayErrMsg(R.string.err_invalid_invite_id);
+            return;
+        }
+        //on a le tout allors on fait le call au service
+        mTrackerBinder.activateInvites(mInviteId);
+
     }
 
     private void setTrackerBinderCallback(){
@@ -81,21 +104,38 @@ public class WatchOverSomeoneActivity extends BaseActivity {
             private static final String TAG = "WatchOverSomeoneActivity.ITrackerBinder";
             public void handleResponse(ServiceResponseObject sro){
                 Tracer.log(TAG, "handleResponse: " + sro);
-                if(sro.getErr() == 0){
+                if(sro.getErr() == 0) {
                     Tracer.log(TAG, "handleResponse: " + sro.getMsg());
-                    switch(sro.getMsg()){
+                    switch (sro.getMsg()) {
                         case Const.response.ON_WATCHINGS_LIST:
                         case Const.response.ON_EMPTY_WATCHINGS_LIST:
                             //ca nous prend un ou l'autre
                             contentListLoaded();
                             break;
+                        case Const.response.ON_INVITE_ID_ACTIVATED:
+                            //ca nous prend un ou l'autre
+                            createNicknameForWatchings();
+                            break;
                         default:
                             break;
                     }
-                }else if(sro.getErr() == Const.conn.NOT_CONNECTED){
-                    Tracer.log(TAG, "handleResponse: NOT_CONNECTED");
-                }else if(sro.getErr() == Const.conn.RECONNECTED){
-                    Tracer.log(TAG, "handleResponse: RECONNECTED");
+                }else{
+                    switch (sro.getErr()) {
+                        case Const.conn.NOT_CONNECTED:
+                            Tracer.log(TAG, "handleResponse: NOT CONNECTED");
+                            break;
+                        case Const.conn.RECONNECTED:
+                            Tracer.log(TAG, "handleResponse: RECONNECTED");
+                            break;
+                        case Const.conn.RECONNECTING:
+                            Tracer.log(TAG, "handleResponse: RECONNECTING");
+                            break;
+                        case Const.error.ERROR_INVITE_ID_FAILURE:
+                            displayErrMsg(R.string.err_invalid_invite_id_failure);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
             public void onSignedIn(ServiceResponseObject sro){}
@@ -103,11 +143,25 @@ public class WatchOverSomeoneActivity extends BaseActivity {
             public void onCreated(ServiceResponseObject sro){}
         };
         //get le binder
-        TrackerService.TrackerBinder trackerBinder = getTrackerBinder();
+        mTrackerBinder = getTrackerBinder();
         //on enleve le precedenet callback de BaseActivity
-        trackerBinder.unregisterCallback();
+        mTrackerBinder.unregisterCallback();
         //set le nouveau callback qui overwrite celui de BaseActivity
-        trackerBinder.registerCallback(serviceCallback);
+        mTrackerBinder.registerCallback(serviceCallback);
+    }
+
+    private void createNicknameForWatchings(){
+        Tracer.log(TAG, "createNicknameForWatchings");
+    }
+
+    public void displayErrMsg(int msgId){
+        showSpinner(false);
+        TextView txtView = findViewById(R.id.errMsg);
+        if(msgId != 0) {
+            txtView.setText(msgId);
+        }else {
+            txtView.setText("");
+        }
     }
 
     private void contentListLoaded() {
@@ -216,7 +270,6 @@ public class WatchOverSomeoneActivity extends BaseActivity {
         return list;
     }
 
-
     private void updateWatchingsListSingleViewItem(String uid){
         Tracer.log(TAG, "updateWatchingsListSingleViewItem: " + uid);
         //get la position selon le uid avec le array ref/pos list
@@ -243,6 +296,19 @@ public class WatchOverSomeoneActivity extends BaseActivity {
                         break;
                 }
             }
+        }
+    }
+
+    private void showSpinner(boolean show){
+        //le bouton et le spinner
+        ProgressBar progressBar = findViewById(R.id.loading_spinner_butt);
+        Button buttSend = findViewById(R.id.buttActivate);
+        if(show){
+            progressBar.setVisibility(View.VISIBLE);
+            buttSend.setVisibility(View.INVISIBLE);
+        }else{
+            progressBar.setVisibility(View.INVISIBLE);
+            buttSend.setVisibility(View.VISIBLE);
         }
     }
 

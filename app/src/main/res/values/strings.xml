@@ -66,18 +66,20 @@
     <string name="invitation_message_hint">Your invitation message here</string>
 
     <!-- ERR MESSAGE -->
-    <string name="email_invalid">the email is invalid</string>
-    <string name="psw_too_short">the password is too short</string>
-    <string name="psw_not_the_same">the two passwords must be identical</string>
-    <string name="psw_weak">the password is weak</string>
+    <string name="err_email_invalid">the email is invalid</string>
+    <string name="err_psw_too_short">the password is too short</string>
+    <string name="err_psw_not_the_same">the two passwords must be identical</string>
+    <string name="err_psw_weak">the password is weak</string>
     <string name="err_invalid_credential">invalid credential</string>
     <string name="err_invalid_password">invalid password</string>
     <string name="err_no_connectivity">no internet connection available</string>
     <string name="err_no_name">You need to provide a nickname</string>
     <string name="err_no_phone">You need to provide a phone number</string>
     <string name="err_no_message">You need to provide a little welcome message!</string>
-    <string name="err_sms_not_sent">The message was not sent, please try again!...</string>
+    <string name="err_sms_not_sent">The message was not sent, please try again!</string>
     <string name="err_sms_send_permission">You have to enable permission of sending this SMS message to continue.</string>
+    <string name="err_invalid_invite_id">The ID you entered is not valid (20 chars min).</string>
+    <string name="err_invalid_invite_id_failure">Woops!!! An error occurred during the validation please retry</string>
 
     <!-- TEXT -->
     <string name="or"> OR </string>

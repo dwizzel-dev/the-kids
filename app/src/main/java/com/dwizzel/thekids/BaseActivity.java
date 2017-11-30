@@ -68,7 +68,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
         public void onSignedOut(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedOut");
             //show le msg
-            Utils.getInstance().hideProgressDialog();
+            //Utils.getInstance().hideProgressDialog();
             Utils.getInstance().showToastMsg(BaseActivity.this, R.string.toast_signed_out);
             startLoginActivity();
         }

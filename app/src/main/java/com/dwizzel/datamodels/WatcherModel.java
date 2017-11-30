@@ -76,6 +76,9 @@ public class WatcherModel{
     }
 
     public void setPosition(GeoPoint position) {
+        if(position == null){
+            position = new GeoPoint(.0,.0);
+        }
         this.position = position;
     }
 

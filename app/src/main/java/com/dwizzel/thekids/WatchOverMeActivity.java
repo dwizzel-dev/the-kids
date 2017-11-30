@@ -45,6 +45,7 @@ public class WatchOverMeActivity extends BaseActivity {
     private HashMap<String, Integer> mWatchersPair;
     private HashMap<String, Integer> mInvitationsPair;
     private RecyclerView mRecyclerView;
+    TrackerService.TrackerBinder mTrackerBinder;
 
     public void onSubDestroy(){
         Tracer.log(TAG, "onSubDestroy");
@@ -63,8 +64,8 @@ public class WatchOverMeActivity extends BaseActivity {
             setTrackerBinderCallback();
             //on cherche la list
             try {
-                getTrackerBinder().getWatchersList();
-                getTrackerBinder().getInvitationsList();
+                mTrackerBinder.getWatchersList();
+                mTrackerBinder.getInvitationsList();
             } catch (NullPointerException npe) {
                 Tracer.log(TAG, "onSubCreate.NullPointerException: ", npe);
             }
@@ -125,11 +126,11 @@ public class WatchOverMeActivity extends BaseActivity {
             public void onCreated(ServiceResponseObject sro){}
         };
         //get le binder
-        TrackerService.TrackerBinder trackerBinder = getTrackerBinder();
+        mTrackerBinder = getTrackerBinder();
         //on enleve le precedenet callback de BaseActivity
-        trackerBinder.unregisterCallback();
+        mTrackerBinder.unregisterCallback();
         //set le nouveau callback qui overwrite celui de BaseActivity
-        trackerBinder.registerCallback(serviceCallback);
+        mTrackerBinder.registerCallback(serviceCallback);
     }
 
     private boolean isContentLoaded(){
@@ -302,8 +303,6 @@ public class WatchOverMeActivity extends BaseActivity {
                     case Const.invitation.ACCEPTED:
                         break;
                     case Const.invitation.PENDING:
-                        break;
-                    case Const.invitation.REFUSED:
                         break;
                     default:
                         break;

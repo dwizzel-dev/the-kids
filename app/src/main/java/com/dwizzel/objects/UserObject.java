@@ -382,6 +382,7 @@ public class UserObject extends Observable{
         map.put("name", name);
         map.put("phone", phone);
         map.put("inviteId", inviteId);
+        map.put("state", Const.invitation.PENDING);
         return map;
     }
 

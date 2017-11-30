@@ -80,13 +80,13 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
                             R.string.err_no_connectivity);
                     break;
                 case Const.error.ERROR_WEAK_PASSWORD:
-                    gotoFragmentAndShowErrors(1, R.string.psw_weak);
+                    gotoFragmentAndShowErrors(1, R.string.err_psw_weak);
                     break;
                 case Const.error.ERROR_EMAIL_EXIST:
                     gotoFragmentAndShowErrors(0, R.string.email_in_use);
                     break;
                 case Const.error.ERROR_INVALID_CREDENTIALS:
-                    gotoFragmentAndShowErrors(0, R.string.email_invalid);
+                    gotoFragmentAndShowErrors(0, R.string.err_email_invalid);
                     break;
                 default:
                     break;

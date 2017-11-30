@@ -2,9 +2,7 @@
 <resources>
 
     <dimen name="butt_login_layout_margin">100dp</dimen>
-
     <dimen name="butt_big_button_margin">16dp</dimen>
-
     <dimen name="image_login_layout_margin">50dp</dimen>
 
     <dimen name="layout_reponsive_margin_first_start">16dp</dimen>
@@ -17,6 +15,7 @@
     <dimen name="layout_reponsive_margin_first_top">8dp</dimen>
     <dimen name="layout_reponsive_margin_middle_top">16dp</dimen>
     <dimen name="layout_reponsive_margin_last_top">16dp</dimen>
+
 
 
 </resources>

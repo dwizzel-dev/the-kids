@@ -95,11 +95,11 @@ public class Utils {
     public int isValidEmail(String email) {
         Tracer.log(TAG, "isValidEmail");
         if(email.equals("")){
-            return R.string.email_invalid;
+            return R.string.err_email_invalid;
         }
         Pattern pattern = Patterns.EMAIL_ADDRESS;
         if(!pattern.matcher(email).matches()){
-            return R.string.email_invalid;
+            return R.string.err_email_invalid;
         }
         return 0;
     }
@@ -108,12 +108,12 @@ public class Utils {
         Tracer.log(TAG, "isValidPsw");
         if(psw.length == 2){
             if(!psw[0].equals(psw[1])) {
-                return R.string.psw_not_the_same;
+                return R.string.err_psw_not_the_same;
             }
         }
         //check juste le premier
         if(psw[0].length() < 6) {
-            return R.string.psw_too_short;
+            return R.string.err_psw_too_short;
         }
         return 0;
     }
