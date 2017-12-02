@@ -48,6 +48,7 @@ public final class Const {
         public static final int PENDING = 802;
         public static final int INNACTIVE = 803;
         public static final int REMOVE = 804;
+        public static final int DEFAULT_CODE = 0;
     }
     public static final class notif {
         public static final int WATCHER_UPDATE = 900;

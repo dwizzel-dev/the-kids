@@ -373,6 +373,7 @@ public class UserObject extends Observable{
         map.put("createTime", FieldValue.serverTimestamp());
         map.put("to", ""); //since we don't know yet
         map.put("state", Const.invitation.INNACTIVE);
+        map.put("code", Const.invitation.DEFAULT_CODE);
         return map;
     }
 

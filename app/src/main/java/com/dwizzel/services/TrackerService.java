@@ -431,9 +431,10 @@ public class TrackerService extends Service implements ITrackerService{
             mDatabaseService.createInvitation(inviteId, name, phone, email);
         }
 
-        public void activateInvites(String inviteId){
-            Tracer.log(TAG, "TrackerBinder.activateInvites: " + inviteId);
-            mDatabaseService.activateInvites(inviteId);
+        public void activateInvites(String code){
+            Tracer.log(TAG, "TrackerBinder.activateInvites: " + code);
+            //mDatabaseService.activateInvites(inviteId);
+            mDatabaseService.activateInvitation(code);
         }
 
         public void getWatchersList(){

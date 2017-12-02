@@ -49,7 +49,7 @@
                     android:layout_marginTop="8dp"
                     android:ems="10"
                     android:hint="@string/activate_hint"
-                    android:inputType="textNoSuggestions|textVisiblePassword"
+                    android:inputType="number"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textViewDescription"
                     tools:text="UomMJLiAHSk2kSaOFcZS" />

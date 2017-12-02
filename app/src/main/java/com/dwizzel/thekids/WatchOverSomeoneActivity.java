@@ -83,7 +83,6 @@ public class WatchOverSomeoneActivity extends BaseActivity{
     }
 
     private void checkMandatoryFieldsAndActivate(){
-        showSpinner(true);
         displayErrMsg(Const.error.NO_ERROR);
         //on va chercher les infos et on les sets
         mInviteId = String.format("%s",((EditText)findViewById(R.id.txtInviteId)).getText());
@@ -93,6 +92,7 @@ public class WatchOverSomeoneActivity extends BaseActivity{
             return;
         }
         //on a le tout allors on fait le call au service
+        showSpinner(true);
         mTrackerBinder.activateInvites(mInviteId);
 
     }

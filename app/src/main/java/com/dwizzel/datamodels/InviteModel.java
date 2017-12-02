@@ -15,10 +15,19 @@ public class InviteModel{
     private String to;
     private Date updateTime;
     private Date createTime;
+    private int code = Const.invitation.DEFAULT_CODE;
     private int state = Const.invitation.PENDING;
 
     public InviteModel(){
 
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
     }
 
     public int getState() {

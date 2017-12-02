@@ -1,5 +1,9 @@
 package com.dwizzel.objects;
 
+import java.io.ObjectInputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Dwizzel on 15/11/2017.
  */
@@ -11,6 +15,7 @@ public final class ServiceResponseObject{
     private int err = 0;
     private String msg = "";
     private String arg = "";
+    private Map<String, Object> args = new HashMap<String, Object>();
 
     public ServiceResponseObject() {
 
@@ -43,6 +48,11 @@ public final class ServiceResponseObject{
         this.arg = arg;
     }
 
+    public ServiceResponseObject(String msg, HashMap<String, Object> args) {
+        this.msg = msg;
+        this.args.putAll(args);
+    }
+
     public int getErr(){
         return err;
     }
@@ -53,6 +63,10 @@ public final class ServiceResponseObject{
 
     public String getArg(){
         return arg;
+    }
+
+    public Map<String, Object> getArgs(){
+        return args;
     }
 
     public Object getObj(){

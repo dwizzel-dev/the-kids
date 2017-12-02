@@ -41,6 +41,9 @@ import java.util.Map;
  *  sur les documents avec FireStore
  *  https://firebase.google.com/docs/firestore/query-data/listen
  *
+ *  CODE LAB:
+ *  https://codelabs.developers.google.com/codelabs/firestore-android/#0
+ *
  * TODO: on va faire des triggers avec le CloudFunction
  *  - sur le signIn pour les mettre dans la collection "active"
  *  - sur un signOut pour les enlever de la collection "active"
@@ -62,9 +65,11 @@ class DatabaseService implements IDatabaseService{
     private UserObject mUser;
     private ITrackerService mTrackerService;
     private ListenerRegistration mUserListener;
-    private Map<String, ListenerRegistration> mWatchersListener = new HashMap<>();
-    private Map<String, ListenerRegistration> mInvitesListener = new HashMap<>();
-    private Map<String, ListenerRegistration> mWatchingsListener = new HashMap<>();
+    private ListenerRegistration mInvitesCodeListener;
+    private Map<String, ListenerRegistration> mWatchersActiveListener = new HashMap<>();
+    private Map<String, ListenerRegistration> mInvitationsListener = new HashMap<>();
+    private Map<String, ListenerRegistration> mWatchingsActiveListener = new HashMap<>();
+
 
     DatabaseService (ITrackerService trackerService) {
         mDb = FirebaseFirestore.getInstance();
@@ -77,32 +82,32 @@ class DatabaseService implements IDatabaseService{
         mDb.setFirestoreSettings(settings);
         }
 
-    private void addListenerOnWatchings(String watchingUid){
-        Tracer.log(TAG, "addListenerOnWatchings: " + watchingUid);
+    private void addListenerOnWatchingsActive(String watchingUid){
+        Tracer.log(TAG, "addListenerOnWatchingsActive: " + watchingUid);
         //trigger a chaque fois qu'il y aune modifications sur le serveur du status ou position
-        mWatchingsListener.put(watchingUid,
+        mWatchingsActiveListener.put(watchingUid,
                 mDb.collection("actives").document(watchingUid)
                         .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                             @Override
                             public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
                                 if (e != null) {
-                                    Tracer.log(TAG, "watchings[" + documentSnapshot.getId()
+                                    Tracer.log(TAG, "watchings-active[" + documentSnapshot.getId()
                                             + "].onEvent.exception: ", e);
                                     return;
                                 }
                                 if(documentSnapshot.exists()) {
-                                    Tracer.log(TAG, "watchings[" + documentSnapshot.getId()
+                                    Tracer.log(TAG, "watchings-active[" + documentSnapshot.getId()
                                             + "].onEvent.DATA ------- : " + documentSnapshot.getData());
                                     try {
                                         //on tranforme en activeModel et on met dans mUser
                                         mUser.updateWatchings(documentSnapshot.getId(),
                                                 documentSnapshot.toObject(ActiveModel.class));
                                     }catch(Exception excpt){
-                                        Tracer.log(TAG, "watchings[" + documentSnapshot.getId()
+                                        Tracer.log(TAG, "watchings-active[" + documentSnapshot.getId()
                                                 + "].onEvent.exception[1]: ", excpt);
                                     }
                                 }else {
-                                    Tracer.log(TAG, "watchings[" + documentSnapshot.getId()
+                                    Tracer.log(TAG, "watchings-active[" + documentSnapshot.getId()
                                             + "].onEvent.NO_DATA ------- ");
                                 }
                             }
@@ -110,10 +115,10 @@ class DatabaseService implements IDatabaseService{
         );
     }
 
-    private void removeListenersOnWatchings(){
-        Tracer.log(TAG, "removeListenersOnWatchings");
-        if(mWatchingsListener != null) {
-            Iterator<Map.Entry<String, ListenerRegistration>> it = mWatchingsListener.entrySet().iterator();
+    private void removeListenersOnWatchingsActive(){
+        Tracer.log(TAG, "removeListenersOnWatchingsActive");
+        if(mWatchingsActiveListener != null) {
+            Iterator<Map.Entry<String, ListenerRegistration>> it = mWatchingsActiveListener.entrySet().iterator();
             while(it.hasNext()) {
                 Map.Entry<String, ListenerRegistration> entry = it.next();
                 ListenerRegistration listenerRegistration = entry.getValue();
@@ -126,46 +131,55 @@ class DatabaseService implements IDatabaseService{
 
     }
 
-    private void addListenerOnInvites(String inviteId){
-        Tracer.log(TAG, "addListenerOnInvites: " + inviteId);
+    private void addListenerOnInvitations(String inviteId){
+        Tracer.log(TAG, "addListenerOnInvitations: " + inviteId);
         //trigger a chaque fois qu'il y aune modifications sur le serveur du status ou position
-        mInvitesListener.put(inviteId,
-                mDb.collection("invites").document(inviteId)
+        mInvitationsListener.put(inviteId,
+                mDb.collection("users").document(mUser.getUid()).collection("invitations").document(inviteId)
                         .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                             @Override
                             public void onEvent(DocumentSnapshot documentSnapshot,
                                                 FirebaseFirestoreException e) {
                                 if (e != null) {
-                                    Tracer.log(TAG, "invites[" + documentSnapshot.getId()
+                                    Tracer.log(TAG, "invitations[" + documentSnapshot.getId()
                                             + "].onEvent.exception[0]: ", e);
                                     return;
                                 }
                                 if(documentSnapshot.exists()) {
-                                    Tracer.log(TAG, "invites[" + documentSnapshot.getId() +
+                                    Tracer.log(TAG, "invitations[" + documentSnapshot.getId() +
                                             "].onEvent.DATA ------- : " + documentSnapshot.getData());
                                     //avec le data on va pouvoir updater le status de la liste
                                     //le invites
                                     try {
                                         //on tranforme en InvitationModel et on met dans mUser
-                                        mUser.updateInvitation(documentSnapshot.getId(),
-                                                documentSnapshot.toObject(InviteModel.class));
+                                        //mUser.updateInvitation(documentSnapshot.getId(),
+                                        //        documentSnapshot.toObject(InviteModel.class));
                                     }catch(Exception excpt){
-                                        Tracer.log(TAG, "invites[" + documentSnapshot.getId()
+                                        Tracer.log(TAG, "invitations[" + documentSnapshot.getId()
                                                 + "].onEvent.exception[1]: ", excpt);
                                     }
                                 }else {
-                                    Tracer.log(TAG, "invites[" + documentSnapshot.getId() +
+                                    Tracer.log(TAG, "invitations[" + documentSnapshot.getId() +
                                             "].onEvent.NO_DATA ------- ");
+                                    // pas de data alors le document a ete supprimer par le script
+                                    // car le invitation a ete active
+                                    // on fait pareil dans la liste du mUser
+                                    // on remove le listener
+                                    removeListenerOnInvitesCode();
+                                    mUser.removeInvitation(documentSnapshot.getId());
+
+                                    // et on rafrachit la liste des watchers car a ete deplace
+                                    // par le script de invitations -> watchers
                                 }
                             }
                         })
         );
     }
 
-    private void removeListenersOnInvites(){
-        Tracer.log(TAG, "removeListenersOnInvites");
-        if(mInvitesListener != null) {
-            Iterator<Map.Entry<String, ListenerRegistration>> it = mInvitesListener.entrySet().iterator();
+    private void removeListenersOnInvitations(){
+        Tracer.log(TAG, "removeListenersOnInvitations");
+        if(mInvitationsListener != null) {
+            Iterator<Map.Entry<String, ListenerRegistration>> it = mInvitationsListener.entrySet().iterator();
             while(it.hasNext()) {
                 Map.Entry<String, ListenerRegistration> entry = it.next();
                 ListenerRegistration listenerRegistration = entry.getValue();
@@ -178,32 +192,32 @@ class DatabaseService implements IDatabaseService{
 
     }
 
-    private void addListenerOnWatchers(String watcherUid){
-        Tracer.log(TAG, "addListenerOnWatchers: " + watcherUid);
+    private void addListenerOnWatchersActive(String watcherUid){
+        Tracer.log(TAG, "addListenerOnWatchersActive: " + watcherUid);
         //trigger a chaque fois qu'il y aune modifications sur le serveur du status ou position
-        mWatchersListener.put(watcherUid,
+        mWatchersActiveListener.put(watcherUid,
                 mDb.collection("actives").document(watcherUid)
                         .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                             @Override
                             public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
                                 if (e != null) {
-                                    Tracer.log(TAG, "watchers[" + documentSnapshot.getId()
+                                    Tracer.log(TAG, "watchers-active[" + documentSnapshot.getId()
                                             + "].onEvent.exception: ", e);
                                     return;
                                 }
                                 if(documentSnapshot.exists()) {
-                                    Tracer.log(TAG, "watchers[" + documentSnapshot.getId()
+                                    Tracer.log(TAG, "watchers-active[" + documentSnapshot.getId()
                                             + "].onEvent.DATA ------- : " + documentSnapshot.getData());
                                     try {
                                         //on tranforme en activeModel et on met dans mUser
                                         mUser.updateWatchers(documentSnapshot.getId(),
                                                 documentSnapshot.toObject(ActiveModel.class));
                                     }catch(Exception excpt){
-                                        Tracer.log(TAG, "watchers[" + documentSnapshot.getId()
+                                        Tracer.log(TAG, "watchers-active[" + documentSnapshot.getId()
                                                 + "].onEvent.exception[1]: ", excpt);
                                     }
                                 }else {
-                                    Tracer.log(TAG, "watchers[" + documentSnapshot.getId()
+                                    Tracer.log(TAG, "watchers-active[" + documentSnapshot.getId()
                                             + "].onEvent.NO_DATA ------- ");
                                 }
                             }
@@ -211,10 +225,10 @@ class DatabaseService implements IDatabaseService{
         );
     }
 
-    private void removeListenersOnWatchers(){
-        Tracer.log(TAG, "removeListenersOnWatchers");
-        if(mWatchersListener != null) {
-            Iterator<Map.Entry<String, ListenerRegistration>> it = mWatchersListener.entrySet().iterator();
+    private void removeListenersOnWatchersActive(){
+        Tracer.log(TAG, "removeListenersOnWatchersActive");
+        if(mWatchersActiveListener != null) {
+            Iterator<Map.Entry<String, ListenerRegistration>> it = mWatchersActiveListener.entrySet().iterator();
             while(it.hasNext()) {
                 Map.Entry<String, ListenerRegistration> entry = it.next();
                 ListenerRegistration listenerRegistration = entry.getValue();
@@ -225,6 +239,48 @@ class DatabaseService implements IDatabaseService{
             }
         }
 
+    }
+
+    private void addListenerOnInvitesCode(String inviteId){
+        Tracer.log(TAG, "addListenerOnInvitesCode: " + inviteId);
+        //trigger a chaque fois qu'il y aune modifications sur le serveur
+        mInvitesCodeListener = mDb.collection("invites").document(inviteId)
+                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    //va surement cause une exception sur le deactivate vu
+                    // que l'on signout du FirebaseAuth donc plus de Uid
+                    public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Tracer.log(TAG, " invites.onEvent.exception: ", e);
+                            return;
+                        }
+                        if(documentSnapshot.exists()) {
+                            Tracer.log(TAG, " invites.onEvent.DATA ------- : " + documentSnapshot.getData());
+                            InviteModel inviteModel = documentSnapshot.toObject(InviteModel.class);
+                            if(inviteModel.getCode() != 0){
+                                HashMap<String, Object> args = new HashMap<>();
+                                args.put("inviteId", documentSnapshot.getId());
+                                args.put("code", String.valueOf(inviteModel.getCode()));
+                                //c'est le code que l,on recoit alors on peut renviyer a l'activity et continuer
+                                mTrackerService.onInviteIdCreated(
+                                        new ServiceResponseObject(
+                                                Const.response.ON_INVITE_ID_CREATED,
+                                                args
+                                        ));
+                            }
+
+                        }else {
+                            Tracer.log(TAG, " invites.onEvent.NO_DATA ------- ");
+                        }
+                    }
+                });
+    }
+
+    private void removeListenerOnInvitesCode(){
+        Tracer.log(TAG, "removeListenerOnInvitesCode");
+        if(mInvitesCodeListener != null) {
+            mInvitesCodeListener.remove();
+        }
     }
 
     private void addListenerOnUser(){
@@ -292,7 +348,11 @@ class DatabaseService implements IDatabaseService{
             // il faut que le user soit creer avant tout
             if(mUser.isCreated()) {
                 WriteBatch batch = mDb.batch();
-                batch.update(mDb.collection("users").document(mUser.getUid()), "updateTime", FieldValue.serverTimestamp(), "loginType", mUser.getLoginType());
+                batch.update(mDb.collection(
+                        "users").document(mUser.getUid()),
+                        "updateTime", FieldValue.serverTimestamp(),
+                        "loginType", mUser.getLoginType()
+                );
                 batch.update(mDb.collection("actives").document(mUser.getUid()), mUser.toActiveData());
                 batch.commit()
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -436,12 +496,14 @@ class DatabaseService implements IDatabaseService{
         try{
             //on enleve les listener sur le user
             removeListenerOnUser();
+            //on enleve les listener sur le invites code
+            removeListenerOnInvitesCode();
             // enleve les listener sur les watchers du user
-            removeListenersOnWatchers();
-            //on enleve les listener sur les invites
-            removeListenersOnInvites();
+            removeListenersOnWatchersActive();
+            //on enleve les listener sur les invitations
+            removeListenersOnInvitations();
             //on enleve les listener sur les watchings
-            removeListenersOnWatchings();
+            removeListenersOnWatchingsActive();
             //  1. remove user collection with his id
             //  OR
             //  2. change the status only we will put a listener on the status for status changes
@@ -489,7 +551,7 @@ class DatabaseService implements IDatabaseService{
                                             //rajoute la liste en interne a mUser
                                             mUser.addWatcher(document.getId(), document.toObject(WatcherModel.class));
                                             //on mets un listener sur les changement de ceux qui peuvent nous watcher
-                                            addListenerOnWatchers(document.getId());
+                                            addListenerOnWatchersActive(document.getId());
                                         }catch (Exception e){
                                             Tracer.log(TAG, "getWatchersList.onComplete.exception: ", e);
                                         }
@@ -532,7 +594,7 @@ class DatabaseService implements IDatabaseService{
                                                     document.toObject(InvitationModel.class));
                                             //on mets un listener sur les changement de ceux qui peuvent nous accepter
                                             //on recoit le event tout de suite apres
-                                            addListenerOnInvites(document.getId());
+                                            //addListenerOnInvitations(document.getId());
                                         }catch (Exception e){
                                             Tracer.log(TAG, "getInvitationsList.onComplete.exception: ", e);
                                         }
@@ -554,6 +616,43 @@ class DatabaseService implements IDatabaseService{
         }
     }
 
+    public void createInviteId(){
+        Tracer.log(TAG, "createInviteId");
+        try{
+            //add the new invites to the collection and retrieve de inviteId
+            mDb.collection("invites")
+                    .add(mUser.toInviteData())
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Tracer.log(TAG, "createInviteId.addOnSuccessListener");
+                            //maintenant il est cree alors on attend que le random number soit genere
+                            //alors on met un listener sur l'invites pour avoir le code pour le SMS
+                            addListenerOnInvitesCode(documentReference.getId());
+                            /*
+                            //TODO: mettre dans addListenerOnInvitesCode()
+                            mTrackerService.onInviteIdCreated(
+                                    new ServiceResponseObject(
+                                            Const.response.ON_INVITE_ID_CREATED,
+                                            documentReference.getId()
+                                    ));
+                            */
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG, "createInviteId.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+
+        }catch (Exception e){
+            Tracer.log(TAG, "createInviteId.Exception: ", e);
+        }
+
+    }
+
+    /*
     public void createInviteId(){
         Tracer.log(TAG, "createInviteId");
         try{
@@ -584,6 +683,7 @@ class DatabaseService implements IDatabaseService{
         }
 
     }
+    */
 
     public void createInvitation(final String inviteId, final String name, final String phone, final String email){
         Tracer.log(TAG, "createInvitation: " + inviteId);
@@ -612,7 +712,7 @@ class DatabaseService implements IDatabaseService{
                             mUser.addInvitation(inviteId, new InvitationModel(inviteId, name, phone, email));
                             //on mets un listener sur les changement de ceux qui accepte ou refuse l'invitation
                             //on recoit le event tout de suite apres
-                            addListenerOnInvites(inviteId);
+                            //addListenerOnInvitations(inviteId);
                             //on call le service commeq quoi c'est fait
                             mTrackerService.onInvitationCreated(new ServiceResponseObject(
                                     Const.response.ON_INVITATION_CREATED));
@@ -652,7 +752,7 @@ class DatabaseService implements IDatabaseService{
                                             //si n'est pas deja dans la liste des watchers, car c'est mUser
                                             //qui va trigger un observer
                                             //TODO: le listener sur les watchings state
-                                            addListenerOnWatchings(document.getId());
+                                            addListenerOnWatchingsActive(document.getId());
                                         }catch (Exception e){
                                             Tracer.log(TAG, "getWatchingsList.onComplete.exception: ", e);
                                         }
@@ -702,6 +802,51 @@ class DatabaseService implements IDatabaseService{
                     });
         }catch (Exception e){
             Tracer.log(TAG, "activateInvites.Exception: ", e);
+        }
+
+    }
+
+    public void activateInvitation(String code){
+        Tracer.log(TAG, "activateInvitation: " + code);
+        //c'est bon on peut faire le call avec un update
+        try{
+            //on va chercher le id de l'invites avec le code
+            mDb.collection("invites")
+                    .whereEqualTo("code", Integer.parseInt(code))
+                    .limit(1)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            Tracer.log(TAG, "activateInvitation.onComplete");
+                            if (task.isSuccessful()) {
+                                QuerySnapshot querySnapshot = task.getResult();
+                                if(!querySnapshot.isEmpty()){
+                                    for(DocumentSnapshot document : querySnapshot) {
+                                        Tracer.log(TAG, "activateInvitation.onComplete.DATA ------- : " +
+                                                document.getId() + " | " +  document.getData());
+                                        try{
+                                            activateInvites(document.getId());
+                                        }catch (Exception e){
+                                            Tracer.log(TAG, "activateInvitation.onEvent.exception: ", e);
+                                            mTrackerService.onActivateInvites(
+                                                    new ServiceResponseObject(Const.error.ERROR_INVITE_ID_FAILURE));
+                                        }
+                                    }
+                                }else{
+                                    Tracer.log(TAG, "activateInvitation.onComplete.NO_DATA ------- ");
+                                    mTrackerService.onActivateInvites(
+                                            new ServiceResponseObject(Const.error.ERROR_INVITE_ID_FAILURE));
+                                }
+                            } else {
+                                Tracer.log(TAG, "activateInvitation.onComplete.exception: ", task.getException());
+                                mTrackerService.onActivateInvites(
+                                        new ServiceResponseObject(Const.error.ERROR_INVITE_ID_FAILURE));
+                            }
+                        }
+                    });
+        }catch (Exception e){
+            Tracer.log(TAG, "activateInvitation.Exception: ", e);
         }
 
     }

@@ -24,6 +24,8 @@ import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 
+import java.util.Map;
+
 /*
 * NOTES:
 * http://stackandroid.com/tutorial/contact-picker-using-intent-android-tutorial/
@@ -46,6 +48,7 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
     private String mEmail = "";
     private String mMessage = "";
     private String mInviteId;
+    private String mCode;
 
     public void onSubDestroy(){
         Tracer.log(TAG, "onSubDestroy");
@@ -82,7 +85,10 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
                     Tracer.log(TAG, "handleResponse: " + sro.getMsg());
                     switch(sro.getMsg()){
                         case Const.response.ON_INVITE_ID_CREATED:
-                            mInviteId = sro.getArg();
+                            //on va chercher les arguments
+                            Map<String, Object> args = sro.getArgs();
+                            mInviteId = (String)args.get("inviteId");
+                            mCode = (String)args.get("code");
                             //on a le inviteId genere par le serveur
                             createBundleAndGotoFragment(Const.error.NO_ERROR);
                             break;
@@ -140,7 +146,7 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
     protected void createBundleAndGotoFragment(int err){
         Tracer.log(TAG, "createBundleAndGotoFragment: " + err);
         //le message complet avec inviteID
-        mMessage = getResources().getString(R.string.sms_invitation_message, mMessage, mInviteId);
+        mMessage = getResources().getString(R.string.sms_invitation_message, mMessage, mCode);
         //les args a passer
         Bundle bundle = new Bundle();
         bundle.putString("phone", mPhone);

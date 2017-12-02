@@ -83,7 +83,6 @@ public class SendInvitationForWatchingFragment1 extends Fragment implements ISen
     }
 
     private void checkMandatoryFieldsAndCreate(){
-        showSpinner(true);
         displayErrMsg(Const.error.NO_ERROR);
         //on va chercher les infos et on les sets
         String name = String.format("%s",((EditText)fragmentView.findViewById(R.id.userName)).getText());
@@ -104,6 +103,7 @@ public class SendInvitationForWatchingFragment1 extends Fragment implements ISen
         }
 
         //on a le tout allors on creer l'invitation
+        showSpinner(true);
         ((SendInvitationForWatchingActivity) getActivity()).createInviteId(phone, name, message);
 
     }
