@@ -16,7 +16,6 @@ public class InvitationModel{
     private String phone;
     private String name;
     private Date updateTime;
-    private Date createTime;
     private int state = Const.invitation.PENDING;
 
     public InvitationModel(){
@@ -68,14 +67,6 @@ public class InvitationModel{
 
     public void setInviteId(String inviteId) {
         this.inviteId = inviteId;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
     }
 
     public Date getUpdateTime() {

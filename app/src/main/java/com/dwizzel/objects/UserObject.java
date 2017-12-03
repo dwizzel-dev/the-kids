@@ -402,7 +402,6 @@ public class UserObject extends Observable{
         Map<String, Object> map = new HashMap<>(5);
         map.put("from", getUid());
         map.put("updateTime", FieldValue.serverTimestamp());
-        map.put("createTime", FieldValue.serverTimestamp());
         map.put("to", ""); //since we don't know yet
         map.put("state", Const.invitation.INNACTIVE);
         map.put("code", Const.invitation.DEFAULT_CODE);
@@ -416,7 +415,6 @@ public class UserObject extends Observable{
         map.put("phone", phone);
         map.put("inviteId", inviteId);
         map.put("updateTime", FieldValue.serverTimestamp());
-        map.put("createTime", FieldValue.serverTimestamp());
         map.put("state", Const.invitation.PENDING);
         return map;
     }

@@ -14,7 +14,6 @@ public class InviteModel{
     private String from;
     private String to;
     private Date updateTime;
-    private Date createTime;
     private int code = Const.invitation.DEFAULT_CODE;
     private int state = Const.invitation.PENDING;
 
@@ -36,14 +35,6 @@ public class InviteModel{
 
     public void setState(int state) {
         this.state = state;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
     }
 
     public Date getUpdateTime() {

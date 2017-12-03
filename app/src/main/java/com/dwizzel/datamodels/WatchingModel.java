@@ -20,16 +20,7 @@ public class WatchingModel{
     private int status = Const.status.OFFLINE;
     private Date updateTime;
 
-    public WatchingModel(){
-
-    }
-
-    public WatchingModel(String uid, String email, String phone, String name){
-        this.uid = uid;
-        this.email = email;
-        this.phone = phone;
-        this.name = name;
-    }
+    public WatchingModel(){}
 
     public String getPhone() {
         return phone;

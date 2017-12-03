@@ -20,9 +20,7 @@ public class WatcherModel{
     private int status = Const.status.OFFLINE;
     private Date updateTime;
 
-    public WatcherModel(){
-
-    }
+    public WatcherModel(){}
 
     public String getPhone() {
         return phone;

@@ -7,16 +7,25 @@ package com.dwizzel;
 public final class Const {
     public static final class error {
         public static final int NO_ERROR = 0;
+
         public static final int ERROR_INVALID_PASSWORD = 203;
         public static final int ERROR_INVALID_CREDENTIALS = 204;
         public static final int ERROR_INVALID_EMAIL = 205;
         public static final int ERROR_EMAIL_EXIST = 206;
         public static final int ERROR_WEAK_PASSWORD = 207;
+
         public static final int ERROR_SMS_NOT_SENT = 208;
         public static final int ERROR_SMS_SEND_PERMISSION = 209;
+
         public static final int ERROR_INVITE_ID_FAILURE = 211;
         public static final int ERROR_INVALID_INVITE_CODE_FAILURE = 212;
         public static final int ERROR_INVALID_INVITE_CODE = 213;
+
+        public static final int ERROR_INVITE_CREATION_FAILURE = 214;
+        public static final int ERROR_INVITATION_CREATION_FAILURE = 215;
+
+
+
     }
     public static final class except {
         public static final int GENERIC = 301;
