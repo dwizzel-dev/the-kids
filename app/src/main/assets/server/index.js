@@ -91,17 +91,18 @@ exports.activateInvitation = functions.firestore
 		const PENDING = 802;
 		const INNACTIVE = 803;
 		const REMOVE = 804;
-		//get the state  
-		const state = event.data.data().state;  
+		//get the state
+		const state = event.data.data().state;
 		if(state == ACCEPTED){
 			//le userID de celui qui accepte l'invitation
 			const userA = event.data.data().to; //2UT3SOpMxPOfAPrTFUwWTswAA0l1
 			//le userID de celui qui a envoye l'invitation
 			const userB = event.data.data().from; //0CDFrsffJKbmVnU2St3NIQd0yOe2
+			const defaultName = "Code_" + event.data.data().code;
 			//le inviteId
 			const inviteId = event.params.inviteId; //PC6L4STvnhjqpI3Y94az
 			//on va chercher les infos de l'invitation
-			// DB:/users/0CDFrsffJKbmVnU2St3NIQd0yOe2/invitations/PC6L4STvnhjqpI3Y94az 
+			// DB:/users/0CDFrsffJKbmVnU2St3NIQd0yOe2/invitations/PC6L4STvnhjqpI3Y94az
 			// DB:/users/{userB}/invitations/{inviteId} [inviteId, name, phone, email, state]
 			const userRefA = db.collection('users').doc(userA);
 			const userRefB = db.collection('users').doc(userB);
@@ -118,11 +119,11 @@ exports.activateInvitation = functions.firestore
 						uid: userA,
 						gps: false,
 						status: 0,
-						position:null,
+						position: new admin.firestore.GeoPoint(0.0, 0.0),
 						updateTime: admin.firestore.FieldValue.serverTimestamp()
 					};
 				})
-				.then((result) => {	
+				.then((result) => {
 					console.log("set watchers: " + userA);
 					//on va setter le watchers du user B
 					return userRefB.collection('watchers').doc(userA).set(result);
@@ -131,13 +132,13 @@ exports.activateInvitation = functions.firestore
 					console.log("set watchings: " + userB);
 					//on va setter le watching du user A
 					return userRefA.collection('watchings').doc(userB).set({
-						name: "default",
+						name: defaultName,
 						email: "",
 						phone: "",
 						uid: userB,
 						gps: false,
 						status: 0,
-						position:null,
+						position: new admin.firestore.GeoPoint(0.0, 0.0),
 						updateTime: admin.firestore.FieldValue.serverTimestamp()
 					});
 				})
@@ -149,81 +150,8 @@ exports.activateInvitation = functions.firestore
 				.then(() =>{
 					console.log("delete invites: " + inviteId);
 					//on peut supprimer le invite
-					event.data.ref.delete();
-					//
-					return;
+					return event.data.ref.delete();
 				});
 		}
 	});
-
-
-/*
-exports.activateInvitation = functions.firestore
-	.document('invites/{inviteId}')
-	.onUpdate((event) => {
-		//constant
-		const ACCEPTED = 800;
-		const PENDING = 802;
-		const INNACTIVE = 803;
-		const REMOVE = 804;
-		//get the state  
-		const state = event.data.data().state;  
-		if(state == ACCEPTED){
-			//le userID de celui qui accepte l'invitation
-			const userA = event.data.data().to; //2UT3SOpMxPOfAPrTFUwWTswAA0l1
-			//le userID de celui qui a envoye l'invitation
-			const userB = event.data.data().from; //0CDFrsffJKbmVnU2St3NIQd0yOe2
-			//le inviteId
-			const inviteId = event.params.inviteId; //PC6L4STvnhjqpI3Y94az
-			//on va chercher les infos de l'invitation
-			// DB:/users/0CDFrsffJKbmVnU2St3NIQd0yOe2/invitations/PC6L4STvnhjqpI3Y94az 
-			// DB:/users/{userB}/invitations/{inviteId} [inviteId, name, phone, email, state]
-			const userRefA = db.collection('users').doc(userA);
-			const userRefB = db.collection('users').doc(userB);
-			return userRefB.collection('invitations').doc(inviteId)
-				.get()
-				.then(doc => {
-					const data = doc.data();
-					const watchers = {
-						name: data.name,
-						email: data.email,
-						phone: data.phone,
-						uid: userA,
-						gps: false,
-						status: 0,
-						position:null,
-						updateTime: admin.firestore.FieldValue.serverTimestamp()
-					};
-					//on va setter le watchers du user B
-					userRefB.collection('watchers').doc(userA)
-						.set(watchers)
-						.then(() => {
- 							//on va setter le watching du user A
-							const watchings = {
-								name: "default",
-								email: "",
-								phone: "",
-								uid: userB,
-								gps: false,
-								status: 0,
-								position:null,
-								updateTime: admin.firestore.FieldValue.serverTimestamp()
-							};
-							userRefA.collection('watchings').doc(userB)
-								.set(watchings)
-								.then(() => {
-									//on peut supprimer le invitation maintenant
-									userRefB.collection('invitations').doc(inviteId).delete();
-									//on peut supprimer le invite
-									event.data.ref.delete();
-									//log
-									console.log("activated: " + inviteId);
-								});
-						});	
-					
-				});
-			
-		}
-	});
-*/
 

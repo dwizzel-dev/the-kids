@@ -294,6 +294,7 @@ public class TrackerService extends Service implements ITrackerService{
 
     public void onUserWatchersList(ServiceResponseObject sro){
         Tracer.log(TAG, "onUserWatchersList");
+        mUser.setFetchWatchers(false);
         //on tranmet la reponse au activy qui a caller si il y a
         if(mBinderCallback != null) {
             mBinderCallback.handleResponse(sro);
@@ -302,6 +303,7 @@ public class TrackerService extends Service implements ITrackerService{
 
     public void onUserWatchingsList(ServiceResponseObject sro){
         Tracer.log(TAG, "onUserWatchingsList");
+        mUser.setFetchWatchings(false);
         //on tranmet la reponse au activy qui a caller si il y a
         if(mBinderCallback != null) {
             mBinderCallback.handleResponse(sro);
@@ -310,6 +312,7 @@ public class TrackerService extends Service implements ITrackerService{
 
     public void onUserInvitationsList(ServiceResponseObject sro){
         Tracer.log(TAG, "onUserInvitationsList");
+        mUser.setFetchInvitations(false);
         //on tranmet la reponse au activy qui a caller si il y a
         if(mBinderCallback != null) {
             mBinderCallback.handleResponse(sro);
@@ -440,42 +443,33 @@ public class TrackerService extends Service implements ITrackerService{
         public void getWatchersList(){
             Tracer.log(TAG, "TrackerBinder.getWatchersList");
             //on cherche la liste de nos watchers si la notre est a null
-            if(mUser.getWatchers() == null) {
+            if(mUser.isFetchWatchers()) {
                 mDatabaseService.getWatchersList();
             }else{
                 //sinon il l'a deja alors on repond tout de suite
-                if(mBinderCallback != null) {
-                    mBinderCallback.handleResponse(
-                            new ServiceResponseObject(Const.response.ON_WATCHERS_LIST));
-                }
+                onUserWatchersList(new ServiceResponseObject(Const.response.ON_WATCHERS_LIST));
             }
         }
 
         public void getInvitationsList(){
             Tracer.log(TAG, "TrackerBinder.getInvitationsList");
             //on cherche la liste de nos watchers si la notre est a null
-            if(mUser.getInvitations() == null) {
+            if(mUser.isFetchInvitations()) {
                 mDatabaseService.getInvitationsList();
             }else{
                 //sinon il l'a deja alors on repond tout de suite
-                if(mBinderCallback != null) {
-                    mBinderCallback.handleResponse(
-                            new ServiceResponseObject(Const.response.ON_INVITES_LIST));
-                }
+                onUserInvitationsList(new ServiceResponseObject(Const.response.ON_INVITATIONS_LIST));
             }
         }
 
         public void getWatchingsList(){
             Tracer.log(TAG, "TrackerBinder.getWatchingsList");
             //on cherche la liste de nos watchings si la notre est a null
-            if(mUser.getWatchings() == null) {
+            if(mUser.isFetchWatchings()) {
                 mDatabaseService.getWatchingsList();
             }else{
                 //sinon il l'a deja alors on repond tout de suite
-                if(mBinderCallback != null) {
-                    mBinderCallback.handleResponse(
-                            new ServiceResponseObject(Const.response.ON_WATCHINGS_LIST));
-                }
+                onUserWatchingsList(new ServiceResponseObject(Const.response.ON_WATCHINGS_LIST));
             }
         }
 

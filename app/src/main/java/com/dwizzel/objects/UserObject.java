@@ -4,9 +4,8 @@ import android.content.Context;
 
 import com.dwizzel.Const;
 import com.dwizzel.datamodels.ActiveModel;
-import com.dwizzel.datamodels.DataModel;
 import com.dwizzel.datamodels.InvitationModel;
-import com.dwizzel.datamodels.InviteModel;
+import com.dwizzel.datamodels.UserModel;
 import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.datamodels.WatchingModel;
 import com.dwizzel.utils.Tracer;
@@ -24,8 +23,11 @@ import java.util.Observable;
 
 public class UserObject extends Observable{
 
+    //instance et tracer
     private static final String TAG = "UserObject";
     private static UserObject sInst;
+
+    //les infos de base
     private static int sRefCount = 0;
     private String email = "";
     private String uid = "";
@@ -34,16 +36,52 @@ public class UserObject extends Observable{
     private boolean active = false;
     private int status = Const.status.OFFLINE;
     private boolean gps = false;
-    private DataModel data;
     private GeoPoint position = new GeoPoint(0.0,0.0);
     private int loginType = 0; //facebook, twitter, email, instagram, etc...
-    private HashMap<String, WatcherModel> watchers;
-    private HashMap<String, InvitationModel> invitations;
-    private HashMap<String, WatchingModel> watchings;
 
-    private UserObject(){
-        //default
+    //les infos sur user retourne du serveur
+    private UserModel user;
+
+    //les array des listings
+    private HashMap<String, WatcherModel> watchers = new HashMap<>();
+    private HashMap<String, InvitationModel> invitations = new HashMap<>();
+    private HashMap<String, WatchingModel> watchings = new HashMap<>();
+
+    //les flag pour savoir si on doir ou pas aller chercher les infos sur le serveur
+    //ce qui initie aussi de databaseservice listener sur les differents array
+    private boolean fetchWatchers = true;
+    private boolean fetchWatchings = true;
+    private boolean fetchInvitations = true;
+
+    private UserObject(){}
+
+
+
+    public boolean isFetchWatchers() {
+        return fetchWatchers;
     }
+
+    public void setFetchWatchers(boolean fetchWatchers) {
+        this.fetchWatchers = fetchWatchers;
+    }
+
+    public boolean isFetchWatchings() {
+        return fetchWatchings;
+    }
+
+    public void setFetchWatchings(boolean fetchWatchings) {
+        this.fetchWatchings = fetchWatchings;
+    }
+
+    public boolean isFetchInvitations() {
+        return fetchInvitations;
+    }
+
+    public void setFetchInvitations(boolean fetchInvitations) {
+        this.fetchInvitations = fetchInvitations;
+    }
+
+
 
     public int getStatus() {
         return status;
@@ -53,6 +91,8 @@ public class UserObject extends Observable{
         this.status = status;
     }
 
+
+
     public void updateWatchers(String uid, ActiveModel activeModel) {
         //ces infos ne viennent pas de la meme collection et arrive apres
         //du au limitation de firestore
@@ -60,7 +100,6 @@ public class UserObject extends Observable{
             if (watchers.containsKey(uid)) {
                 try {
                     WatcherModel watcher = watchers.get(uid);
-                    setChanged();
                     watcher.setGps(activeModel.isGps());
                     watcher.setStatus(activeModel.getStatus());
                     watcher.setPosition(activeModel.getPosition());
@@ -77,25 +116,24 @@ public class UserObject extends Observable{
         }
     }
 
-    public boolean addWatcher(String uid, WatcherModel watcher) {
-        if (watchers == null) {
-            watchers = new HashMap<>();
-        }
-        if (!watchers.containsKey(uid)){
+    public void updateWatchers(String uid, WatcherModel watcher) {
+        if (watchers != null) {
             watchers.put(uid, watcher);
-            return true;
         }
-        return false;
     }
 
-    public boolean removeWatcher(String uid) {
+    public void addWatcher(String uid, WatcherModel watcher) {
+        if (!watchers.containsKey(uid)){
+            watchers.put(uid, watcher);
+        }
+    }
+
+    public void removeWatcher(String uid) {
         if (watchers != null) {
             if (watchers.containsKey(uid)) {
                 watchers.remove(uid);
-                return true;
             }
         }
-        return false;
     }
 
     public HashMap<String, WatcherModel> getWatchers(){
@@ -111,18 +149,19 @@ public class UserObject extends Observable{
         return null;
     }
 
-    public void updateWatchings(String uid, ActiveModel activeModel) {
+
+
+    public void updateWatchings(String uid, ActiveModel active) {
         //ces infos ne viennent pas de la meme collection et arrive apres
         //du au limitation de firestore
         if (watchings != null) {
             if (watchings.containsKey(uid)) {
                 try {
                     WatchingModel watching = watchings.get(uid);
-                    setChanged();
-                    watching.setGps(activeModel.isGps());
-                    watching.setStatus(activeModel.getStatus());
-                    watching.setPosition(activeModel.getPosition());
-                    watching.setUpdateTime(activeModel.getUpdateTime());
+                    watching.setGps(active.isGps());
+                    watching.setStatus(active.getStatus());
+                    watching.setPosition(active.getPosition());
+                    watching.setUpdateTime(active.getUpdateTime());
                     //et on replace
                     watchings.put(uid, watching);
                     //on notifie les observers
@@ -135,25 +174,24 @@ public class UserObject extends Observable{
         }
     }
 
-    public boolean addWatching(String uid, WatchingModel watching) {
-        if (watchings == null) {
-            watchings = new HashMap<>();
-        }
-        if (!watchings.containsKey(uid)){
+    public void updateWatchings(String uid, WatchingModel watching) {
+        if (watchings != null) {
             watchings.put(uid, watching);
-            return true;
         }
-        return false;
     }
 
-    public boolean removeWatching(String uid) {
+    public void addWatching(String uid, WatchingModel watching) {
+        if (!watchings.containsKey(uid)){
+            watchings.put(uid, watching);
+        }
+    }
+
+    public void removeWatching(String uid) {
         if (watchings != null) {
             if (watchings.containsKey(uid)) {
                 watchings.remove(uid);
-                return true;
             }
         }
-        return false;
     }
 
     public HashMap<String, WatchingModel> getWatchings(){
@@ -169,42 +207,29 @@ public class UserObject extends Observable{
         return null;
     }
 
-    public void updateInvitation(String inviteId, InviteModel inviteModel) {
+
+
+    public void updateInvitation(String inviteId, InvitationModel invite) {
         //ces infos ne viennent pas de la meme collection et arrive apres
         //du au limitation de firestore
         if (invitations != null) {
-            if (invitations.containsKey(inviteId)) {
-                InvitationModel invitation = invitations.get(inviteId);
-                invitation.setState(inviteModel.getState());
-                invitation.setCreateTime(inviteModel.getCreateTime());
-                invitation.setUpdateTime(inviteModel.getUpdateTime());
-                invitation.setFrom(inviteModel.getFrom());
-                invitation.setTo(inviteModel.getTo());
-                //et on replace
-                invitations.put(inviteId, invitation);
-            }
+            //et on replace
+            invitations.put(inviteId, invite);
         }
     }
 
-    public boolean addInvitation(String inviteId, InvitationModel invite) {
-        if (invitations == null) {
-            invitations = new HashMap<>();
-        }
+    public void addInvitation(String inviteId, InvitationModel invite) {
         if (!invitations.containsKey(inviteId)){
             invitations.put(inviteId, invite);
-            return true;
         }
-        return false;
     }
 
-    public boolean removeInvitation(String inviteId) {
+    public void removeInvitation(String inviteId) {
         if (invitations != null) {
             if (invitations.containsKey(inviteId)) {
                 invitations.remove(inviteId);
-                return true;
             }
         }
-        return false;
     }
 
     public HashMap<String, InvitationModel> getInvitations(){
@@ -219,6 +244,8 @@ public class UserObject extends Observable{
         }
         return null;
     }
+
+
 
     public static UserObject getInstance(){
         Tracer.log(TAG, "getInstance: " + (sRefCount++));
@@ -235,21 +262,26 @@ public class UserObject extends Observable{
         gps = false;
         created = false;
         signed = false;
-        data = null;
+        user = null;
         position = new GeoPoint(0.0,0.0);
         loginType = 0;
-        watchers = null;
-        invitations = null;
-        watchings = null;
+        watchers = new HashMap<>();
+        invitations = new HashMap<>();
+        watchings = new HashMap<>();
         status = Const.status.OFFLINE;
+
+        //flag the fetch different listings
+        fetchWatchers = true;
+        fetchWatchings = true;
+        fetchInvitations = true;
     }
 
     public String getEmail(){
         return email;
     }
 
-    public Object getData(){
-        return data;
+    public UserModel getUser(){
+        return user;
     }
 
     public boolean isActive(){
@@ -280,10 +312,10 @@ public class UserObject extends Observable{
         this.email = email;
     }
 
-    public void setData(DataModel data){
-        this.data = data;
+    public void setUser(UserModel user){
+        this.user = user;
         try{
-            status = this.data.getStatus();
+            status = this.user.getStatus();
         }catch (Exception e){
            //
         }
@@ -327,8 +359,8 @@ public class UserObject extends Observable{
 
     public String getLastConnection(Context context){
         //cherche la date
-        if(data != null){
-            return Utils.getInstance().formatDate(context, data.getUpdateTime());
+        if(user != null){
+            return Utils.getInstance().formatDate(context, user.getUpdateTime());
         }
         return "";
     }
@@ -383,6 +415,8 @@ public class UserObject extends Observable{
         map.put("name", name);
         map.put("phone", phone);
         map.put("inviteId", inviteId);
+        map.put("updateTime", FieldValue.serverTimestamp());
+        map.put("createTime", FieldValue.serverTimestamp());
         map.put("state", Const.invitation.PENDING);
         return map;
     }

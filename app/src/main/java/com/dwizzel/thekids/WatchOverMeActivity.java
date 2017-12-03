@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchOverMeListAdapter;
@@ -104,8 +103,8 @@ public class WatchOverMeActivity extends BaseActivity {
                                 contentListLoaded();
                             }
                             break;
-                        case Const.response.ON_INVITES_LIST:
-                        case Const.response.ON_EMPTY_INVITES_LIST:
+                        case Const.response.ON_INVITATIONS_LIST:
+                        case Const.response.ON_EMPTY_INVITATIONS_LIST:
                             isInvitationsLoaded = true;
                             //ca nous prend les 2, watchers et invitations
                             if(isContentLoaded()) {

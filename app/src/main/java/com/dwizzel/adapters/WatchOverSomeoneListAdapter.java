@@ -8,8 +8,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dwizzel.Const;
-import com.dwizzel.datamodels.InvitationModel;
-import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.datamodels.WatchingModel;
 import com.dwizzel.objects.ListItems;
 import com.dwizzel.objects.UserObject;
@@ -39,7 +37,7 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
     // Create new views (invoked by the layout manager)
     @Override
     public WatchOverSomeoneListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Tracer.log(TAG, "onCreateViewHolder");
+        //Tracer.log(TAG, "onCreateViewHolder");
         View mItemView;
         if (viewType == ListItems.Type.TYPE_WATCHING) {
             mItemView = LayoutInflater.from(parent.getContext())
@@ -60,20 +58,20 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Tracer.log(TAG, "onBindViewHolder");
+        //Tracer.log(TAG, "onBindViewHolder");
         holder.bindToViewHolder(holder, position);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        Tracer.log(TAG, "getItemCount");
+        //Tracer.log(TAG, "getItemCount");
         return mList.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        Tracer.log(TAG, "getItemViewType");
+        //Tracer.log(TAG, "getItemViewType");
         return mList.get(position).getItemType();
     }
 

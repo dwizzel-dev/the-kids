@@ -131,7 +131,11 @@ public class WatchOverSomeoneActivity extends BaseActivity{
                             Tracer.log(TAG, "handleResponse: RECONNECTING");
                             break;
                         case Const.error.ERROR_INVITE_ID_FAILURE:
+                        case Const.error.ERROR_INVALID_INVITE_CODE_FAILURE:
                             displayErrMsg(R.string.err_invalid_invite_id_failure);
+                            break;
+                        case Const.error.ERROR_INVALID_INVITE_CODE:
+                            displayErrMsg(R.string.err_invalid_invite_code);
                             break;
                         default:
                             break;
@@ -152,6 +156,12 @@ public class WatchOverSomeoneActivity extends BaseActivity{
 
     private void createNicknameForWatchings(){
         Tracer.log(TAG, "createNicknameForWatchings");
+        //on va a edition de profil
+        Intent intent = new Intent(WatchOverSomeoneActivity.this,
+                ActivateInvitationActivity.class);
+        //start activity and clear the backStack
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     public void displayErrMsg(int msgId){

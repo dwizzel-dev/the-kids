@@ -24,13 +24,6 @@ public class WatcherModel{
 
     }
 
-    public WatcherModel(String uid, String email, String phone, String name){
-        this.uid = uid;
-        this.email = email;
-        this.phone = phone;
-        this.name = name;
-    }
-
     public String getPhone() {
         return phone;
     }

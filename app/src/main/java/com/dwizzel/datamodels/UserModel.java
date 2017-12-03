@@ -9,7 +9,7 @@ import java.util.Date;
 //---------------------------------------------------------------------------------------------
 //Firestore Data Object
 
-public class DataModel{
+public class UserModel{
 
     private Date createTime;
     private Date updateTime;
@@ -18,7 +18,7 @@ public class DataModel{
     private String uid;
     private int status;
 
-    DataModel(){
+    UserModel(){
 
     }
 

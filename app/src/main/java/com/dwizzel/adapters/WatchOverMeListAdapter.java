@@ -38,7 +38,7 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
     // Create new views (invoked by the layout manager)
     @Override
     public WatchOverMeListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Tracer.log(TAG, "onCreateViewHolder");
+        //Tracer.log(TAG, "onCreateViewHolder");
         View mItemView;
         if (viewType == ListItems.Type.TYPE_WATCHER) {
             mItemView = LayoutInflater.from(parent.getContext())
@@ -63,20 +63,20 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Tracer.log(TAG, "onBindViewHolder");
+        //Tracer.log(TAG, "onBindViewHolder");
         holder.bindToViewHolder(holder, position);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        Tracer.log(TAG, "getItemCount");
+        //Tracer.log(TAG, "getItemCount");
         return mList.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        Tracer.log(TAG, "getItemViewType");
+        //Tracer.log(TAG, "getItemViewType");
         return mList.get(position).getItemType();
     }
 

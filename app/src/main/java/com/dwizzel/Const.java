@@ -14,7 +14,9 @@ public final class Const {
         public static final int ERROR_WEAK_PASSWORD = 207;
         public static final int ERROR_SMS_NOT_SENT = 208;
         public static final int ERROR_SMS_SEND_PERMISSION = 209;
-        public static final int ERROR_INVITE_ID_FAILURE = 210;
+        public static final int ERROR_INVITE_ID_FAILURE = 211;
+        public static final int ERROR_INVALID_INVITE_CODE_FAILURE = 212;
+        public static final int ERROR_INVALID_INVITE_CODE = 213;
     }
     public static final class except {
         public static final int GENERIC = 301;
@@ -63,14 +65,18 @@ public final class Const {
     }
     public static final class response {
         public static final String ON_WATCHERS_LIST = "ON_WATCHERS_LIST";
-        public static final String ON_INVITES_LIST = "ON_INVITES_LIST";
-        public static final String ON_EMPTY_WATCHERS_LIST = "ON_EMPTY_WATCHERS_LIST";
-        public static final String ON_EMPTY_INVITES_LIST = "ON_EMPTY_INVITES_LIST";
-        public static final String ON_INVITE_ID_CREATED = "ON_INVITE_ID_CREATED";
-        public static final String ON_INVITATION_CREATED = "ON_INVITATION_CREATED";
+        public static final String ON_INVITATIONS_LIST = "ON_INVITATIONS_LIST";
         public static final String ON_WATCHINGS_LIST = "ON_WATCHINGS_LIST";
+
+        public static final String ON_EMPTY_WATCHERS_LIST = "ON_EMPTY_WATCHERS_LIST";
+        public static final String ON_EMPTY_INVITATIONS_LIST = "ON_EMPTY_INVITATIONS_LIST";
         public static final String ON_EMPTY_WATCHINGS_LIST = "ON_EMPTY_WATCHINGS_LIST";
+
+        public static final String ON_INVITE_ID_CREATED = "ON_INVITE_ID_CREATED";
         public static final String ON_INVITE_ID_ACTIVATED = "ON_INVITE_ID_ACTIVATED";
+        public static final String ON_INVITATION_CREATED = "ON_INVITATION_CREATED";
+
+
 
     }
 

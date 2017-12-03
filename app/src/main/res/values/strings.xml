@@ -18,7 +18,7 @@
     <string name="watch_over_me_title">Watch Over Me</string>
     <string name="watch_over_someone_title">Watch Over Someone</string>
     <string name="watch_over_me_send_invitation">Send An Invitation</string>
-    <string name="activate_invitation">Activate Invitation</string>
+    <string name="activate_invitation">Invitation Profil</string>
 
     <!-- LIST HEADER -->
     <string name="watchers_header">Watchers</string>
@@ -55,6 +55,7 @@
     <string name="butt_select_from_contacts">Select From Your Contacts</string>
     <string name="butt_enter_phone_number">Enter Phone Number</string>
     <string name="butt_activate">Activate</string>
+    <string name="butt_save">Save</string>
 
     <!-- INPUT FIELD HINT -->
     <string name="email_hint">Email</string>
@@ -64,6 +65,7 @@
     <string name="phone_hint">Phone number</string>
     <string name="activate_hint">Invitation ID</string>
     <string name="invitation_message_hint">Your invitation message here</string>
+    <string name="nickname_hint">Nickname</string>
 
     <!-- ERR MESSAGE -->
     <string name="err_email_invalid">the email is invalid</string>
@@ -80,6 +82,8 @@
     <string name="err_sms_send_permission">You have to enable permission of sending this SMS message to continue.</string>
     <string name="err_invalid_invite_id">The ID you entered is not valid (20 chars min).</string>
     <string name="err_invalid_invite_id_failure">Woops!!! An error occurred during the validation please retry</string>
+    <string name="err_invalid_invite_code">This code is not valid</string>
+    <string name="err_invalid_invite_code_failure">Woops!!! An error occurred during the validation please retry</string>
 
     <!-- TEXT -->
     <string name="or"> OR </string>

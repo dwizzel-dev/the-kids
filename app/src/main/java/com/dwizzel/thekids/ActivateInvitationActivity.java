@@ -57,11 +57,11 @@ public class ActivateInvitationActivity extends BaseActivity {
             public void onCreated(ServiceResponseObject sro){}
         };
         //get le binder
-        TrackerService.TrackerBinder trackerBinder = getTrackerBinder();
+        mTrackerBinder = getTrackerBinder();
         //on enleve le precedenet callback de BaseActivity
-        trackerBinder.unregisterCallback();
+        mTrackerBinder.unregisterCallback();
         //set le nouveau callback qui overwrite celui de BaseActivity
-        trackerBinder.registerCallback(serviceCallback);
+        mTrackerBinder.registerCallback(serviceCallback);
     }
 
 
