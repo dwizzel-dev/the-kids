@@ -34,6 +34,8 @@ import java.util.TimeZone;
  * https://developer.android.com/guide/components/aidl.html#CreateAidl
  * https://developer.android.com/guide/components/bound-services.html#Messenger
  * https://developer.android.com/reference/android/app/Service.html
+ * https://gist.github.com/mjohnsullivan/403149218ecb480e7759
+ * https://stackoverflow.com/questions/29941267/postdelayed-in-a-service
  *
  *
  * NOTES: on va le faire en IBinder sans le AIDL, car pas besoin d'IPC, et j'aimerais mieux partager
@@ -50,18 +52,25 @@ public class TrackerService extends Service implements ITrackerService{
 
     private final static String TAG = "TrackerService";
 
+    //COnstant
+    private final static int MSG_UPDATE_TIME = 0;
+    private final static int MSG_UPDATE_DELAY = 30000; //au 30 secondes
+
+    //
     private ITrackerBinderCallback mBinderCallback;
     private IAuthService mAuthService;
     private IDatabaseService mDatabaseService;
     private IGpsService mGpsService;
     private UserObject mUser;
     private IBinder mTrackerBinder = new TrackerBinder();
+
     //timer
-    private HandlerThread mThTimer;
+    //private HandlerThread mThTimer;
     private Handler mHandlerTimer;
-    private Runnable mRunnableTimer;
+    //private Runnable mRunnableTimer;
     private long mTimer = 0;
     private long mStartTime;
+
     //internet
     private boolean mHasConnectivity;
 
@@ -90,13 +99,17 @@ public class TrackerService extends Service implements ITrackerService{
         super.onDestroy();
         //clea le timer
         if(mHandlerTimer != null){
-            mHandlerTimer.removeCallbacks(mRunnableTimer);
+            //mHandlerTimer.removeCallbacks(mRunnableTimer);
+            mHandlerTimer.removeMessages(MSG_UPDATE_TIME);
             mHandlerTimer = null;
         }
+        /*
         if(mThTimer != null){
             mThTimer.quitSafely();
             mThTimer = null;
         }
+        */
+
     }
 
     @Override
@@ -123,7 +136,7 @@ public class TrackerService extends Service implements ITrackerService{
         Tracer.log(TAG, "onUnbind:" + intent);
         //si clear le callback
         try {
-            ((TrackerService.TrackerBinder) mTrackerBinder).unregisterCallback();
+            ((TrackerService.TrackerBinder)mTrackerBinder).unregisterCallback();
         }catch (Exception e){
             Tracer.log(TAG, "onUnbind.Exception: ", e);
         }
@@ -137,26 +150,37 @@ public class TrackerService extends Service implements ITrackerService{
         Tracer.log(TAG, "onRebind: " + intent);
     }
 
-    private String getTimer(){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss",
-                Utils.getInstance().getLocale(TrackerService.this));
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return simpleDateFormat.format(new Date(mTimer*1000));
-    }
-
     private void startRunningTime() {
         Tracer.log(TAG, "startRunningTime");
+        try {
+            if(mHandlerTimer == null) {
+                //on part le timer sur le main loop, sinon quand Idle il run 1 fois sur 10
+                mHandlerTimer = new TimerHandler(Looper.getMainLooper());
+                //le timer start time
+                mStartTime = System.currentTimeMillis() / MSG_UPDATE_DELAY;
+                //le start du thread loop
+                mHandlerTimer.sendEmptyMessage(MSG_UPDATE_TIME);
+            }
+        }catch (Exception e){
+            Tracer.log(TAG, "startTimer.Exception: ", e);
+        }
+        /*
         if(mThTimer == null) {
             try {
                 mThTimer = new HandlerThread("mThTimer");
                 mThTimer.start();
                 mHandlerTimer = new TimerHandler(mThTimer.getLooper());
-                mRunnableTimer = new TimerRunnable();
-                mHandlerTimer.post(mRunnableTimer);
+                //mRunnableTimer = new TimerRunnable();
+                //mHandlerTimer.post(mRunnableTimer);
+                //le timer start time
+                mStartTime = System.currentTimeMillis()/MSG_UPDATE_DELAY;
+                //le start du thread loop
+                mHandlerTimer.sendEmptyMessage(MSG_UPDATE_TIME);
             }catch (Exception e){
                 Tracer.log(TAG, "startTimer.Exception: ", e);
             }
         }
+        */
     }
 
     private void changeUserStatus(int status){
@@ -206,21 +230,6 @@ public class TrackerService extends Service implements ITrackerService{
         mDatabaseService.deactivateUser();
         //on stop le gps
         mGpsService.stopLocationUpdate();
-
-        /*
-        //le probleme avec firestore c'est qu'il y a va par batch alors ce n'est pas vraiment live
-        //si on fait un signout du mauth alors on a un probleme car plus de droit de changer le status
-        //on va trigger le firestore pour appeler onUserSignout pour essayer
-        // firebaseAuthentification
-        mAuthService.signOut();
-        //on reset les infos
-        mUser.resetUser();
-        //on call l'activity appelante pour le signOut
-        if(mBinderCallback != null) {
-            mBinderCallback.onSignedOut(null);
-        }
-        */
-
         //NOTE: le OnUnbind va s'occuper de stopper le thread et clearer le mBinderCallback
     }
 
@@ -389,7 +398,7 @@ public class TrackerService extends Service implements ITrackerService{
         }
 
         public long getTimeDiff() {
-            return ((System.currentTimeMillis()/1000) - mStartTime);
+            return ((System.currentTimeMillis()/MSG_UPDATE_DELAY) - mStartTime);
         }
 
         public void registerCallback(ITrackerBinderCallback callback){
@@ -482,7 +491,7 @@ public class TrackerService extends Service implements ITrackerService{
 
     //--------------------------------------------------------------------------------------------
     //NESTED CLASS
-
+    /*
     class TimerRunnable implements Runnable{
         private final static String TAG = "TimerRunnable";
         private boolean loop = true;
@@ -523,16 +532,45 @@ public class TrackerService extends Service implements ITrackerService{
             }
         }
     }
+    */
 
     //--------------------------------------------------------------------------------------------
     //NESTED CLASS
 
     class TimerHandler extends Handler {
+
         private final static String TAG = "TimerHandler";
-        TimerHandler(Looper looper) {super(looper);}
+        //toujours selon le MSG_UPDATE_DELAY = 30000 milliseconds
+        private int keepAliveDelay = 10; // x * MSG_UPDATE_DELAY
+        private int checkConnectivityDelay = 2; //x * MSG_UPDATE_DELAY
+
+        TimerHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             Tracer.log(TAG, "handleMessage: " + msg);
+            if(msg.what == MSG_UPDATE_TIME){
+                //increment le timer
+                mTimer++;
+                //on recall selon le MSG_UPDATE_DELAY
+                mHandlerTimer.sendEmptyMessageDelayed(MSG_UPDATE_TIME, MSG_UPDATE_DELAY);
+                //keep alive on the server
+                if (mTimer % keepAliveDelay == 0) {
+                    keepActive();
+                }
+                //check connectivity
+                if (mTimer % checkConnectivityDelay == 0) {
+                    boolean conn = Utils.getInstance().checkConnectivity(TrackerService.this);
+                    if (mHasConnectivity && !conn){
+                        onConnectivityChange(new ServiceResponseObject(Const.conn.NOT_CONNECTED));
+                    }else if(!mHasConnectivity && conn){
+                        onConnectivityChange(new ServiceResponseObject(Const.conn.RECONNECTED));
+                    }
+                    mHasConnectivity = conn;
+                }
+            }
         }
     }
 }
