@@ -241,7 +241,11 @@ public class TrackerService extends Service implements ITrackerService{
             if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.error.NO_ERROR){
                 //NOTE: on va juste setter la derniere position
                 //pour avoir le tracking live il faut activer le mGpsService.startLocationUpdate()
-                mGpsService.startLocationUpdate();
+                /*
+                if(!mGpsService.startLocationUpdate()){
+                    Tracer.log(TAG, "keepActive.mGpsService.startLocationUpdate: FAILED");
+                }
+                */
                 //check la position maintenant qu'il est restarte
                 GeoPoint position = mGpsService.getLastPosition();
                 if(position != null){
@@ -277,16 +281,20 @@ public class TrackerService extends Service implements ITrackerService{
         Tracer.log(TAG, "onUserCreated");
         //on peut maintenant setter le gps
         switch(mGpsService.checkGpsStatus()){
-            case Const.gps.NO_PERMISSION :
+            case Const.gps.NO_PERMISSION:
                 Tracer.log(TAG, "NO GPS PERMISSIONS ++++");
                 break;
-            case Const.gps.NO_PROVIDER :
+            case Const.gps.NO_PROVIDER:
                 Tracer.log(TAG, "NO GPS PROVIDER ++++");
                 break;
             default:
                 Tracer.log(TAG, "GPS ENABLED ++++");
                 //pour avoir le tracking live il faut activer le mGpsService.startLocationUpdate()
-                mGpsService.startLocationUpdate();
+                /*
+                if(!mGpsService.startLocationUpdate()){
+                    Tracer.log(TAG, "onUserCreated.mGpsService.startLocationUpdate: FAILED");
+                }
+                */
                 //on check la derniere postion si possible
                 GeoPoint position = mGpsService.getLastPosition();
                 if(position != null){

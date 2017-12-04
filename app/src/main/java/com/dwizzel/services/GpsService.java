@@ -36,10 +36,10 @@ public class GpsService implements IGpsService{
     private final static String TAG = "GpsService";
     private Context mContext;
     private ITrackerService mTrackerService;
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 50; // in meters
-    private static final long MIN_TIME_BW_UPDATES = 300000; // 60000 = 1 minute
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 5; // in meters
+    private static final long MIN_TIME_BW_UPDATES = 60000; // 60000 = 1 minute
     private LocationManager mLocationManager;
-    private LocationListener locationListener;
+    private LocationListener mLocationListener;
     private boolean isGPSEnabled = false;
     private boolean isNetworkEnabled = false;
 
@@ -47,7 +47,7 @@ public class GpsService implements IGpsService{
         Tracer.log(TAG, "GpsService");
         mContext = context;
         mTrackerService = trackerService;
-        locationListener = new LocationListener();
+        mLocationListener = new LocationListener();
     }
 
     private boolean hasPermission() {
@@ -141,7 +141,7 @@ public class GpsService implements IGpsService{
             mLocationManager.requestLocationUpdates(
                         LocationManager.GPS_PROVIDER,
                         MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES, mLocationListener);
             Tracer.log(TAG, "getLocation: ++ GPS Enabled");
         }catch (NullPointerException npe){
             Tracer.log(TAG, "getLocation.NullPointerException: ", npe);
@@ -156,7 +156,7 @@ public class GpsService implements IGpsService{
     public void stopLocationUpdate(){
         Tracer.log(TAG, "stopLocationUpdate");
         if(mLocationManager != null){
-            mLocationManager.removeUpdates(locationListener);
+            mLocationManager.removeUpdates(mLocationListener);
         }
     }
 
@@ -221,7 +221,7 @@ public class GpsService implements IGpsService{
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            Tracer.log(TAG, "onStatusChanged");
+            Tracer.log(TAG, String.format("onStatusChanged: %s | %d", provider, status));
             // Called when the provider status changes. This method is called when a provider is unable
             // to fetch a location or if the provider has recently
             // become available after a period of unavailability.
