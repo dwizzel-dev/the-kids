@@ -53,6 +53,8 @@ public class UserObject extends Observable{
     private boolean fetchWatchings = true;
     private boolean fetchInvitations = true;
 
+
+
     private UserObject(){}
 
 
@@ -119,12 +121,18 @@ public class UserObject extends Observable{
     public void updateWatchers(String uid, WatcherModel watcher) {
         if (watchers != null) {
             watchers.put(uid, watcher);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_UPDATE, uid));
         }
     }
 
     public void addWatcher(String uid, WatcherModel watcher) {
         if (!watchers.containsKey(uid)){
             watchers.put(uid, watcher);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_ADDED, uid));
         }
     }
 
@@ -132,6 +140,9 @@ public class UserObject extends Observable{
         if (watchers != null) {
             if (watchers.containsKey(uid)) {
                 watchers.remove(uid);
+                //on notifie les observers
+                setChanged();
+                notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_REMOVE, uid));
             }
         }
     }
@@ -177,12 +188,18 @@ public class UserObject extends Observable{
     public void updateWatchings(String uid, WatchingModel watching) {
         if (watchings != null) {
             watchings.put(uid, watching);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_UPDATE, uid));
         }
     }
 
     public void addWatching(String uid, WatchingModel watching) {
         if (!watchings.containsKey(uid)){
             watchings.put(uid, watching);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_ADDED, uid));
         }
     }
 
@@ -190,6 +207,9 @@ public class UserObject extends Observable{
         if (watchings != null) {
             if (watchings.containsKey(uid)) {
                 watchings.remove(uid);
+                //on notifie les observers
+                setChanged();
+                notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_REMOVE, uid));
             }
         }
     }
@@ -215,12 +235,18 @@ public class UserObject extends Observable{
         if (invitations != null) {
             //et on replace
             invitations.put(inviteId, invite);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.INVITATION_UPDATE, inviteId));
         }
     }
 
     public void addInvitation(String inviteId, InvitationModel invite) {
         if (!invitations.containsKey(inviteId)){
             invitations.put(inviteId, invite);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.INVITATION_ADDED, inviteId));
         }
     }
 
@@ -228,6 +254,9 @@ public class UserObject extends Observable{
         if (invitations != null) {
             if (invitations.containsKey(inviteId)) {
                 invitations.remove(inviteId);
+                //on notifie les observers
+                setChanged();
+                notifyObservers(new ObserverNotifObject(Const.notif.INVITATION_REMOVE, inviteId));
             }
         }
     }
@@ -271,6 +300,7 @@ public class UserObject extends Observable{
         status = Const.status.OFFLINE;
 
         //flag the fetch different listings
+        //car ce sera le databaseService qui aura un listener sur ces array pour les update et autres
         fetchWatchers = true;
         fetchWatchings = true;
         fetchInvitations = true;
@@ -347,10 +377,6 @@ public class UserObject extends Observable{
 
     public void setGps(boolean gps) {
         this.gps = gps;
-    }
-
-    public void setPosition(double latitude, double longitude){
-        this.position = new GeoPoint(longitude, latitude);
     }
 
     public void setPosition(GeoPoint position){

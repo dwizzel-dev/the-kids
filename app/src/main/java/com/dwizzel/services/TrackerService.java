@@ -195,7 +195,7 @@ public class TrackerService extends Service implements ITrackerService{
         // si on veut ca live dans la DB,
         // il faut activer la ligne ci-dessous
         // sinon il va se faire au updateUserInfo du keepAlive
-        //mFirestoreService.updateUserPosition();
+        mDatabaseService.updateUserPosition();
     }
 
     private void resetUser(){
@@ -231,7 +231,9 @@ public class TrackerService extends Service implements ITrackerService{
             //car quand on enleve des permissions il restart, mais si on les redonne il ne fait rien
             if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.error.NO_ERROR){
                 //NOTE: on va juste setter la derniere position
-                //pour avoir le tracking live il faudrait activer le mGpsService.startLocationUpdate()
+                //pour avoir le tracking live il faut activer le mGpsService.startLocationUpdate()
+                mGpsService.startLocationUpdate();
+                //check la position maintenant qu'il est restarte
                 GeoPoint position = mGpsService.getLastPosition();
                 if(position != null){
                     mUser.setPosition(position);
@@ -246,7 +248,7 @@ public class TrackerService extends Service implements ITrackerService{
             }
         }
         //for debug check user object
-        Tracer.log(TAG, "User: ", mUser);
+        //Tracer.log(TAG, "User: ", mUser);
     }
 
     public void onUserSignedIn(ServiceResponseObject sro){
@@ -273,6 +275,9 @@ public class TrackerService extends Service implements ITrackerService{
                 Tracer.log(TAG, "NO GPS PROVIDER ++++");
                 break;
             default:
+                Tracer.log(TAG, "GPS ENABLED ++++");
+                //pour avoir le tracking live il faut activer le mGpsService.startLocationUpdate()
+                mGpsService.startLocationUpdate();
                 //on check la derniere postion si possible
                 GeoPoint position = mGpsService.getLastPosition();
                 if(position != null){

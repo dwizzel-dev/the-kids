@@ -501,9 +501,8 @@ class DatabaseService implements IDatabaseService{
     public void updateUserPosition(){
         Tracer.log(TAG, "updateUserPosition");
         try{
-            mDb.collection("users").document(mUser.getUid())
+            mDb.collection("actives").document(mUser.getUid())
                     .update(
-                            "updateTimePosition", FieldValue.serverTimestamp(),
                             "position", mUser.getPosition(),
                             "gps", mUser.isGps(),
                             "updateTime", FieldValue.serverTimestamp()

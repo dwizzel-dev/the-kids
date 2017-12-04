@@ -46,6 +46,8 @@ public class WatchOverSomeoneActivity extends BaseActivity{
     public void onSubDestroy(){
         Tracer.log(TAG, "onSubDestroy");
         //si on a des chose a cleaner ici
+        //TODO: on enleve les observer de mUser car plus besoin
+
     }
 
     public void onSubCreate(){
@@ -239,13 +241,14 @@ public class WatchOverSomeoneActivity extends BaseActivity{
             public void update(Observable observable, Object o) {
                 ObserverNotifObject observerNotifObject = (ObserverNotifObject)o;
                 if(observerNotifObject != null){
-                    Tracer.log(TAG, String.format("mUser.update: %s = %s",
-                            observerNotifObject.getType(),
-                            observerNotifObject.getValue()));
                     //test case
                     switch (observerNotifObject.getType()){
                         case Const.notif.WATCHING_UPDATE:
                             updateWatchingsListSingleViewItem((String)observerNotifObject.getValue());
+                            break;
+                        case Const.notif.WATCHING_REMOVE:
+                            break;
+                        case Const.notif.WATCHING_ADDED:
                             break;
                         default:
                             break;

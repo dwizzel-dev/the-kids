@@ -15,14 +15,14 @@ public final class Tracer {
     private static final String TAG = "TK.";
 
     public static void data(String tag, String msg){
-        Log.v("====DATA." + TAG + tag, msg);
+        Log.v(TAG + tag + ".DATA-------:", msg);
         if(logToFile){
             //write to file
         }
     }
 
     public static void data(String tag, String msg, Exception e){
-        Log.e("====DATA." + TAG + tag, msg, e);
+        Log.e(TAG + tag + ".DATA-------:", msg, e);
         if(logToFile){
             //write to file
         }

@@ -36,8 +36,8 @@ public class GpsService implements IGpsService{
     private final static String TAG = "GpsService";
     private Context mContext;
     private ITrackerService mTrackerService;
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // in meters
-    private static final long MIN_TIME_BW_UPDATES = 10000; // 60000 = 1 minute
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 50; // in meters
+    private static final long MIN_TIME_BW_UPDATES = 300000; // 60000 = 1 minute
     private LocationManager mLocationManager;
     private LocationListener locationListener;
     private boolean isGPSEnabled = false;

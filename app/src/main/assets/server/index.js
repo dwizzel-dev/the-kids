@@ -64,14 +64,23 @@ function getRandomIntInclusive(min, max) {
 	min = Math.ceil(min);
 	max = Math.floor(max);
 	return Math.floor(Math.random() * (max - min + 1)) + min; 
-  }
+}
+
+function createUniqueActivationCode(event){
+    //genere le code
+    const randomCode = getRandomIntInclusive(10000,99999);
+    let unique = false;
+    //check si le unique code existe
+}
 
 exports.createInvitation = functions.firestore
 	.document('invites/{inviteId}')
-	.onCreate((event) => {	
+	.onCreate((event) => {
 		//on va generer un code
 		const randomCode = getRandomIntInclusive(10000,99999);
 		const inviteId = event.params.inviteId;
+		//on va mettre une nouvelle collection ce qui va eviter de trigger activateInvitation
+		//car avec firestore on ne peut pas mettre de trigger sur un single field
 		//on va le mettre dans la collection invites
 		return db.collection('invites').doc(inviteId)
 			.update({
@@ -79,79 +88,82 @@ exports.createInvitation = functions.firestore
 			})
 			.then(() => {
 				console.log("code: " + inviteId + " --> " + randomCode);
-				return;
+				return randomCode;
 			})
 	});
 
 exports.activateInvitation = functions.firestore
 	.document('invites/{inviteId}')
 	.onUpdate((event) => {
-		//constant
-		const ACCEPTED = 800;
-		const PENDING = 802;
-		const INNACTIVE = 803;
-		const REMOVE = 804;
-		//get the state
-		const state = event.data.data().state;
-		if(state == ACCEPTED){
-			//le userID de celui qui accepte l'invitation
-			const userA = event.data.data().to; //2UT3SOpMxPOfAPrTFUwWTswAA0l1
-			//le userID de celui qui a envoye l'invitation
-			const userB = event.data.data().from; //0CDFrsffJKbmVnU2St3NIQd0yOe2
-			const defaultName = "Code_" + event.data.data().code;
-			//le inviteId
-			const inviteId = event.params.inviteId; //PC6L4STvnhjqpI3Y94az
-			//on va chercher les infos de l'invitation
-			// DB:/users/0CDFrsffJKbmVnU2St3NIQd0yOe2/invitations/PC6L4STvnhjqpI3Y94az
-			// DB:/users/{userB}/invitations/{inviteId} [inviteId, name, phone, email, state]
-			const userRefA = db.collection('users').doc(userA);
-			const userRefB = db.collection('users').doc(userB);
-			//get l'invitations
-			return userRefB.collection('invitations').doc(inviteId)
-				.get()
-				.then((doc) => {
-					const data = doc.data();
-					console.log("get invitation: " + inviteId);
-					return {
-						name: data.name,
-						email: data.email,
-						phone: data.phone,
-						uid: userA,
-						gps: false,
-						status: 0,
-						position: new admin.firestore.GeoPoint(0.0, 0.0),
-						updateTime: admin.firestore.FieldValue.serverTimestamp()
-					};
-				})
-				.then((result) => {
-					console.log("set watchers: " + userA);
-					//on va setter le watchers du user B
-					return userRefB.collection('watchers').doc(userA).set(result);
-				})
-				.then(() => {
-					console.log("set watchings: " + userB);
-					//on va setter le watching du user A
-					return userRefA.collection('watchings').doc(userB).set({
-						name: defaultName,
-						email: "",
-						phone: "",
-						uid: userB,
-						gps: false,
-						status: 0,
-						position: new admin.firestore.GeoPoint(0.0, 0.0),
-						updateTime: admin.firestore.FieldValue.serverTimestamp()
-					});
-				})
-				.then(() => {
-					console.log("delete users invitation: " + inviteId);
-					//on peut supprimer le invitation maintenant
-					return userRefB.collection('invitations').doc(inviteId).delete();
-				})
-				.then(() =>{
-					console.log("delete invites: " + inviteId);
-					//on peut supprimer le invite
-					return event.data.ref.delete();
-				});
-		}
+	    /*
+	    var newValue = event.data.data();
+        var previousValue = event.data.previous.data();
+	    */
+	    //la seule chose qui est update c'est le "to:" car c'est le uid de celui qui a accepte
+		//le userID de celui qui accepte l'invitation
+        const userA = event.data.data().to; //2UT3SOpMxPOfAPrTFUwWTswAA0l1
+        if(userA == null || userA == ""){
+            return false;
+        }
+        //le userID de celui qui a envoye l'invitation
+        //le inviteId
+        const inviteId = event.params.inviteId; //PC6L4STvnhjqpI3Y94az
+        const userB = event.data.data().from; //0CDFrsffJKbmVnU2St3NIQd0yOe2
+        if(userB == null || userB == "" || inviteId == null || inviteId == ""){
+            return false;
+        }
+        const defaultName = "Code " + event.data.data().code;
+        //sinon
+        //on va chercher les infos de l'invitation
+        // DB:/users/0CDFrsffJKbmVnU2St3NIQd0yOe2/invitations/PC6L4STvnhjqpI3Y94az
+        // DB:/users/{userB}/invitations/{inviteId} [inviteId, name, phone, email, state]
+        const userRefA = db.collection('users').doc(userA);
+        const userRefB = db.collection('users').doc(userB);
+        //get l'invitations
+        return userRefB.collection('invitations').doc(inviteId)
+            .get()
+            .then((doc) => {
+                const data = doc.data();
+                console.log("get invitation: " + inviteId);
+                return {
+                    name: data.name,
+                    email: data.email,
+                    phone: data.phone,
+                    uid: userA,
+                    gps: false,
+                    status: 0,
+                    position: new admin.firestore.GeoPoint(0.0, 0.0),
+                    updateTime: admin.firestore.FieldValue.serverTimestamp()
+                };
+            })
+            .then((result) => {
+                console.log("set watchers: " + userA);
+                //on va setter le watchers du user B
+                return userRefB.collection('watchers').doc(userA).set(result);
+            })
+            .then(() => {
+                console.log("set watchings: " + userB);
+                //on va setter le watching du user A
+                return userRefA.collection('watchings').doc(userB).set({
+                    name: defaultName,
+                    email: "",
+                    phone: "",
+                    uid: userB,
+                    gps: false,
+                    status: 0,
+                    position: new admin.firestore.GeoPoint(0.0, 0.0),
+                    updateTime: admin.firestore.FieldValue.serverTimestamp()
+                });
+            })
+            .then(() => {
+                console.log("delete users invitation: " + inviteId);
+                //on peut supprimer le invitation maintenant
+                return userRefB.collection('invitations').doc(inviteId).delete();
+            })
+            .then(() =>{
+                console.log("delete invites: " + inviteId);
+                //on peut supprimer le invite
+                return event.data.ref.delete();
+            });
 	});
 

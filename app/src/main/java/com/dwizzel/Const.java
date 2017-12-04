@@ -65,6 +65,15 @@ public final class Const {
         public static final int WATCHER_UPDATE = 900;
         public static final int INVITATION_UPDATE = 901;
         public static final int WATCHING_UPDATE = 902;
+
+        public static final int WATCHER_REMOVE = 903;
+        public static final int INVITATION_REMOVE = 904;
+        public static final int WATCHING_REMOVE = 905;
+
+        public static final int WATCHER_ADDED = 906;
+        public static final int INVITATION_ADDED = 907;
+        public static final int WATCHING_ADDED = 908;
+
     }
     public static final class conn {
         public static final int CONNECTED = 1000;
