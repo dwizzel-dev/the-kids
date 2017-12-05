@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.dwizzel.Const;
+import com.dwizzel.datamodels.InviteInfoModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.objects.UserObject;
 import com.dwizzel.utils.Tracer;
@@ -372,8 +373,16 @@ public class TrackerService extends Service implements ITrackerService{
         }
     }
 
-    public void onActivateInvites(ServiceResponseObject sro){
-        Tracer.log(TAG, "onActivateInvites");
+    public void onActivateInvite(ServiceResponseObject sro){
+        Tracer.log(TAG, "onActivateInvite");
+        //on tranmet la reponse object au caller
+        if(mBinderCallback != null) {
+            mBinderCallback.handleResponse(sro);
+        }
+    }
+
+    public void onValidateInviteCode(ServiceResponseObject sro){
+        Tracer.log(TAG, "onValidateInviteCode");
         //on tranmet la reponse object au caller
         if(mBinderCallback != null) {
             mBinderCallback.handleResponse(sro);
@@ -464,10 +473,16 @@ public class TrackerService extends Service implements ITrackerService{
             mDatabaseService.createInvitation(inviteId, name, phone, email);
         }
 
-        public void activateInvites(String code){
-            Tracer.log(TAG, "TrackerBinder.activateInvites: " + code);
+        public void validateInviteCode(String code){
+            Tracer.log(TAG, "TrackerBinder.validateInviteCode: " + code);
             //mDatabaseService.activateInvites(inviteId);
-            mDatabaseService.activateInvitation(code);
+            mDatabaseService.validateInviteCode(code);
+        }
+
+        public void saveInviteInfo(InviteInfoModel inviteInfoModel){
+            Tracer.log(TAG, "TrackerBinder.validateInviteCode", inviteInfoModel);
+            //mDatabaseService.activateInvites(inviteId);
+            mDatabaseService.saveInviteInfo(inviteInfoModel);
         }
 
         public void getWatchersList(){
@@ -503,10 +518,6 @@ public class TrackerService extends Service implements ITrackerService{
             }
         }
 
-        public void saveNewWatchingProfil(String fromUid, String name, String phone, String email){
-            Tracer.log(TAG, "TrackerBinder.saveNewWatchingProfil: " + fromUid);
-            mDatabaseService.modifyWatchingProfil(fromUid, name, phone, email);
-        }
 
     }
 

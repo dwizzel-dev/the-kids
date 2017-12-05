@@ -212,7 +212,7 @@ public class WatchOverMeActivity extends BaseActivity {
                         case Const.notif.WATCHER_ADDED:
                             break;
                         case Const.notif.INVITATION_UPDATE:
-                            updateInvitationsListSingleViewItem((String)observerNotifObject.getValue());
+                            //updateInvitationsListSingleViewItem((String)observerNotifObject.getValue());
                             break;
                         case Const.notif.INVITATION_REMOVE:
                             break;
@@ -294,6 +294,7 @@ public class WatchOverMeActivity extends BaseActivity {
         }
     }
 
+    /*
     private void updateInvitationsListSingleViewItem(String invitationId){
         Tracer.log(TAG, "updateInvitationsListSingleViewItem: " + invitationId);
         //get la position selon le uid avec le array ref/pos list
@@ -315,6 +316,7 @@ public class WatchOverMeActivity extends BaseActivity {
             }
         }
     }
+    */
 
 
 }

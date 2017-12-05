@@ -66,6 +66,7 @@
     <string name="name_hint">Name</string>
     <string name="phone_hint">Phone number</string>
     <string name="activate_hint">Invitation ID</string>
+    <string name="validate_hint">Invitation Code</string>
     <string name="invitation_message_hint">Your invitation message here</string>
     <string name="nickname_hint">Nickname</string>
 
@@ -84,10 +85,10 @@
     <string name="err_sms_not_sent">The message was not sent, please try again!</string>
     <string name="err_sms_send_permission">You have to enable permission of sending this SMS message to continue.</string>
     <string name="err_invalid_invite_id">The ID you entered is not valid.</string>
-    <string name="err_invalid_invite_id_failure">Woops!!! An error occurred during the validation please retry</string>
+    <string name="err_invalid_invite_id_failure">Woops!!! An error occurred during the activation</string>
     <string name="err_invalid_invite_code">This code is not valid</string>
-    <string name="err_invalid_invite_code_failure">Woops!!! An error occurred during the validation please retry</string>
-    <string name="err_watching_profil_modif_failure">Woops!!! An error occurred during the modification, please retry</string>
+    <string name="err_invalid_invite_code_failure">Woops!!! An error occurred during the validation</string>
+    <string name="err_invalid_invite_infos_failure">Woops!!! An error occurred during the activation</string>
 
     <!-- TEXT -->
     <string name="or"> OR </string>

@@ -4,7 +4,9 @@ import android.support.annotation.NonNull;
 import com.dwizzel.Const;
 import com.dwizzel.datamodels.ActiveModel;
 import com.dwizzel.datamodels.InvitationModel;
+import com.dwizzel.datamodels.InviteInfoModel;
 import com.dwizzel.datamodels.InviteModel;
+import com.dwizzel.datamodels.InviteStateModel;
 import com.dwizzel.datamodels.UserModel;
 import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.datamodels.WatchingModel;
@@ -879,43 +881,41 @@ class DatabaseService implements IDatabaseService{
 
 
     //est appele par activateInvitation une fois que le code entre est valide
-    private void activateInvites(String inviteId, final String fromUid){
-        Tracer.log(TAG, "activateInvites: " + inviteId);
+    private void activateInvite(InviteInfoModel inviteInfoModel){
+        Tracer.log(TAG, "activateInvite");
         //c'est bon on peut faire le call avec un update
         try{
-            mDb.collection("invites").document(inviteId)
-                    //on ajoute seulement le uid de celui qui a accepte
-                    //pour que le trigger de cloudFunction run juste une fois
-                    .update(
-                            "to", mUser.getUid()
-                            //"state", Const.invitation.ACCEPTED,
-                            //"updateTime", FieldValue.serverTimestamp()
-                    )
+            mDb.collection("invites")
+                    .document(inviteInfoModel.getInviteId())
+                    .collection("state")
+                    .document(mUser.getUid())
+                    .set(new InviteStateModel(inviteInfoModel.getFrom()))
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
-                            Tracer.log(TAG, "activateInvites.addOnSuccessListener");
-                            mTrackerService.onActivateInvites(
-                                    new ServiceResponseObject(
-                                            Const.response.ON_INVITE_ID_ACTIVATED, fromUid));
+                            Tracer.log(TAG, "activateInvite.addOnSuccessListener");
+                            mTrackerService.onActivateInvite(
+                                    new ServiceResponseObject(Const.response.ON_INVITE_ID_ACTIVATED));
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Tracer.log(TAG,"activateInvites.addOnFailureListener.Exception: ", e);
-                            mTrackerService.onActivateInvites(
+                            Tracer.log(TAG,"activateInvite.addOnFailureListener.Exception: ", e);
+                            mTrackerService.onActivateInvite(
                                     new ServiceResponseObject(Const.error.ERROR_INVITE_ID_FAILURE));
                         }
                     });
         }catch (Exception e){
-            Tracer.log(TAG, "activateInvites.Exception: ", e);
+            Tracer.log(TAG, "activateInvite.Exception: ", e);
+            mTrackerService.onActivateInvite(
+                    new ServiceResponseObject(Const.error.ERROR_INVITE_ID_FAILURE));
         }
 
     }
 
-    public void activateInvitation(String code){
-        Tracer.log(TAG, "activateInvitation: " + code);
+    public void validateInviteCode(final String code){
+        Tracer.log(TAG, "validateInviteCode: " + code);
         //c'est bon on peut faire le call avec un update
         try{
             //on va chercher le id de l'invites avec le code
@@ -930,79 +930,86 @@ class DatabaseService implements IDatabaseService{
                                 QuerySnapshot querySnapshot = task.getResult();
                                 if(!querySnapshot.isEmpty()){
                                     for(DocumentSnapshot documentSnapshot : querySnapshot) {
-                                        Tracer.data(TAG, "invitation-activate.info[" + documentSnapshot.getId() +
+                                        Tracer.data(TAG, "code-validate.info[" + documentSnapshot.getId() +
                                                 "]: " + documentSnapshot.getData());
                                         try{
                                             //ca nous prend le "from:" aussi
                                             InviteModel inviteModel = documentSnapshot.toObject(InviteModel.class);
                                             //on a un invites ID relie au code alors on fait le update du invites
-                                            activateInvites(documentSnapshot.getId(), inviteModel.getFrom());
+                                            //activateInvites(documentSnapshot.getId(), inviteModel.getFrom());
+                                            InviteInfoModel inviteInfoModel = new InviteInfoModel(
+                                                    documentSnapshot.getId(),
+                                                    code,
+                                                    inviteModel.getFrom(),
+                                                    mUser.getUid()
+                                            );
+                                            mTrackerService.onValidateInviteCode(
+                                                    new ServiceResponseObject(Const.response.ON_INVITE_CODE_VALIDATED,
+                                                            inviteInfoModel));
                                             //vu que l'on en a juste un seul on break tout de suite
                                             break;
                                         }catch (Exception e){
-                                            Tracer.log(TAG, "activateInvitation.addOnCompleteListener.exception[0]: "
+                                            Tracer.log(TAG, "validateInviteCode.addOnCompleteListener.exception[0]: "
                                                     , e);
-                                            mTrackerService.onActivateInvites(
-                                                    new ServiceResponseObject(Const.error.ERROR_INVALID_INVITE_CODE));
+                                            mTrackerService.onValidateInviteCode(
+                                                    new ServiceResponseObject(
+                                                            Const.error.ERROR_INVALID_INVITE_CODE));
                                         }
                                     }
                                 }else{
-                                    Tracer.data(TAG, "invitation: NO DATA");
-                                    mTrackerService.onActivateInvites(
+                                    Tracer.data(TAG, "code-validate: NO DATA");
+                                    mTrackerService.onValidateInviteCode(
                                             new ServiceResponseObject(Const.error.ERROR_INVALID_INVITE_CODE));
                                 }
                             } else {
-                                Tracer.log(TAG, "activateInvitation.addOnCompleteListener.exception[1]: "
+                                Tracer.log(TAG, "validateInviteCode.addOnCompleteListener.exception[1]: "
                                         , task.getException());
-                                mTrackerService.onActivateInvites(
-                                        new ServiceResponseObject(Const.error.ERROR_INVALID_INVITE_CODE));
+                                mTrackerService.onValidateInviteCode(
+                                        new ServiceResponseObject(
+                                                Const.error.ERROR_INVALID_INVITE_CODE_FAILURE));
                             }
                         }
                     });
         }catch (Exception e){
-            Tracer.log(TAG, "activateInvitation.Exception: ", e);
-            mTrackerService.onActivateInvites(
-                    new ServiceResponseObject(Const.error.ERROR_INVALID_INVITE_CODE));
+            Tracer.log(TAG, "validateInviteCode.Exception: ", e);
+            mTrackerService.onValidateInviteCode(
+                    new ServiceResponseObject(Const.error.ERROR_INVALID_INVITE_CODE_FAILURE));
         }
 
     }
 
-    public void modifyWatchingProfil(String fromUid, String name, String phone, String email){
-        Tracer.log(TAG, "modifyWatchingProfil: " + fromUid);
+    //est appele par activateInvitation une fois que le code entre est valide
+    public void saveInviteInfo(final InviteInfoModel inviteInfoModel){
+        Tracer.log(TAG, "saveInviteInfo");
         try{
-            //add the new user collection with his id
-            mDb.collection("users").document(mUser.getUid()).collection("watchings").document(fromUid)
-                    .update(
-                            "name", name,
-                            "phone", phone,
-                            "email", email
-                    )
+            mDb.collection("invites")
+                    .document(inviteInfoModel.getInviteId())
+                    .collection("infos")
+                    .document(mUser.getUid())
+                    .set(inviteInfoModel)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void avoid) {
-                            Tracer.log(TAG, "modifyWatchingProfil.addOnSuccessListener");
-                            mTrackerService.onActivateInvites(
-                                    new ServiceResponseObject(
-                                            Const.response.ON_WATCHING_PROFIL_MODIFIED));
+                            Tracer.log(TAG, "saveInviteInfo.addOnSuccessListener");
+                            //les infos sont sauve alors on peut active le cloud functions fera le reste
+                            activateInvite(inviteInfoModel);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Tracer.log(TAG,"modifyWatchingProfil.addOnFailureListener.Exception: ", e);
-                            mTrackerService.onWatchingProfilModified(
-                                    new ServiceResponseObject(Const.error.ERROR_WATCHING_PROFIL_MODIF_FAILURE));
+                            Tracer.log(TAG,"saveInviteInfo.addOnFailureListener.Exception: ", e);
+                            mTrackerService.onActivateInvite(
+                                    new ServiceResponseObject(Const.error.ERROR_INVITE_INFOS_FAILURE));
                         }
                     });
-
         }catch (Exception e){
-            Tracer.log(TAG, "modifyWatchingProfil.Exception: ", e);
-            mTrackerService.onWatchingProfilModified(
-                    new ServiceResponseObject(Const.error.ERROR_WATCHING_PROFIL_MODIF_FAILURE));
+            Tracer.log(TAG, "saveInviteInfo.Exception: ", e);
+            mTrackerService.onActivateInvite(
+                    new ServiceResponseObject(Const.error.ERROR_INVITE_INFOS_FAILURE));
         }
 
     }
-
 
 
  }

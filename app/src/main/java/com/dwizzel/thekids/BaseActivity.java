@@ -60,15 +60,12 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         private static final String TAG = "BaseActivity.ITrackerBinder";
         public void handleResponse(ServiceResponseObject sro){
-            Tracer.log(TAG, String.format("handleResponse: %s", sro));
+            Tracer.log(TAG, "handleResponse: %s", sro);
         }
         public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");
         }
         public void onSignedOut(ServiceResponseObject sro){
-            Tracer.log(TAG, "onSignedOut");
-            //show le msg
-            //Utils.getInstance().hideProgressDialog();
             Utils.getInstance().showToastMsg(BaseActivity.this, R.string.toast_signed_out);
             startLoginActivity();
         }
@@ -143,7 +140,6 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
 
     protected void signOutUser(){
         Tracer.log(TAGBASE, "signOutUser");
-        //Utils.getInstance().showProgressDialog(BaseActivity.this);
         //on effce le menu
         ConstraintLayout constraintLayout;
         constraintLayout = findViewById(R.id.LayoutButtons);

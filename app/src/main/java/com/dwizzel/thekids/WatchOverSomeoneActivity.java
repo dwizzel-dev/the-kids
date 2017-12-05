@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchOverSomeoneListAdapter;
+import com.dwizzel.datamodels.InviteInfoModel;
 import com.dwizzel.datamodels.WatchingModel;
 import com.dwizzel.objects.ListItems;
 import com.dwizzel.objects.ObserverNotifObject;
@@ -40,7 +41,6 @@ public class WatchOverSomeoneActivity extends BaseActivity{
     private UserObject mUser;
     private HashMap<String, Integer> mWatchingsPair;
     private RecyclerView mRecyclerView;
-    private String mInviteId;
     TrackerService.TrackerBinder mTrackerBinder;
 
 
@@ -90,15 +90,16 @@ public class WatchOverSomeoneActivity extends BaseActivity{
     private void checkMandatoryFieldsAndValidate(){
         displayErrMsg(Const.error.NO_ERROR);
         //on va chercher les infos et on les sets
-        mInviteId = String.format("%s",((EditText)findViewById(R.id.txtInviteId)).getText());
+        String code = String.format("%s",((EditText)findViewById(R.id.txtInviteCode)).getText());
         //minor check
-        if(mInviteId.isEmpty()){
-            displayErrMsg(R.string.err_invalid_invite_id);
+        if(code.isEmpty()){
+            displayErrMsg(R.string.err_invalid_invite_code);
             return;
         }
         //on a le tout allors on fait le call au service
         showSpinner(true);
-        mTrackerBinder.activateInvites(mInviteId);
+        //mTrackerBinder.activateInvites(mInviteId);
+        mTrackerBinder.validateInviteCode(code);
 
     }
 
@@ -108,19 +109,19 @@ public class WatchOverSomeoneActivity extends BaseActivity{
         ITrackerBinderCallback serviceCallback = new ITrackerBinderCallback() {
             private static final String TAG = "WatchOverSomeoneActivity.ITrackerBinder";
             public void handleResponse(ServiceResponseObject sro){
-                Tracer.log(TAG, "handleResponse: " + sro);
+                Tracer.log(TAG, "handleResponse: ", sro);
                 if(sro.getErr() == 0) {
-                    Tracer.log(TAG, "handleResponse: " + sro.getMsg());
                     switch (sro.getMsg()) {
                         case Const.response.ON_WATCHINGS_LIST:
                         case Const.response.ON_EMPTY_WATCHINGS_LIST:
                             //ca nous prend un ou l'autre
                             contentListLoaded();
                             break;
-                        case Const.response.ON_INVITE_ID_ACTIVATED:
+                        //case Const.response.ON_INVITE_ID_ACTIVATED:
+                        case Const.response.ON_INVITE_CODE_VALIDATED:
                             //les args du inviteId et FromUid
                             //ca nous prend un ou l'autre
-                            createNicknameForActivation(sro.getArg());
+                            createNicknameForActivation((InviteInfoModel)sro.getObj());
                             break;
                         default:
                             break;
@@ -136,7 +137,6 @@ public class WatchOverSomeoneActivity extends BaseActivity{
                         case Const.conn.RECONNECTING:
                             Tracer.log(TAG, "handleResponse: RECONNECTING");
                             break;
-                        case Const.error.ERROR_INVITE_ID_FAILURE:
                         case Const.error.ERROR_INVALID_INVITE_CODE_FAILURE:
                             displayErrMsg(R.string.err_invalid_invite_id_failure);
                             break;
@@ -160,25 +160,20 @@ public class WatchOverSomeoneActivity extends BaseActivity{
         mTrackerBinder.registerCallback(serviceCallback);
     }
 
-    private void createNicknameForActivation(String fromUid){
-        Tracer.log(TAG, "createNicknameForWatchings: " + fromUid);
+    private void createNicknameForActivation(InviteInfoModel inviteInfoModel){
+        Tracer.log(TAG, "createNicknameForActivation", inviteInfoModel);
         //on va a edition de profil
         Intent intent = new Intent(WatchOverSomeoneActivity.this,
                 ActivateInvitationActivity.class);
-        //on set le bundle avec le fromUid
-        Bundle bundle = new Bundle();
-        bundle.putString("fromUid", fromUid);
-        intent.putExtras(bundle);
+        //on set l'objet a a passer
+        intent.putExtra("inviteInfo", inviteInfoModel);
         //start activity and clear the backStack
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         //on arrete le loader et clean le reste au cas d'un backstack
-        this.finish();
-        /*
+        //this.finish();
         showSpinner(false);
-        mInviteId = null;
-        ((EditText)findViewById(R.id.txtInviteId)).setText("");
-        */
+        ((EditText)findViewById(R.id.txtInviteCode)).setText("");
 
     }
 

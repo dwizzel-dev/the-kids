@@ -9,6 +9,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.dwizzel.Const;
+import com.dwizzel.datamodels.InviteInfoModel;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
@@ -19,7 +20,7 @@ public class ActivateInvitationActivity extends BaseActivity {
     private static final String TAG = "ActivateInvitationActivity";
     private TrackerService.TrackerBinder mTrackerBinder;
     private boolean isActivityCreated = false;
-    private String mFromUid;
+    private InviteInfoModel mInviteInfoModel;
 
     public void onSubDestroy(){
         Tracer.log(TAG, "onSubDestroy");
@@ -36,7 +37,7 @@ public class ActivateInvitationActivity extends BaseActivity {
             //on cherche les params passes
             Bundle bundle = getIntent().getExtras();
             if(bundle != null) {
-                mFromUid = bundle.getString("fromUid");
+                mInviteInfoModel = (InviteInfoModel) bundle.getParcelable("inviteInfo");
             }
             //set un nouveau callback au lieu de celui de BaseActivity
             //vu qu'il va recevoir une notif quand aura ca liste de Watchers et de Invites
@@ -50,25 +51,38 @@ public class ActivateInvitationActivity extends BaseActivity {
         //on overwrite celui de BaseActivity
         ITrackerBinderCallback serviceCallback = new ITrackerBinderCallback() {
             private static final String TAG = "ActivateInvitationActivity.ITrackerBinder";
-            public void handleResponse(ServiceResponseObject sro){
-                Tracer.log(TAG, "handleResponse: " + sro);
-                if(sro.getErr() == 0){
-                    Tracer.log(TAG, "handleResponse: " + sro.getMsg());
-                    switch(sro.getMsg()){
-                        case Const.response.ON_WATCHING_PROFIL_MODIFIED:
-                            //c'est beau
-                            watchingProfilModified(true);
+            public void handleResponse(ServiceResponseObject sro) {
+                if (sro.getErr() == 0) {
+                    //c'est beau
+                    switch (sro.getMsg()) {
+                        case Const.response.ON_INVITE_ID_ACTIVATED:
+                            inviteActivated(true);
                             break;
                         default:
                             break;
                     }
-                }else if(sro.getErr() == Const.error.ERROR_WATCHING_PROFIL_MODIF_FAILURE){
-                    watchingProfilModified(false);
-                }else if(sro.getErr() == Const.conn.NOT_CONNECTED){
-                    Tracer.log(TAG, "handleResponse: NOT_CONNECTED");
-                }else if(sro.getErr() == Const.conn.RECONNECTED){
-                    Tracer.log(TAG, "handleResponse: RECONNECTED");
+                } else {
+                    switch (sro.getErr()) {
+                        case Const.conn.NOT_CONNECTED:
+                            Tracer.log(TAG, "handleResponse: NOT CONNECTED");
+                            break;
+                        case Const.conn.RECONNECTED:
+                            Tracer.log(TAG, "handleResponse: RECONNECTED");
+                            break;
+                        case Const.conn.RECONNECTING:
+                            Tracer.log(TAG, "handleResponse: RECONNECTING");
+                            break;
+                        case Const.error.ERROR_INVITE_ID_FAILURE:
+                        case Const.error.ERROR_INVITE_INFOS_FAILURE:
+                            inviteActivated(false);
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
+
+
             }
             public void onSignedIn(ServiceResponseObject sro){}
             public void onSignedOut(ServiceResponseObject sro){}
@@ -82,10 +96,9 @@ public class ActivateInvitationActivity extends BaseActivity {
         mTrackerBinder.registerCallback(serviceCallback);
     }
 
-    private void watchingProfilModified(boolean sucess){
-        if(sucess){
+    private void inviteActivated(boolean success){
+        if(success){
             //on revient au listing en clearant le backstack completment
-            //start activity
             Intent intent = new Intent(ActivateInvitationActivity.this,
                     WatchOverSomeoneActivity.class);
             //start activity and clear the backStack
@@ -93,7 +106,7 @@ public class ActivateInvitationActivity extends BaseActivity {
             startActivity(intent);
             this.finish();
         }else{
-            displayErrMsg(R.string.err_watching_profil_modif_failure);
+            displayErrMsg(R.string.err_invalid_invite_infos_failure);
         }
     }
 
@@ -104,7 +117,7 @@ public class ActivateInvitationActivity extends BaseActivity {
                 new View.OnClickListener() {
                     public void onClick(View v) {
                         //on call la function et on met le loader
-                        checkMandatoryFieldsAndSave();
+                        checkMandatoryFieldsAndActivate();
                         //TODO: a enlever
                         //watchingProfilModified(true);
                     }
@@ -112,21 +125,26 @@ public class ActivateInvitationActivity extends BaseActivity {
 
     }
 
-    private void checkMandatoryFieldsAndSave(){
+    private void checkMandatoryFieldsAndActivate(){
         displayErrMsg(Const.error.NO_ERROR);
         //on va chercher les infos et on les sets
-        String nickname = String.format("%s",((EditText)findViewById(R.id.nickname)).getText());
+        String name = String.format("%s",((EditText)findViewById(R.id.name)).getText());
         String phone = String.format("%s",((EditText)findViewById(R.id.phone)).getText());
         String email = String.format("%s",((EditText)findViewById(R.id.email)).getText());
         //minor check
-        if(nickname.isEmpty()){
+        if(name.isEmpty()){
             displayErrMsg(R.string.err_nickname_invalid);
             return;
         }
-        //le reste importe peu
-        //on a le tout alors on fait le call au service
-        showSpinner(true);
-        mTrackerBinder.saveNewWatchingProfil(mFromUid, nickname, phone, email);
+        //on set l'objet
+        if(mInviteInfoModel != null) {
+            mInviteInfoModel.setName(name);
+            mInviteInfoModel.setPhone(phone);
+            mInviteInfoModel.setEmail(email);
+            //on a le tout alors on fait le call au service
+            showSpinner(true);
+            mTrackerBinder.saveInviteInfo(mInviteInfoModel);
+        }
 
     }
 

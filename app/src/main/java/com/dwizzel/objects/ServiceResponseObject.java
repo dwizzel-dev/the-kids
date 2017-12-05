@@ -1,5 +1,7 @@
 package com.dwizzel.objects;
 
+import com.dwizzel.datamodels.InviteInfoModel;
+
 import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +53,11 @@ public final class ServiceResponseObject{
     public ServiceResponseObject(String msg, HashMap<String, Object> args) {
         this.msg = msg;
         this.args.putAll(args);
+    }
+
+    public ServiceResponseObject(String msg, InviteInfoModel inviteInfoModel) {
+        this.msg = msg;
+        this.obj = inviteInfoModel;
     }
 
     public int getErr(){

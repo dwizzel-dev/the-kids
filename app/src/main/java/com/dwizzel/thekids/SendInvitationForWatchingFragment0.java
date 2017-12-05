@@ -87,7 +87,7 @@ public class SendInvitationForWatchingFragment0 extends Fragment implements ISen
     }
 
     private void onContactPicked(Intent data){
-        Tracer.log(TAG, "onContactPicked: ", data);
+        Tracer.log(TAG, "onContactPicked");
         Cursor cursor = null;
         try {
             String phone = "";

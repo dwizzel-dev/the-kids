@@ -16,7 +16,6 @@ public class InvitationModel{
     private String phone;
     private String name;
     private Date updateTime;
-    private int state = Const.invitation.PENDING;
 
     public InvitationModel(){
 
@@ -27,14 +26,6 @@ public class InvitationModel{
         this.name = name;
         this.phone = phone;
         this.email = email;
-    }
-
-    public int getState() {
-        return state;
-    }
-
-    public void setState(int state) {
-        this.state = state;
     }
 
     public String getPhone() {

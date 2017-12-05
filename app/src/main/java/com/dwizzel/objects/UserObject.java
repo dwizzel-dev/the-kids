@@ -425,23 +425,20 @@ public class UserObject extends Observable{
     }
 
     public Map<String, Object> toInviteData(){
-        Map<String, Object> map = new HashMap<>(5);
+        Map<String, Object> map = new HashMap<>(3);
         map.put("from", getUid());
         map.put("updateTime", FieldValue.serverTimestamp());
-        map.put("to", ""); //since we don't know yet
-        map.put("state", Const.invitation.INNACTIVE);
         map.put("code", Const.invitation.DEFAULT_CODE);
         return map;
     }
 
     public Map<String, Object> toInvitationData(String inviteId, String name, String phone, String email){
-        Map<String, Object> map = new HashMap<>(4);
+        Map<String, Object> map = new HashMap<>(5);
         map.put("email", email);
         map.put("name", name);
         map.put("phone", phone);
         map.put("inviteId", inviteId);
         map.put("updateTime", FieldValue.serverTimestamp());
-        map.put("state", Const.invitation.PENDING);
         return map;
     }
 

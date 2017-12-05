@@ -1,5 +1,6 @@
 package com.dwizzel.services;
 
+import com.dwizzel.datamodels.InviteInfoModel;
 import com.google.firebase.auth.AuthCredential;
 
 /**
@@ -22,7 +23,7 @@ public interface ITrackerBinder {
     void createInviteId();
     void createInvitation(String inviteId, String name, String phone, String email);
     void getWatchingsList();
-    void activateInvites(String inviteId);
-    void saveNewWatchingProfil(String fromUid, String name, String phone, String email);
+    void saveInviteInfo(InviteInfoModel inviteInfoModel);
+    void validateInviteCode(String code);
 
 }

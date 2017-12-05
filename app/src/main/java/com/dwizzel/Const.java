@@ -24,8 +24,8 @@ public final class Const {
         public static final int ERROR_INVITE_CREATION_FAILURE = 214;
         public static final int ERROR_INVITATION_CREATION_FAILURE = 215;
 
-        public static final int ERROR_WATCHING_PROFIL_MODIF_FAILURE = 216;
-        public static final int ERROR_WATCHERS_PROFIL_MODIF_FAILURE = 217;
+        public static final int ERROR_INVITE_INFOS_FAILURE = 216;
+
 
 
     }
