@@ -1,6 +1,7 @@
 package com.dwizzel.thekids;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -72,19 +73,21 @@ public class WatchOverSomeoneActivity extends BaseActivity{
     }
 
     private void setButton() {
-        Button buttActivate = findViewById(R.id.buttActivate);
+        Button butt = findViewById(R.id.buttValidate);
         //butt create
-        buttActivate.setOnClickListener(
+        butt.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
                         //on call la function et on met le loader
-                        checkMandatoryFieldsAndActivate();
+                        checkMandatoryFieldsAndValidate();
+                        //TODO: a enlever
+                        //createNicknameForWatchings("blablalba");
                     }
                 });
 
     }
 
-    private void checkMandatoryFieldsAndActivate(){
+    private void checkMandatoryFieldsAndValidate(){
         displayErrMsg(Const.error.NO_ERROR);
         //on va chercher les infos et on les sets
         mInviteId = String.format("%s",((EditText)findViewById(R.id.txtInviteId)).getText());
@@ -115,8 +118,9 @@ public class WatchOverSomeoneActivity extends BaseActivity{
                             contentListLoaded();
                             break;
                         case Const.response.ON_INVITE_ID_ACTIVATED:
+                            //les args du inviteId et FromUid
                             //ca nous prend un ou l'autre
-                            createNicknameForWatchings();
+                            createNicknameForActivation(sro.getArg());
                             break;
                         default:
                             break;
@@ -156,14 +160,26 @@ public class WatchOverSomeoneActivity extends BaseActivity{
         mTrackerBinder.registerCallback(serviceCallback);
     }
 
-    private void createNicknameForWatchings(){
-        Tracer.log(TAG, "createNicknameForWatchings");
+    private void createNicknameForActivation(String fromUid){
+        Tracer.log(TAG, "createNicknameForWatchings: " + fromUid);
         //on va a edition de profil
         Intent intent = new Intent(WatchOverSomeoneActivity.this,
                 ActivateInvitationActivity.class);
+        //on set le bundle avec le fromUid
+        Bundle bundle = new Bundle();
+        bundle.putString("fromUid", fromUid);
+        intent.putExtras(bundle);
         //start activity and clear the backStack
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        //on arrete le loader et clean le reste au cas d'un backstack
+        this.finish();
+        /*
+        showSpinner(false);
+        mInviteId = null;
+        ((EditText)findViewById(R.id.txtInviteId)).setText("");
+        */
+
     }
 
     public void displayErrMsg(int msgId){
@@ -315,13 +331,13 @@ public class WatchOverSomeoneActivity extends BaseActivity{
     private void showSpinner(boolean show){
         //le bouton et le spinner
         ProgressBar progressBar = findViewById(R.id.loading_spinner_butt);
-        Button buttSend = findViewById(R.id.buttActivate);
+        Button butt = findViewById(R.id.buttValidate);
         if(show){
             progressBar.setVisibility(View.VISIBLE);
-            buttSend.setVisibility(View.INVISIBLE);
+            butt.setVisibility(View.INVISIBLE);
         }else{
             progressBar.setVisibility(View.INVISIBLE);
-            buttSend.setVisibility(View.VISIBLE);
+            butt.setVisibility(View.VISIBLE);
         }
     }
 

@@ -17,9 +17,7 @@ public class InviteModel{
     private int code = Const.invitation.DEFAULT_CODE;
     private int state = Const.invitation.PENDING;
 
-    public InviteModel(){
-
-    }
+    public InviteModel(){}
 
     public int getCode() {
         return code;

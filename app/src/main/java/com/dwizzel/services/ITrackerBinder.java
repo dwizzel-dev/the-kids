@@ -23,5 +23,6 @@ public interface ITrackerBinder {
     void createInvitation(String inviteId, String name, String phone, String email);
     void getWatchingsList();
     void activateInvites(String inviteId);
+    void saveNewWatchingProfil(String fromUid, String name, String phone, String email);
 
 }

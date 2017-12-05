@@ -834,7 +834,7 @@ class DatabaseService implements IDatabaseService{
 
     }
 
-    public void createInvitation(final String inviteId, final String name, final String phone, final String email){
+    public void createInvitation(String inviteId, String name, String phone, String email){
         Tracer.log(TAG, "createInvitation: " + inviteId);
         try{
             //add the new user collection with his id
@@ -879,7 +879,7 @@ class DatabaseService implements IDatabaseService{
 
 
     //est appele par activateInvitation une fois que le code entre est valide
-    private void activateInvites(String inviteId){
+    private void activateInvites(String inviteId, final String fromUid){
         Tracer.log(TAG, "activateInvites: " + inviteId);
         //c'est bon on peut faire le call avec un update
         try{
@@ -896,7 +896,8 @@ class DatabaseService implements IDatabaseService{
                         public void onSuccess(Void avoid) {
                             Tracer.log(TAG, "activateInvites.addOnSuccessListener");
                             mTrackerService.onActivateInvites(
-                                    new ServiceResponseObject(Const.response.ON_INVITE_ID_ACTIVATED));
+                                    new ServiceResponseObject(
+                                            Const.response.ON_INVITE_ID_ACTIVATED, fromUid));
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -932,8 +933,10 @@ class DatabaseService implements IDatabaseService{
                                         Tracer.data(TAG, "invitation-activate.info[" + documentSnapshot.getId() +
                                                 "]: " + documentSnapshot.getData());
                                         try{
+                                            //ca nous prend le "from:" aussi
+                                            InviteModel inviteModel = documentSnapshot.toObject(InviteModel.class);
                                             //on a un invites ID relie au code alors on fait le update du invites
-                                            activateInvites(documentSnapshot.getId());
+                                            activateInvites(documentSnapshot.getId(), inviteModel.getFrom());
                                             //vu que l'on en a juste un seul on break tout de suite
                                             break;
                                         }catch (Exception e){
@@ -960,6 +963,42 @@ class DatabaseService implements IDatabaseService{
             Tracer.log(TAG, "activateInvitation.Exception: ", e);
             mTrackerService.onActivateInvites(
                     new ServiceResponseObject(Const.error.ERROR_INVALID_INVITE_CODE));
+        }
+
+    }
+
+    public void modifyWatchingProfil(String fromUid, String name, String phone, String email){
+        Tracer.log(TAG, "modifyWatchingProfil: " + fromUid);
+        try{
+            //add the new user collection with his id
+            mDb.collection("users").document(mUser.getUid()).collection("watchings").document(fromUid)
+                    .update(
+                            "name", name,
+                            "phone", phone,
+                            "email", email
+                    )
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "modifyWatchingProfil.addOnSuccessListener");
+                            mTrackerService.onActivateInvites(
+                                    new ServiceResponseObject(
+                                            Const.response.ON_WATCHING_PROFIL_MODIFIED));
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG,"modifyWatchingProfil.addOnFailureListener.Exception: ", e);
+                            mTrackerService.onWatchingProfilModified(
+                                    new ServiceResponseObject(Const.error.ERROR_WATCHING_PROFIL_MODIF_FAILURE));
+                        }
+                    });
+
+        }catch (Exception e){
+            Tracer.log(TAG, "modifyWatchingProfil.Exception: ", e);
+            mTrackerService.onWatchingProfilModified(
+                    new ServiceResponseObject(Const.error.ERROR_WATCHING_PROFIL_MODIF_FAILURE));
         }
 
     }

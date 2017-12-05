@@ -24,6 +24,8 @@ public final class Const {
         public static final int ERROR_INVITE_CREATION_FAILURE = 214;
         public static final int ERROR_INVITATION_CREATION_FAILURE = 215;
 
+        public static final int ERROR_WATCHING_PROFIL_MODIF_FAILURE = 216;
+        public static final int ERROR_WATCHERS_PROFIL_MODIF_FAILURE = 217;
 
 
     }
@@ -90,9 +92,13 @@ public final class Const {
         public static final String ON_EMPTY_INVITATIONS_LIST = "ON_EMPTY_INVITATIONS_LIST";
         public static final String ON_EMPTY_WATCHINGS_LIST = "ON_EMPTY_WATCHINGS_LIST";
 
+        public static final String ON_INVITE_CODE_VALIDATED = "ON_INVITE_CODE_VALIDATED";
         public static final String ON_INVITE_ID_CREATED = "ON_INVITE_ID_CREATED";
         public static final String ON_INVITE_ID_ACTIVATED = "ON_INVITE_ID_ACTIVATED";
         public static final String ON_INVITATION_CREATED = "ON_INVITATION_CREATED";
+
+        public static final String ON_WATCHING_PROFIL_MODIFIED = "ON_WATCHING_PROFIL_MODIFIED";
+        public static final String ON_WATCHERS_PROFIL_MODIFIED = "ON_WATCHERS_PROFIL_MODIFIED";
 
 
 

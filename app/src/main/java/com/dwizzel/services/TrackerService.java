@@ -380,6 +380,14 @@ public class TrackerService extends Service implements ITrackerService{
         }
     }
 
+    public void onWatchingProfilModified(ServiceResponseObject sro){
+        Tracer.log(TAG, "onWatchingProfilModified");
+        //on tranmet la reponse object au caller
+        if(mBinderCallback != null) {
+            mBinderCallback.handleResponse(sro);
+        }
+    }
+
     public void onGpsPositionUpdate(){
         Tracer.log(TAG, "onGpsPositionUpdate");
         //on fait un update du user et celui de la DB
@@ -493,6 +501,11 @@ public class TrackerService extends Service implements ITrackerService{
                 //sinon il l'a deja alors on repond tout de suite
                 onUserWatchingsList(new ServiceResponseObject(Const.response.ON_WATCHINGS_LIST));
             }
+        }
+
+        public void saveNewWatchingProfil(String fromUid, String name, String phone, String email){
+            Tracer.log(TAG, "TrackerBinder.saveNewWatchingProfil: " + fromUid);
+            mDatabaseService.modifyWatchingProfil(fromUid, name, phone, email);
         }
 
     }

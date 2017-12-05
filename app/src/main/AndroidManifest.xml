@@ -17,6 +17,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="com.dwizzel.permission.SERVICE" />
 
+    <uses-feature android:name="android.hardware.location.gps" />
+    <uses-feature android:name="android.hardware.location.network" />
+
     <!-- NOTES: android:launchMode="singleTask" -->
     <application
         android:allowBackup="true"

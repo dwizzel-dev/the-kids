@@ -54,8 +54,10 @@
     <string name="butt_send_invitation">Send Sms Invitation</string>
     <string name="butt_select_from_contacts">Select From Your Contacts</string>
     <string name="butt_enter_phone_number">Enter Phone Number</string>
+    <string name="butt_validate">Validate</string>
     <string name="butt_activate">Activate</string>
     <string name="butt_save">Save</string>
+
 
     <!-- INPUT FIELD HINT -->
     <string name="email_hint">Email</string>
@@ -68,6 +70,7 @@
     <string name="nickname_hint">Nickname</string>
 
     <!-- ERR MESSAGE -->
+    <string name="err_nickname_invalid">the name is invalid</string>
     <string name="err_email_invalid">the email is invalid</string>
     <string name="err_psw_too_short">the password is too short</string>
     <string name="err_psw_not_the_same">the two passwords must be identical</string>
@@ -80,10 +83,11 @@
     <string name="err_no_message">You need to provide a little welcome message!</string>
     <string name="err_sms_not_sent">The message was not sent, please try again!</string>
     <string name="err_sms_send_permission">You have to enable permission of sending this SMS message to continue.</string>
-    <string name="err_invalid_invite_id">The ID you entered is not valid (20 chars min).</string>
+    <string name="err_invalid_invite_id">The ID you entered is not valid.</string>
     <string name="err_invalid_invite_id_failure">Woops!!! An error occurred during the validation please retry</string>
     <string name="err_invalid_invite_code">This code is not valid</string>
     <string name="err_invalid_invite_code_failure">Woops!!! An error occurred during the validation please retry</string>
+    <string name="err_watching_profil_modif_failure">Woops!!! An error occurred during the modification, please retry</string>
 
     <!-- TEXT -->
     <string name="or"> OR </string>

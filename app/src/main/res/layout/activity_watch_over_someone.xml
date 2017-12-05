@@ -39,7 +39,9 @@
                     android:text="@string/activate_invitation_description"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:visibility="visible"
+                    />
 
                 <EditText
                     android:id="@+id/txtInviteId"
@@ -66,13 +68,13 @@
                     app:layout_constraintTop_toBottomOf="@+id/txtInviteId" />
 
                 <Button
-                    android:id="@+id/buttActivate"
+                    android:id="@+id/buttValidate"
                     style="@style/AppTheme.ButtonFull"
                     android:layout_width="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
-                    android:text="@string/butt_activate"
+                    android:text="@string/butt_validate"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/txtInviteId" />
@@ -88,7 +90,7 @@
                     android:layout_marginTop="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/buttActivate"
+                    app:layout_constraintStart_toEndOf="@+id/buttValidate"
                     app:layout_constraintTop_toBottomOf="@+id/txtInviteId"
                     tools:text="@string/medium_text" />
 
