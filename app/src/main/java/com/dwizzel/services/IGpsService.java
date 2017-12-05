@@ -8,7 +8,7 @@ import com.google.firebase.firestore.GeoPoint;
 
 public interface IGpsService {
 
-    boolean startLocationUpdate();
+    boolean startLocationUpdate(int type);
     void stopLocationUpdate();
     GeoPoint getLastPosition();
     int checkGpsStatus();

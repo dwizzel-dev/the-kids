@@ -9,7 +9,7 @@ import com.dwizzel.datamodels.InviteInfoModel;
 
 public interface IDatabaseService {
 
-    void activateUser();
+    void keepUserActive();
     void deactivateUser();
     void getUserInfos();
     void updateUserPosition();

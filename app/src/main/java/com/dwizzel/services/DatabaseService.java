@@ -125,7 +125,7 @@ class DatabaseService implements IDatabaseService{
                 }
                 it.remove();
             }
-            mWatchingsActiveListener = null;
+            mWatchingsActiveListener = new HashMap<>();
         }
 
     }
@@ -177,7 +177,7 @@ class DatabaseService implements IDatabaseService{
                 }
                 it.remove();
             }
-            mWatchersActiveListener = null;
+            mWatchersActiveListener = new HashMap<>();
         }
 
     }
@@ -202,8 +202,11 @@ class DatabaseService implements IDatabaseService{
                                     Tracer.data(TAG, "watchers[" + dc.getDocument().getId() +
                                             "].ADDED: " + dc.getDocument().getData());
                                     //on rajoute a mUser
-                                    mUser.addWatcher(dc.getDocument().getId(),
-                                            dc.getDocument().toObject(WatcherModel.class));
+                                    if(mUser.addWatcher(dc.getDocument().getId(),
+                                            dc.getDocument().toObject(WatcherModel.class))){
+                                        //si pas deja la alors on met un listener
+                                        addListenerOnWatchersActive(dc.getDocument().getId());
+                                    }
                                     break;
                                 case REMOVED:
                                     Tracer.data(TAG, "watchers[" + dc.getDocument().getId() +
@@ -255,8 +258,11 @@ class DatabaseService implements IDatabaseService{
                                     Tracer.data(TAG, "watchings[" + dc.getDocument().getId() +
                                             "].ADDED: " + dc.getDocument().getData());
                                     //on rajoute a mUser
-                                    mUser.addWatching(dc.getDocument().getId(),
-                                            dc.getDocument().toObject(WatchingModel.class));
+                                    if(mUser.addWatching(dc.getDocument().getId(),
+                                            dc.getDocument().toObject(WatchingModel.class))){
+                                        //si pas deja la alors on met un listener
+                                        addListenerOnWatchingsActive(dc.getDocument().getId());
+                                    }
                                     break;
                                 case REMOVED:
                                     Tracer.data(TAG, "watchings[" + dc.getDocument().getId() +
@@ -588,8 +594,8 @@ class DatabaseService implements IDatabaseService{
         }
     }
 
-    public void activateUser(){
-        Tracer.log(TAG, "activateUser");
+    public void keepUserActive(){
+        Tracer.log(TAG, "keepUserActive");
         try{
             //add the new user collection with his id
             mDb.collection("actives").document(mUser.getUid())
@@ -598,17 +604,17 @@ class DatabaseService implements IDatabaseService{
                         @Override
                         public void onSuccess(Void avoid) {
                             //on set le dernier UID actif pour la verif au delete
-                            Tracer.log(TAG, "activateUser.addOnSuccessListener: " + mUser.getUid());
+                            Tracer.log(TAG, "keepUserActive.addOnSuccessListener: " + mUser.getUid());
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Tracer.log(TAG, "activateUser.addOnFailureListener.Exception: ", e);
+                            Tracer.log(TAG, "keepUserActive.addOnFailureListener.Exception: ", e);
                         }
                     });
         }catch (Exception e){
-            Tracer.log(TAG, "activateUser.Exception: ", e);
+            Tracer.log(TAG, "keepUserActive.Exception: ", e);
         }
 
     }

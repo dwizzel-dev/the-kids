@@ -80,9 +80,8 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
         ITrackerBinderCallback serviceCallback = new ITrackerBinderCallback() {
             private static final String TAG = "SendInvitationForWatchingActivity.ITrackerBinder";
             public void handleResponse(ServiceResponseObject sro){
-                Tracer.log(TAG, "handleResponse: " + sro);
+                Tracer.log(TAG, "handleResponse", sro);
                 if(sro.getErr() == 0){
-                    Tracer.log(TAG, "handleResponse: " + sro.getMsg());
                     switch(sro.getMsg()){
                         case Const.response.ON_INVITE_ID_CREATED:
                             //on va chercher les arguments

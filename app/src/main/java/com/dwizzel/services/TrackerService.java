@@ -55,7 +55,7 @@ public class TrackerService extends Service implements ITrackerService{
 
     //COnstant
     private final static int MSG_UPDATE_TIME = 0;
-    private final static int MSG_UPDATE_DELAY = 30000; //au 30 secondes
+    private final static int MSG_UPDATE_DELAY = 60000; //au 60 secondes
 
     //
     private ITrackerBinderCallback mBinderCallback;
@@ -188,7 +188,7 @@ public class TrackerService extends Service implements ITrackerService{
         Tracer.log(TAG, "changeUserStatus: " + status);
         try {
             mUser.setStatus(status);
-            mDatabaseService.activateUser();
+            mDatabaseService.keepUserActive();
         }catch (Exception e){
             Tracer.log(TAG, "activateUser.exception: ", e);
         }
@@ -234,19 +234,16 @@ public class TrackerService extends Service implements ITrackerService{
         //NOTE: le OnUnbind va s'occuper de stopper le thread et clearer le mBinderCallback
     }
 
-    private void keepActive(){
-        Tracer.log(TAG, "keepActive");
-        if(mAuthService.isSignedIn()){
-            //on va checke les permissions du gps si etait OFF, peut-etre maintenant il est ON
-            //car quand on enleve des permissions il restart, mais si on les redonne il ne fait rien
-            if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.error.NO_ERROR){
-                //NOTE: on va juste setter la derniere position
-                //pour avoir le tracking live il faut activer le mGpsService.startLocationUpdate()
-                /*
-                if(!mGpsService.startLocationUpdate()){
-                    Tracer.log(TAG, "keepActive.mGpsService.startLocationUpdate: FAILED");
-                }
-                */
+
+    private void checkGps(){
+        Tracer.log(TAG, "checkGps");
+        //on va checke les permissions du gps si etait OFF, peut-etre maintenant il est ON
+        //car quand on enleve des permissions il restart, mais si on les redonne il ne fait rien
+        if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.error.NO_ERROR){
+            if(!mGpsService.startLocationUpdate(Const.gpsUpdateType.SOFT)){
+                Tracer.log(TAG, "checkGps: FAILED");
+            }else{
+                Tracer.log(TAG, "checkGps: SUCCESS");
                 //check la position maintenant qu'il est restarte
                 GeoPoint position = mGpsService.getLastPosition();
                 if(position != null){
@@ -254,12 +251,16 @@ public class TrackerService extends Service implements ITrackerService{
                 }
                 mUser.setGps(true);
             }
+        }
+
+    }
+
+    private void keepActive(){
+        Tracer.log(TAG, "keepActive");
+        if(mAuthService.isSignedIn()){
+            checkGps();
             //update les infos de l'usager
-            try {
-                mDatabaseService.activateUser();
-            }catch (Exception e){
-                Tracer.log(TAG, "activateUser.exception: ", e);
-            }
+            mDatabaseService.keepUserActive();
         }
         //for debug check user object
         //Tracer.log(TAG, "User: ", mUser);
@@ -281,29 +282,7 @@ public class TrackerService extends Service implements ITrackerService{
     public void onUserCreated(ServiceResponseObject sro){
         Tracer.log(TAG, "onUserCreated");
         //on peut maintenant setter le gps
-        switch(mGpsService.checkGpsStatus()){
-            case Const.gps.NO_PERMISSION:
-                Tracer.log(TAG, "NO GPS PERMISSIONS ++++");
-                break;
-            case Const.gps.NO_PROVIDER:
-                Tracer.log(TAG, "NO GPS PROVIDER ++++");
-                break;
-            default:
-                Tracer.log(TAG, "GPS ENABLED ++++");
-                //pour avoir le tracking live il faut activer le mGpsService.startLocationUpdate()
-                /*
-                if(!mGpsService.startLocationUpdate()){
-                    Tracer.log(TAG, "onUserCreated.mGpsService.startLocationUpdate: FAILED");
-                }
-                */
-                //on check la derniere postion si possible
-                GeoPoint position = mGpsService.getLastPosition();
-                if(position != null){
-                    mUser.setPosition(position);
-                }
-                mUser.setGps(true);
-                break;
-        }
+        checkGps();
         //on a les infos de firestore et on a crer les user
         //on peut maintenant ouvrir la appz
         //on tranmet la reponse au activy qui a caller si il y a
@@ -574,7 +553,7 @@ public class TrackerService extends Service implements ITrackerService{
         private final static String TAG = "TimerHandler";
         //toujours selon le MSG_UPDATE_DELAY = 30000 milliseconds
         private int keepAliveDelay = 10; // x * MSG_UPDATE_DELAY
-        private int checkConnectivityDelay = 2; //x * MSG_UPDATE_DELAY
+        private int checkConnectivityDelay = 1; //x * MSG_UPDATE_DELAY
 
         TimerHandler(Looper looper) {
             super(looper);
@@ -582,7 +561,8 @@ public class TrackerService extends Service implements ITrackerService{
 
         @Override
         public void handleMessage(Message msg) {
-            Tracer.log(TAG, "handleMessage: " + msg);
+            //Tracer.log(TAG, "handleMessage", msg);
+            Tracer.log(TAG, "handleMessage: " + mTimer);
             if(msg.what == MSG_UPDATE_TIME){
                 //increment le timer
                 mTimer++;

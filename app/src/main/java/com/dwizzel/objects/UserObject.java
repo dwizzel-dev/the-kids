@@ -127,13 +127,15 @@ public class UserObject extends Observable{
         }
     }
 
-    public void addWatcher(String uid, WatcherModel watcher) {
+    public boolean addWatcher(String uid, WatcherModel watcher) {
         if (!watchers.containsKey(uid)){
             watchers.put(uid, watcher);
             //on notifie les observers
             setChanged();
             notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_ADDED, uid));
+            return true;
         }
+        return false;
     }
 
     public void removeWatcher(String uid) {
@@ -194,13 +196,15 @@ public class UserObject extends Observable{
         }
     }
 
-    public void addWatching(String uid, WatchingModel watching) {
+    public boolean addWatching(String uid, WatchingModel watching) {
         if (!watchings.containsKey(uid)){
             watchings.put(uid, watching);
             //on notifie les observers
             setChanged();
             notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_ADDED, uid));
+            return true;
         }
+        return false;
     }
 
     public void removeWatching(String uid) {

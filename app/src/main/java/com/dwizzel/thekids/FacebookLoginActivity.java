@@ -68,13 +68,12 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         private static final String TAG = "FacebookLoginActivity.ITrackerBinder";
         public void handleResponse(ServiceResponseObject sro){
-            Tracer.log(TAG, String.format("handleResponse: %s", sro));
+            Tracer.log(TAG, "handleResponse", sro);
         }
         public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
             if(sro.getErr() != Const.error.NO_ERROR){
-                //ppour aficher les erreurs sinon il continue au created
                 Utils.getInstance().hideProgressDialog();
             }
             //check les erreurs et exception

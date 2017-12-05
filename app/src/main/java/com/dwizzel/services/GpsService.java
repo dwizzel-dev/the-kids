@@ -36,8 +36,7 @@ public class GpsService implements IGpsService{
     private final static String TAG = "GpsService";
     private Context mContext;
     private ITrackerService mTrackerService;
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 5; // in meters
-    private static final long MIN_TIME_BW_UPDATES = 60000; // 60000 = 1 minute
+
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
     private boolean isGPSEnabled = false;
@@ -124,8 +123,28 @@ public class GpsService implements IGpsService{
         return location;
     }
 
-    public boolean startLocationUpdate(){
-        Tracer.log(TAG, "startLocationUpdate");
+    public boolean startLocationUpdate(int type){
+        Tracer.log(TAG, "startLocationUpdate: " + type);
+
+        long minDistanceUpdate;
+        long minTimeUpdate;
+
+        //type de update
+        switch(type){
+            case Const.gpsUpdateType.MED:
+                minDistanceUpdate = 100;
+                minTimeUpdate = 300000;
+                break;
+            case Const.gpsUpdateType.HARD:
+                minDistanceUpdate = 10;
+                minTimeUpdate = 60000;
+                break;
+            default:
+                minDistanceUpdate = 1000;
+                minTimeUpdate = 1800000;
+                break;
+        }
+
         //NOTE: on GPS only because network doesn't move haha!
         if(!hasPermission() || !hasProvider()) {
             return false;
@@ -139,9 +158,11 @@ public class GpsService implements IGpsService{
         //minor check
         try {
             mLocationManager.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES, mLocationListener);
+                    LocationManager.GPS_PROVIDER,
+                    minTimeUpdate,
+                    minDistanceUpdate,
+                    mLocationListener
+            );
             Tracer.log(TAG, "getLocation: ++ GPS Enabled");
         }catch (NullPointerException npe){
             Tracer.log(TAG, "getLocation.NullPointerException: ", npe);

@@ -63,15 +63,11 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         private static final String TAG = "CreateUserWithEmailActivity.ITrackerBinder";
         public void handleResponse(ServiceResponseObject sro){
-            Tracer.log(TAG, String.format("handleResponse: %s", sro));
+            Tracer.log(TAG, "handleResponse", sro);
         }
         public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");
             //on enleve le loader
-            if(sro.getErr() != Const.error.NO_ERROR){
-                //ppour aficher les erreurs sinon il continue au created
-                //Utils.getInstance().hideProgressDialog();
-            }
             switch(sro.getErr()){
                 case Const.error.NO_ERROR:
                     break;

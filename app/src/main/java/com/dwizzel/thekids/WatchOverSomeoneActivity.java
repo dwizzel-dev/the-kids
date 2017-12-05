@@ -109,7 +109,7 @@ public class WatchOverSomeoneActivity extends BaseActivity{
         ITrackerBinderCallback serviceCallback = new ITrackerBinderCallback() {
             private static final String TAG = "WatchOverSomeoneActivity.ITrackerBinder";
             public void handleResponse(ServiceResponseObject sro){
-                Tracer.log(TAG, "handleResponse: ", sro);
+                Tracer.log(TAG, "handleResponse", sro);
                 if(sro.getErr() == 0) {
                     switch (sro.getMsg()) {
                         case Const.response.ON_WATCHINGS_LIST:

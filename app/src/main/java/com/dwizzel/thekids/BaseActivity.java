@@ -60,7 +60,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
     private ITrackerBinderCallback mServiceCallback = new ITrackerBinderCallback() {
         private static final String TAG = "BaseActivity.ITrackerBinder";
         public void handleResponse(ServiceResponseObject sro){
-            Tracer.log(TAG, "handleResponse: %s", sro);
+            Tracer.log(TAG, "handleResponse", sro);
         }
         public void onSignedIn(ServiceResponseObject sro){
             Tracer.log(TAG, "onSignedIn");

@@ -96,12 +96,12 @@ public final class Const {
         public static final String ON_INVITE_ID_CREATED = "ON_INVITE_ID_CREATED";
         public static final String ON_INVITE_ID_ACTIVATED = "ON_INVITE_ID_ACTIVATED";
         public static final String ON_INVITATION_CREATED = "ON_INVITATION_CREATED";
-
-        public static final String ON_WATCHING_PROFIL_MODIFIED = "ON_WATCHING_PROFIL_MODIFIED";
-        public static final String ON_WATCHERS_PROFIL_MODIFIED = "ON_WATCHERS_PROFIL_MODIFIED";
-
-
-
     }
+    public static final class gpsUpdateType {
+        public static final int SOFT = 1100;
+        public static final int MED = 1101;
+        public static final int HARD = 1102;
+    }
+
 
 }
