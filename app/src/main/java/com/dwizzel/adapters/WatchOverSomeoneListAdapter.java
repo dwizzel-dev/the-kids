@@ -1,5 +1,7 @@
 package com.dwizzel.adapters;
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -118,8 +120,10 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
     public class WatchingViewHolder extends ViewHolder {
         TextView name, phone, email;
         ImageView image;
+        Context context;
         WatchingViewHolder(View itemView) {
             super(itemView);
+            context = itemView.getContext();
             name = itemView.findViewById(R.id.name);
             phone = itemView.findViewById(R.id.phone);
             email = itemView.findViewById(R.id.email);
@@ -129,9 +133,27 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
             WatchingViewHolder holder = (WatchingViewHolder) viewholder;
             WatchingModel model = mUser.getWatching(mList.get(position).getItemValue());
             try {
-                holder.name.setText(model.getName());
-                holder.phone.setText(model.getPhone());
-                holder.email.setText(model.getEmail());
+
+                String n = model.getName();
+                String e = model.getEmail();
+                String p = model.getPhone();
+                if(n.equals("")){
+                    n = context.getResources().getString(R.string.empty_name);
+                    holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
+                }
+                if(e.equals("")){
+                    e = context.getResources().getString(R.string.empty_email);
+                    holder.email.setTypeface(holder.email.getTypeface(), Typeface.ITALIC);
+                }
+                if(p.equals("")){
+                    p = context.getResources().getString(R.string.empty_phone);
+                    holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
+                }
+
+                holder.name.setText(n);
+                holder.phone.setText(p);
+                holder.email.setText(e);
+
                 switch(model.getStatus()){
                     case Const.status.ONLINE:
                         image.setImageResource(R.drawable.icon_person_watcher);

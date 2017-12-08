@@ -90,6 +90,11 @@
     <string name="err_invalid_invite_code_failure">Woops!!! An error occurred during the validation</string>
     <string name="err_invalid_invite_infos_failure">Woops!!! An error occurred during the activation</string>
 
+    <!-- EMPTY FIELDS -->
+    <string name="empty_email">no email</string>
+    <string name="empty_phone">no phone</string>
+    <string name="empty_name">no name</string>
+
     <!-- TEXT -->
     <string name="or"> OR </string>
 

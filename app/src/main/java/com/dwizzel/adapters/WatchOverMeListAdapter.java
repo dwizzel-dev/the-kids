@@ -1,5 +1,7 @@
 package com.dwizzel.adapters;
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -123,8 +125,10 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
     public class WatcherViewHolder extends ViewHolder {
         TextView name, phone, email;
         ImageView image;
+        Context context;
         WatcherViewHolder(View itemView) {
             super(itemView);
+            context = itemView.getContext();
             name = itemView.findViewById(R.id.name);
             phone = itemView.findViewById(R.id.phone);
             email = itemView.findViewById(R.id.email);
@@ -134,9 +138,26 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
             WatcherViewHolder holder = (WatcherViewHolder) viewholder;
             WatcherModel model = mUser.getWatcher(mList.get(position).getItemValue());
             try {
-                holder.name.setText(model.getName());
-                holder.phone.setText(model.getPhone());
-                holder.email.setText(model.getEmail());
+                String n = model.getName();
+                String e = model.getEmail();
+                String p = model.getPhone();
+                if(n.equals("")){
+                    n = context.getResources().getString(R.string.empty_name);
+                    holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
+                }
+                if(e.equals("")){
+                    e = context.getResources().getString(R.string.empty_email);
+                    holder.email.setTypeface(holder.email.getTypeface(), Typeface.ITALIC);
+                }
+                if(p.equals("")){
+                    p = context.getResources().getString(R.string.empty_phone);
+                    holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
+                }
+
+                holder.name.setText(n);
+                holder.phone.setText(p);
+                holder.email.setText(e);
+
                 switch(model.getStatus()){
                     case Const.status.ONLINE:
                         image.setImageResource(R.drawable.icon_person_watcher);
@@ -159,20 +180,31 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
 
     //-----------------------------------
     public class InvitationViewHolder extends ViewHolder {
-        TextView name, phone, email;
+        TextView name, phone;
+        Context context;
         InvitationViewHolder(View itemView) {
             super(itemView);
+            context = itemView.getContext();
             name = itemView.findViewById(R.id.name);
             phone = itemView.findViewById(R.id.phone);
-            //email = itemView.findViewById(R.id.email);
         }
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             InvitationViewHolder holder = (InvitationViewHolder) viewholder;
             InvitationModel model = mUser.getInvitation(mList.get(position).getItemValue());
             try {
-                holder.name.setText(model.getName());
-                holder.phone.setText(model.getPhone());
-                //holder.email.setText(model.getEmail());
+                String n = model.getName();
+                String p = model.getPhone();
+                if(n.equals("")){
+                    n = context.getResources().getString(R.string.empty_name);
+                    holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
+                }
+                if(p.equals("")){
+                    p = context.getResources().getString(R.string.empty_phone);
+                    holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
+                }
+                holder.name.setText(n);
+                holder.phone.setText(p);
+
             }catch(Exception e){
                 Tracer.log(TAG, "InvitationViewHolder.exception: ", e);
             }
