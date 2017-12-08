@@ -14,11 +14,15 @@ public interface IDatabaseService {
     void getUserInfos();
     void updateUserPosition();
     void updateUserInfos();
+    void updateTokenId();
+
     void getWatchersList();
     void getInvitationsList();
+    void getWatchingsList();
+
     void createInviteId();
     void createInvitation(String inviteId, String name, String phone, String email);
-    void getWatchingsList();
+
     void validateInviteCode(String code);
     void saveInviteInfo(InviteInfoModel inviteInfoModel);
 

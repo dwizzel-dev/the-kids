@@ -16,10 +16,17 @@ public class UserModel{
     private int loginType;
     private String email;
     private String uid;
+    private String token;
     private int status;
 
-    UserModel(){
+    UserModel(){}
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public Date getCreateTime() {

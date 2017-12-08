@@ -5,13 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerThread;
+//import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import com.dwizzel.Const;
 import com.dwizzel.datamodels.InviteInfoModel;
 import com.dwizzel.objects.ServiceResponseObject;
@@ -20,11 +19,8 @@ import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.iid.FirebaseInstanceId;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Created by Dwizzel on 10/11/2017.
@@ -63,6 +59,7 @@ public class TrackerService extends Service implements ITrackerService{
     private IDatabaseService mDatabaseService;
     private IGpsService mGpsService;
     private UserObject mUser;
+    private TokenIdService mTokenIdService;
     private IBinder mTrackerBinder = new TrackerBinder();
 
     //timer
@@ -123,6 +120,7 @@ public class TrackerService extends Service implements ITrackerService{
             mAuthService = new AuthService(TrackerService.this, TrackerService.this);
             mDatabaseService = new DatabaseService(TrackerService.this);
             mGpsService = new GpsService(TrackerService.this, TrackerService.this);
+            mTokenIdService = new TokenIdService(TrackerService.this);
             //start running keep alive timer
             startRunningTime();
             //check pour user infos si etait deja connecte avant le restart du tracker service
@@ -202,6 +200,7 @@ public class TrackerService extends Service implements ITrackerService{
             //on creer le user de base
             mUser.setEmail(mAuthService.getEmail());
             mUser.setUid(mAuthService.getUserID());
+            mUser.setToken(FirebaseInstanceId.getInstance().getToken());
             mUser.setSigned(true);
             mUser.setActive(true);
             mUser.setStatus(Const.status.ONLINE);
@@ -264,6 +263,15 @@ public class TrackerService extends Service implements ITrackerService{
         }
         //for debug check user object
         //Tracer.log(TAG, "User: ", mUser);
+    }
+
+    public void onTokenRefreshed(String token){
+        Tracer.log(TAG, "onTokenRefreshed: " + token);
+        //si le user est connecte on le set
+        if(mAuthService.isSignedIn()){
+            mUser.setToken(token);
+            mDatabaseService.updateTokenId();
+        }
     }
 
     public void onUserSignedIn(ServiceResponseObject sro){
@@ -362,14 +370,6 @@ public class TrackerService extends Service implements ITrackerService{
 
     public void onValidateInviteCode(ServiceResponseObject sro){
         Tracer.log(TAG, "onValidateInviteCode");
-        //on tranmet la reponse object au caller
-        if(mBinderCallback != null) {
-            mBinderCallback.handleResponse(sro);
-        }
-    }
-
-    public void onWatchingProfilModified(ServiceResponseObject sro){
-        Tracer.log(TAG, "onWatchingProfilModified");
         //on tranmet la reponse object au caller
         if(mBinderCallback != null) {
             mBinderCallback.handleResponse(sro);

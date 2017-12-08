@@ -478,12 +478,12 @@ class DatabaseService implements IDatabaseService{
             // il faut que le user soit creer avant tout
             if(mUser.isCreated()) {
                 WriteBatch batch = mDb.batch();
-                batch.update(mDb.collection(
-                        "users").document(mUser.getUid()),
+                batch.update(mDb.collection("users").document(mUser.getUid()),
                         "updateTime", FieldValue.serverTimestamp(),
-                        "loginType", mUser.getLoginType()
+                        "loginType", mUser.getLoginType(),
+                        "token", mUser.getToken()
                 );
-                batch.update(mDb.collection("actives").document(mUser.getUid()), mUser.toActiveData());
+                batch.set(mDb.collection("actives").document(mUser.getUid()), mUser.toActiveData());
                 batch.commit()
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -504,6 +504,30 @@ class DatabaseService implements IDatabaseService{
             Tracer.log(TAG, "updateUserInfos.exception: ", e);
         }
 
+    }
+
+    public void updateTokenId(){
+        Tracer.log(TAG, "updateTokenId");
+        try{
+            mDb.collection("users").document(mUser.getUid())
+                    .update(
+                            "token", mUser.getToken()
+                    )
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "updateTokenId.addOnSuccessListener");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG,"updateTokenId.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+        }catch (Exception e){
+            Tracer.log(TAG, "updateTokenId.Exception: ", e);
+        }
     }
 
     public void updateUserPosition(){

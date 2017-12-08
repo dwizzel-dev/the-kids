@@ -31,6 +31,7 @@ public class UserObject extends Observable{
     private static int sRefCount = 0;
     private String email = "";
     private String uid = "";
+    private String token = "";
     private boolean created = false;
     private boolean signed = false;
     private boolean active = false;
@@ -56,6 +57,37 @@ public class UserObject extends Observable{
 
 
     private UserObject(){}
+
+    public static UserObject getInstance(){
+        Tracer.log(TAG, "getInstance: " + (sRefCount++));
+        if(sInst == null){
+            sInst = new UserObject();
+        }
+        return  sInst;
+    }
+
+    public void resetUser(){
+        email = "";
+        uid = "";
+        token = "";
+        active = false;
+        gps = false;
+        created = false;
+        signed = false;
+        user = null;
+        position = new GeoPoint(0.0,0.0);
+        loginType = 0;
+        watchers = new HashMap<>();
+        invitations = new HashMap<>();
+        watchings = new HashMap<>();
+        status = Const.status.OFFLINE;
+
+        //flag the fetch different listings
+        //car ce sera le databaseService qui aura un listener sur ces array pour les update et autres
+        fetchWatchers = true;
+        fetchWatchings = true;
+        fetchInvitations = true;
+    }
 
 
 
@@ -280,70 +312,41 @@ public class UserObject extends Observable{
 
 
 
-    public static UserObject getInstance(){
-        Tracer.log(TAG, "getInstance: " + (sRefCount++));
-        if(sInst == null){
-            sInst = new UserObject();
-        }
-        return  sInst;
-    }
-
-    public void resetUser(){
-        email = "";
-        uid = "";
-        active = false;
-        gps = false;
-        created = false;
-        signed = false;
-        user = null;
-        position = new GeoPoint(0.0,0.0);
-        loginType = 0;
-        watchers = new HashMap<>();
-        invitations = new HashMap<>();
-        watchings = new HashMap<>();
-        status = Const.status.OFFLINE;
-
-        //flag the fetch different listings
-        //car ce sera le databaseService qui aura un listener sur ces array pour les update et autres
-        fetchWatchers = true;
-        fetchWatchings = true;
-        fetchInvitations = true;
-    }
-
-    public String getEmail(){
-        return email;
-    }
-
-    public UserModel getUser(){
-        return user;
-    }
-
+    //gett and setter
     public boolean isActive(){
         return active;
-    }
-
-    public int getLoginType(){
-        return loginType;
-    }
-
-    public boolean isGps() {
-        return gps;
-    }
-
-    public GeoPoint getPosition(){
-        return position;
     }
 
     public void setActive(boolean active){
         this.active = active;
     }
 
+    public int getLoginType(){
+        return loginType;
+    }
+
     public void setLoginType(int type){
         this.loginType = type;
     }
 
+    public String getToken(){
+        return token;
+    }
+
+    public void setToken(String token){
+        this.token = token;
+    }
+
+    public String getEmail(){
+        return email;
+    }
+
     public void setEmail(String email){
         this.email = email;
+    }
+
+    public UserModel getUser(){
+        return user;
     }
 
     public void setUser(UserModel user){
@@ -355,12 +358,12 @@ public class UserObject extends Observable{
         }
     }
 
-    public void setUid(String uid){
-        this.uid = uid;
-    }
-
     public String getUid(){
         return uid;
+    }
+
+    public void setUid(String uid){
+        this.uid = uid;
     }
 
     public boolean isSigned(){
@@ -379,13 +382,24 @@ public class UserObject extends Observable{
         this.created = created;
     }
 
+    public boolean isGps() {
+        return gps;
+    }
+
     public void setGps(boolean gps) {
         this.gps = gps;
+    }
+
+    public GeoPoint getPosition(){
+        return position;
     }
 
     public void setPosition(GeoPoint position){
         this.position = position;
     }
+
+
+
 
     public String getLastConnection(Context context){
         //cherche la date
@@ -395,18 +409,21 @@ public class UserObject extends Observable{
         return "";
     }
 
+
+
     //---------------------------------------------------------------------------------------------
     //Firestore Data Model
 
 
     public Map<String, Object> toUserData(){
-        Map<String, Object> map = new HashMap<>(6);
+        Map<String, Object> map = new HashMap<>(7);
         map.put("email", getEmail() );
         map.put("uid", getUid());
         map.put("status", getStatus());
         map.put("createTime", FieldValue.serverTimestamp());
         map.put("updateTime", FieldValue.serverTimestamp());
         map.put("loginType", getLoginType());
+        map.put("token", getToken());
         return map;
     }
 
@@ -424,7 +441,7 @@ public class UserObject extends Observable{
         map.put("status", Const.status.OFFLINE);
         map.put("updateTime", FieldValue.serverTimestamp());
         map.put("position", getPosition());
-        map.put("gps", isGps());
+        map.put("gps", false);
         return map;
     }
 
