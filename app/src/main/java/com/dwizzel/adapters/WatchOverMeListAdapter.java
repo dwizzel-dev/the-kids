@@ -21,7 +21,6 @@ import java.util.ArrayList;
 
 /**
  * Created by Dwizzel on 22/11/2017.
- * TODO: trigger event on status change of the watchers with an observer ou autres
  */
 
 public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeListAdapter.ViewHolder> {
@@ -93,9 +92,8 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
         notifyItemRangeChanged(position, mList.size());
     }
 
-    public void addItem(int position){
+    public void addItem(int type, ListItems.Item item, int position){
         /*
-        * TODO: add items
         * on a plusieurs type d'item [title, etxt, watchers, invitations] alors on ne doit pas
         * le mettre a la fin de mList, mais plutot à la fin de son type d'item
         *
@@ -112,7 +110,9 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
         *
         *
         * */
-
+        mList.add(position, item);
+        notifyItemInserted(position);
+        notifyItemRangeChanged(position, mList.size());
 
     }
 

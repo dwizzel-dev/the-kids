@@ -31,6 +31,7 @@ import java.util.Observer;
 /*
 * NOTES:
 * https://developer.android.com/reference/android/support/v7/widget/RecyclerView.Recycler.html#getViewForPosition(int)
+* https://developer.android.com/reference/android/support/v7/widget/RecyclerView.Adapter.html#notifyItemChanged(int)
 *
 * */
 
@@ -292,8 +293,46 @@ public class WatchOverMeActivity extends BaseActivity {
 
     private void addWatchers(String uid){
         Tracer.log(TAG, "addWatchers: " + uid);
+
+        //0 = watchers title
+        //1 to n = watcher item ou text item si liste watchers vide
+        //n + 1 = invitation title
+        //n to m = inviation item ou text item si liste invitation vide
+
         if(!mWatchersPair.containsKey(uid)){
             try {
+                //il est deja rajouter a mUser
+                //on va chercher la derniere position des mWatcherPair
+                int lastPosInPair = mWatchersPair.size();
+                if(lastPosInPair > 0){
+                    //si on a au moins un item
+                    mWatchersPair.put(uid, --lastPosInPair);
+                    //on decale les mInvitationPair de +1
+                    for(String invitationUid : mInvitationsPair.keySet()){
+                        mInvitationsPair.put(invitationUid, (mInvitationsPair.get(invitationUid) + 1));
+                    }
+                    //on le rajoute a la liste du adapter
+                    //on va chercher sa nouvelle position dans le mList du adapter
+                    // +1 car il y a le Watchers Title Item
+                    ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).addItem(
+                            ListItems.Type.TYPE_WATCHER,
+                            new ListItems.WatcherItem(uid),
+                            (lastPosInPair + 1)
+                    );
+                }else{
+                    //si la liste de watchers est vide
+                    //0 = watchers title
+                    //1 = text items car la liste est vide,
+                    // maintenant il faut le remplacer par le watcher et virer le text item
+                    //donc on a pas besoin de decaler les mInvitationsPair
+                    ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).removeItem(1);
+                    mWatchersPair.put(uid, 1); //1 car le watchers title est en premier
+                    ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).addItem(
+                            ListItems.Type.TYPE_WATCHER,
+                            new ListItems.WatcherItem(uid),
+                            1
+                    );
+                }
 
             }catch(Exception e){
                 Tracer.log(TAG, "addWatchers.exception: ", e);
