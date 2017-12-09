@@ -49,6 +49,12 @@ import java.util.Map;
  *
  * NOTES: les onEvent sur les docuements sont trigger tout de suite apres avoir ete rajoute
  *
+ *
+ * TODO: changer la methode des listener active
+ * car un watchers peu etre un watchings alors on duplicate les listeners
+ * il faudrait faire une seule liste sur les actives qu'il soit watchers ou watchings
+ *
+ *
  */
 
 class DatabaseService implements IDatabaseService{
@@ -213,6 +219,7 @@ class DatabaseService implements IDatabaseService{
                                             "].REMOVED: " + dc.getDocument().getData());
                                     //remove de la liste
                                     mUser.removeWatcher(dc.getDocument().getId());
+                                    //TODO: remove le watchersActive listener
                                     break;
                                 case MODIFIED:
                                     Tracer.data(TAG, "watchers[" + dc.getDocument().getId() +
@@ -269,6 +276,7 @@ class DatabaseService implements IDatabaseService{
                                             "].REMOVED: " + dc.getDocument().getData());
                                     //remove de la liste
                                     mUser.removeWatching(dc.getDocument().getId());
+                                    //TODO: remove le watchingActive listener
                                     break;
                                 case MODIFIED:
                                     Tracer.data(TAG, "watchings[" + dc.getDocument().getId() +

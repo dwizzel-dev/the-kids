@@ -8,11 +8,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Adapter;
 import android.widget.ImageView;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchOverMeListAdapter;
-import com.dwizzel.datamodels.InvitationModel;
 import com.dwizzel.datamodels.WatcherModel;
 import com.dwizzel.objects.ListItems;
 import com.dwizzel.objects.ObserverNotifObject;
@@ -204,14 +204,15 @@ public class WatchOverMeActivity extends BaseActivity {
                     //test case
                     switch (observerNotifObject.getType()){
                         case Const.notif.WATCHER_UPDATE:
-                            updateWatchersListSingleViewItem((String)observerNotifObject.getValue());
+                            updateWatchers((String)observerNotifObject.getValue());
                             break;
                         case Const.notif.WATCHER_REMOVE:
+                            removeWatchers((String)observerNotifObject.getValue());
                             break;
                         case Const.notif.WATCHER_ADDED:
+                            addWatchers((String)observerNotifObject.getValue());
                             break;
                         case Const.notif.INVITATION_UPDATE:
-                            //updateInvitationsListSingleViewItem((String)observerNotifObject.getValue());
                             break;
                         case Const.notif.INVITATION_REMOVE:
                             break;
@@ -263,59 +264,42 @@ public class WatchOverMeActivity extends BaseActivity {
         return list;
     }
 
-
-    private void updateWatchersListSingleViewItem(String uid){
-        Tracer.log(TAG, "updateWatchersListSingleViewItem: " + uid);
-        //get la position selon le uid avec le array ref/pos list
-        WatcherModel watcherModel = mUser.getWatcher(uid);
-        if(mWatchersPair.containsKey(uid) && watcherModel != null) {
-            //avec la position on cherche la view
-            View itemView = mRecyclerView.getLayoutManager()
-                    .findViewByPosition(mWatchersPair.get(uid));
-            if(itemView != null){
-                //changer l'etat
-                ImageView image = itemView.findViewById(R.id.imageView);
-                switch(watcherModel.getStatus()){
-                    case Const.status.OFFLINE:
-                        image.setImageResource(R.drawable.icon_person_offline);
-                        break;
-                    case Const.status.ONLINE:
-                        image.setImageResource(R.drawable.icon_person_watcher);
-                        break;
-                    case Const.status.OCCUPIED:
-                        image.setImageResource(R.drawable.icon_person_occupied);
-                        break;
-                    default:
-                        image.setImageResource(R.drawable.icon_person_watcher);
-                        break;
-                }
+    private void updateWatchers(String uid){
+        Tracer.log(TAG, "updateWatchers: " + uid);
+        if(mWatchersPair.containsKey(uid)){
+            try {
+                mRecyclerView.getAdapter().notifyItemChanged(mWatchersPair.get(uid));
+            }catch(Exception e){
+                Tracer.log(TAG, "updateWatchers.exception: ", e);
             }
         }
     }
 
-    /*
-    private void updateInvitationsListSingleViewItem(String invitationId){
-        Tracer.log(TAG, "updateInvitationsListSingleViewItem: " + invitationId);
-        //get la position selon le uid avec le array ref/pos list
-        InvitationModel invitationModel = mUser.getInvitation(invitationId);
-        if(mInvitationsPair.containsKey(invitationId) && invitationModel != null) {
-            //avec la position on cherche la view
-            View itemView = mRecyclerView.getLayoutManager()
-                    .findViewByPosition(mInvitationsPair.get(invitationId));
-            if(itemView != null){
-                //changer l'etat
-                switch(invitationModel.getState()){
-                    case Const.invitation.ACCEPTED:
-                        break;
-                    case Const.invitation.PENDING:
-                        break;
-                    default:
-                        break;
-                }
+    private void removeWatchers(String uid){
+        Tracer.log(TAG, "removeWatchers: " + uid);
+        if(mWatchersPair.containsKey(uid)){
+            try {
+                //on le retire en callant la methode de l'adapter qui lui fera le clean de sa liste
+                ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).removeItem(mWatchersPair.get(uid));
+                //on le retire de la liste des pairs
+                mWatchersPair.remove(uid);
+
+            }catch(Exception e){
+                Tracer.log(TAG, "removeWatchers.exception: ", e);
             }
         }
     }
-    */
+
+    private void addWatchers(String uid){
+        Tracer.log(TAG, "addWatchers: " + uid);
+        if(!mWatchersPair.containsKey(uid)){
+            try {
+
+            }catch(Exception e){
+                Tracer.log(TAG, "addWatchers.exception: ", e);
+            }
+        }
+    }
 
 
 }

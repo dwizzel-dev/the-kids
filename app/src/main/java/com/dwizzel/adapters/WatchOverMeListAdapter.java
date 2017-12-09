@@ -42,30 +42,32 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
     public WatchOverMeListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         //Tracer.log(TAG, "onCreateViewHolder");
         View mItemView;
-        if (viewType == ListItems.Type.TYPE_WATCHER) {
-            mItemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recycler_list_watcher_item, parent, false);
-            return new WatcherViewHolder(mItemView);
-        } else if (viewType == ListItems.Type.TYPE_INVITATION) {
-            mItemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recycler_list_invitation_item, parent, false);
-            return new InvitationViewHolder(mItemView);
-        } else if (viewType == ListItems.Type.TYPE_HEADER) {
-            mItemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recycler_list_header, parent, false);
-            return new HeaderViewHolder(mItemView);
-        } else if (viewType == ListItems.Type.TYPE_TEXT) {
-            mItemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recycler_list_text, parent, false);
-            return new TextViewHolder(mItemView);
+        switch(viewType){
+            case ListItems.Type.TYPE_WATCHER:
+                mItemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.recycler_list_watcher_item, parent, false);
+                return new WatcherViewHolder(mItemView);
+            case ListItems.Type.TYPE_INVITATION:
+                mItemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.recycler_list_invitation_item, parent, false);
+                return new InvitationViewHolder(mItemView);
+            case ListItems.Type.TYPE_HEADER:
+                mItemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.recycler_list_header, parent, false);
+                return new HeaderViewHolder(mItemView);
+            case ListItems.Type.TYPE_TEXT:
+                mItemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.recycler_list_text, parent, false);
+                return new TextViewHolder(mItemView);
+            default:
+                return null;
         }
-        return null;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        //Tracer.log(TAG, "onBindViewHolder");
+        Tracer.log(TAG, "onBindViewHolder");
         holder.bindToViewHolder(holder, position);
     }
 
@@ -82,6 +84,38 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
         return mList.get(position).getItemType();
     }
 
+    public void removeItem(int position){
+        //remove form the list
+        mList.remove(position);
+        //notify item remove from the views
+        notifyItemRemoved(position);
+        //notify the range of list has changed
+        notifyItemRangeChanged(position, mList.size());
+    }
+
+    public void addItem(int position){
+        /*
+        * TODO: add items
+        * on a plusieurs type d'item [title, etxt, watchers, invitations] alors on ne doit pas
+        * le mettre a la fin de mList, mais plutot à la fin de son type d'item
+        *
+        *   Example:
+        *   mList[0] = title watchers
+        *   mList[1] = watchers items
+        *   mList[2] = watchers items
+        *   mList[3] = title invitations
+        *   mList[4] = invitations items
+        *   mList[5] = invitations items
+        *
+        * 1. Si on rajoute un watchers, il faut le mettre a mList[3] et decaler la liste completement
+        * 2. Si on rajoute une invitation on le met simplement a la la fin soi mList[6]
+        *
+        *
+        * */
+
+
+    }
+
 
 
     //-------------------------------------------------------------------------------------
@@ -93,7 +127,6 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
         }
         public abstract void bindToViewHolder(ViewHolder viewholder, int position);
     }
-
 
     //-----------------------------------
     public class HeaderViewHolder extends ViewHolder {
@@ -138,9 +171,12 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
             WatcherViewHolder holder = (WatcherViewHolder) viewholder;
             WatcherModel model = mUser.getWatcher(mList.get(position).getItemValue());
             try {
+
                 String n = model.getName();
                 String e = model.getEmail();
                 String p = model.getPhone();
+                int ir;
+
                 if(n.equals("")){
                     n = context.getResources().getString(R.string.empty_name);
                     holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
@@ -154,24 +190,27 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
                     holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
                 }
 
+                switch(model.getStatus()){
+                    case Const.status.ONLINE:
+                        ir = R.drawable.icon_person_watcher;
+                        break;
+                    case Const.status.OFFLINE:
+                        ir = R.drawable.icon_person_offline;
+                        break;
+                    case Const.status.OCCUPIED:
+                        ir = R.drawable.icon_person_occupied;
+                        break;
+                    default:
+                        ir = R.drawable.icon_person_offline;
+                        break;
+                }
+
                 holder.name.setText(n);
                 holder.phone.setText(p);
                 holder.email.setText(e);
+                holder.image.setImageResource(ir);
 
-                switch(model.getStatus()){
-                    case Const.status.ONLINE:
-                        image.setImageResource(R.drawable.icon_person_watcher);
-                        break;
-                    case Const.status.OFFLINE:
-                        image.setImageResource(R.drawable.icon_person_offline);
-                        break;
-                    case Const.status.OCCUPIED:
-                        image.setImageResource(R.drawable.icon_person_occupied);
-                        break;
-                    default:
-                        image.setImageResource(R.drawable.icon_person_offline);
-                        break;
-                }
+
             }catch(Exception e){
                 Tracer.log(TAG, "WatcherViewHolder.exception: ", e);
             }

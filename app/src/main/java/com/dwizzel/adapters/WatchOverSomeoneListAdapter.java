@@ -137,6 +137,8 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
                 String n = model.getName();
                 String e = model.getEmail();
                 String p = model.getPhone();
+                int ir;
+
                 if(n.equals("")){
                     n = context.getResources().getString(R.string.empty_name);
                     holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
@@ -150,24 +152,26 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
                     holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
                 }
 
+                switch(model.getStatus()){
+                    case Const.status.ONLINE:
+                        ir = R.drawable.icon_person_watcher;
+                        break;
+                    case Const.status.OFFLINE:
+                        ir = R.drawable.icon_person_offline;
+                        break;
+                    case Const.status.OCCUPIED:
+                        ir = R.drawable.icon_person_occupied;
+                        break;
+                    default:
+                        ir = R.drawable.icon_person_offline;
+                        break;
+                }
+
                 holder.name.setText(n);
                 holder.phone.setText(p);
                 holder.email.setText(e);
+                holder.image.setImageResource(ir);
 
-                switch(model.getStatus()){
-                    case Const.status.ONLINE:
-                        image.setImageResource(R.drawable.icon_person_watcher);
-                        break;
-                    case Const.status.OFFLINE:
-                        image.setImageResource(R.drawable.icon_person_offline);
-                        break;
-                    case Const.status.OCCUPIED:
-                        image.setImageResource(R.drawable.icon_person_occupied);
-                        break;
-                    default:
-                        image.setImageResource(R.drawable.icon_person_offline);
-                        break;
-                }
             }catch(Exception e){
                 Tracer.log(TAG, "WatchingViewHolder.exception: ", e);
             }

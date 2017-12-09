@@ -92,31 +92,6 @@ public class UserObject extends Observable{
 
 
 
-    public boolean isFetchWatchers() {
-        return fetchWatchers;
-    }
-
-    public void setFetchWatchers(boolean fetchWatchers) {
-        this.fetchWatchers = fetchWatchers;
-    }
-
-    public boolean isFetchWatchings() {
-        return fetchWatchings;
-    }
-
-    public void setFetchWatchings(boolean fetchWatchings) {
-        this.fetchWatchings = fetchWatchings;
-    }
-
-    public boolean isFetchInvitations() {
-        return fetchInvitations;
-    }
-
-    public void setFetchInvitations(boolean fetchInvitations) {
-        this.fetchInvitations = fetchInvitations;
-    }
-
-
 
     public int getStatus() {
         return status;
@@ -127,6 +102,15 @@ public class UserObject extends Observable{
     }
 
 
+
+
+    public boolean isFetchWatchers() {
+        return fetchWatchers;
+    }
+
+    public void setFetchWatchers(boolean fetchWatchers) {
+        this.fetchWatchers = fetchWatchers;
+    }
 
     public void updateWatchers(String uid, ActiveModel activeModel) {
         //ces infos ne viennent pas de la meme collection et arrive apres
@@ -197,6 +181,15 @@ public class UserObject extends Observable{
 
 
 
+
+    public boolean isFetchWatchings() {
+        return fetchWatchings;
+    }
+
+    public void setFetchWatchings(boolean fetchWatchings) {
+        this.fetchWatchings = fetchWatchings;
+    }
+
     public void updateWatchings(String uid, ActiveModel active) {
         //ces infos ne viennent pas de la meme collection et arrive apres
         //du au limitation de firestore
@@ -265,6 +258,15 @@ public class UserObject extends Observable{
     }
 
 
+
+
+    public boolean isFetchInvitations() {
+        return fetchInvitations;
+    }
+
+    public void setFetchInvitations(boolean fetchInvitations) {
+        this.fetchInvitations = fetchInvitations;
+    }
 
     public void updateInvitation(String inviteId, InvitationModel invite) {
         //ces infos ne viennent pas de la meme collection et arrive apres

@@ -1,9 +1,7 @@
 package com.dwizzel.thekids;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -27,7 +25,6 @@ import com.dwizzel.services.ITrackerBinderCallback;
 import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.ListPaddingDecoration;
 import com.dwizzel.utils.Tracer;
-import com.dwizzel.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

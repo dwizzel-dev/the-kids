@@ -19,6 +19,12 @@ $ git commit -m "TK.1"
 $ git remote add -f -t master -m master origin https://github.com/dwizzel-dev/the-kids-cloud-functions.git
 $ git push --set-upstream origin master
 
+Examples:
+https://github.com/MahmoudAlyuDeen/FirebaseIM
+https://developers.google.com/cloud-messaging/concept-options
+
+
+
 */
 
 //type de notification
