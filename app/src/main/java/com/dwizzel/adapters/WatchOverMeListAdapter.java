@@ -46,18 +46,22 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
                 mItemView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.recycler_list_watcher_item, parent, false);
                 return new WatcherViewHolder(mItemView);
+
             case ListItems.Type.TYPE_INVITATION:
                 mItemView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.recycler_list_invitation_item, parent, false);
                 return new InvitationViewHolder(mItemView);
+
             case ListItems.Type.TYPE_HEADER:
                 mItemView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.recycler_list_header, parent, false);
                 return new HeaderViewHolder(mItemView);
+
             case ListItems.Type.TYPE_TEXT:
                 mItemView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.recycler_list_text, parent, false);
                 return new TextViewHolder(mItemView);
+
             default:
                 return null;
         }

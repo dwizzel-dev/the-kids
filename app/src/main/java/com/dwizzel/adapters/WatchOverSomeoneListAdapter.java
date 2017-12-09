@@ -40,20 +40,25 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
     public WatchOverSomeoneListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         //Tracer.log(TAG, "onCreateViewHolder");
         View mItemView;
-        if (viewType == ListItems.Type.TYPE_WATCHING) {
-            mItemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recycler_list_watching_item, parent, false);
-            return new WatchingViewHolder(mItemView);
-        } else if (viewType == ListItems.Type.TYPE_HEADER) {
-            mItemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recycler_list_header, parent, false);
-            return new HeaderViewHolder(mItemView);
-        } else if (viewType == ListItems.Type.TYPE_TEXT) {
-            mItemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recycler_list_text, parent, false);
-            return new TextViewHolder(mItemView);
+        switch(viewType){
+            case ListItems.Type.TYPE_WATCHING:
+                mItemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.recycler_list_watching_item, parent, false);
+                return new WatchingViewHolder(mItemView);
+
+            case ListItems.Type.TYPE_HEADER:
+                mItemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.recycler_list_header, parent, false);
+                return new HeaderViewHolder(mItemView);
+
+            case ListItems.Type.TYPE_TEXT:
+                mItemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.recycler_list_text, parent, false);
+                return new TextViewHolder(mItemView);
+
+            default:
+                return null;
         }
-        return null;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
