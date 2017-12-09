@@ -17,9 +17,18 @@ public class UserModel{
     private String email;
     private String uid;
     private String token;
+    private String locale;
     private int status;
 
     UserModel(){}
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
 
     public String getToken() {
         return token;

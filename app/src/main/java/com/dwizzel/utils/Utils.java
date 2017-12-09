@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.util.Patterns;
@@ -144,15 +145,6 @@ public class Utils {
         }
     }
 
-    public Locale getLocale(Context context){
-        try {
-            return context.getResources().getConfiguration().locale;
-        }catch (Exception e){
-            Tracer.log(TAG, "getLocale.exception: ", e);
-        }
-        return null;
-    }
-
     public void showSettingsAlert(final Context context){
         Tracer.log(TAG, "showSettingsAlert");
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
@@ -179,7 +171,7 @@ public class Utils {
     public String formatDate(Context context, Date date){
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-                    Utils.getInstance().getLocale(context));
+                    getLocale(context));
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             return simpleDateFormat.format(date);
         }catch(Exception e){
@@ -189,6 +181,13 @@ public class Utils {
 
     }
 
+    public Locale getLocale(Context context){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            return context.getResources().getConfiguration().getLocales().get(0);
+        } else{
+            return context.getResources().getConfiguration().locale;
+        }
+    }
 
 
 }

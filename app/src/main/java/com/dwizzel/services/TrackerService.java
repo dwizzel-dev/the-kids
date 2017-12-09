@@ -21,6 +21,8 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import java.util.Locale;
+
 
 /**
  * Created by Dwizzel on 10/11/2017.
@@ -200,10 +202,16 @@ public class TrackerService extends Service implements ITrackerService{
             //on creer le user de base
             mUser.setEmail(mAuthService.getEmail());
             mUser.setUid(mAuthService.getUserID());
+            //peut etre change avec onTokenRefreshed de mTokenIdServide
             mUser.setToken(FirebaseInstanceId.getInstance().getToken());
+            //la base
             mUser.setSigned(true);
             mUser.setActive(true);
+            //status peut-etre achanage avec ces prefernce tout de suite apres
             mUser.setStatus(Const.status.ONLINE);
+            //set la langue locale de l'application
+            Locale locale = Utils.getInstance().getLocale(TrackerService.this);
+            mUser.setLocale(locale.getLanguage());
             //on va chercher les infos du user sur la DB ou on les creer
             mDatabaseService.getUserInfos();
         }

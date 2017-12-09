@@ -32,6 +32,7 @@ public class UserObject extends Observable{
     private String email = "";
     private String uid = "";
     private String token = "";
+    private String locale = "";
     private boolean created = false;
     private boolean signed = false;
     private boolean active = false;
@@ -313,6 +314,14 @@ public class UserObject extends Observable{
 
 
     //gett and setter
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
     public boolean isActive(){
         return active;
     }
@@ -416,7 +425,7 @@ public class UserObject extends Observable{
 
 
     public Map<String, Object> toUserData(){
-        Map<String, Object> map = new HashMap<>(7);
+        Map<String, Object> map = new HashMap<>(8);
         map.put("email", getEmail() );
         map.put("uid", getUid());
         map.put("status", getStatus());
@@ -424,6 +433,7 @@ public class UserObject extends Observable{
         map.put("updateTime", FieldValue.serverTimestamp());
         map.put("loginType", getLoginType());
         map.put("token", getToken());
+        map.put("locale", getLocale());
         return map;
     }
 
