@@ -170,49 +170,50 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             WatcherViewHolder holder = (WatcherViewHolder) viewholder;
             WatcherModel model = mUser.getWatcher(mList.get(position).getItemValue());
-            try {
+            if(model != null) {
+                try {
 
-                String n = model.getName();
-                String e = model.getEmail();
-                String p = model.getPhone();
-                int ir;
+                    String n = model.getName();
+                    String e = model.getEmail();
+                    String p = model.getPhone();
+                    int ir;
 
-                if(n.equals("")){
-                    n = context.getResources().getString(R.string.empty_name);
-                    holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
+                    if (n.equals("")) {
+                        n = context.getResources().getString(R.string.empty_name);
+                        holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
+                    }
+                    if (e.equals("")) {
+                        e = context.getResources().getString(R.string.empty_email);
+                        holder.email.setTypeface(holder.email.getTypeface(), Typeface.ITALIC);
+                    }
+                    if (p.equals("")) {
+                        p = context.getResources().getString(R.string.empty_phone);
+                        holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
+                    }
+
+                    switch (model.getStatus()) {
+                        case Const.status.ONLINE:
+                            ir = R.drawable.icon_person_watcher;
+                            break;
+                        case Const.status.OFFLINE:
+                            ir = R.drawable.icon_person_offline;
+                            break;
+                        case Const.status.OCCUPIED:
+                            ir = R.drawable.icon_person_occupied;
+                            break;
+                        default:
+                            ir = R.drawable.icon_person_offline;
+                            break;
+                    }
+
+                    holder.name.setText(n);
+                    holder.phone.setText(p);
+                    holder.email.setText(e);
+                    holder.image.setImageResource(ir);
+
+                } catch (Exception e) {
+                    Tracer.log(TAG, "WatcherViewHolder.exception: ", e);
                 }
-                if(e.equals("")){
-                    e = context.getResources().getString(R.string.empty_email);
-                    holder.email.setTypeface(holder.email.getTypeface(), Typeface.ITALIC);
-                }
-                if(p.equals("")){
-                    p = context.getResources().getString(R.string.empty_phone);
-                    holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
-                }
-
-                switch(model.getStatus()){
-                    case Const.status.ONLINE:
-                        ir = R.drawable.icon_person_watcher;
-                        break;
-                    case Const.status.OFFLINE:
-                        ir = R.drawable.icon_person_offline;
-                        break;
-                    case Const.status.OCCUPIED:
-                        ir = R.drawable.icon_person_occupied;
-                        break;
-                    default:
-                        ir = R.drawable.icon_person_offline;
-                        break;
-                }
-
-                holder.name.setText(n);
-                holder.phone.setText(p);
-                holder.email.setText(e);
-                holder.image.setImageResource(ir);
-
-
-            }catch(Exception e){
-                Tracer.log(TAG, "WatcherViewHolder.exception: ", e);
             }
         }
     }
@@ -230,22 +231,24 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             InvitationViewHolder holder = (InvitationViewHolder) viewholder;
             InvitationModel model = mUser.getInvitation(mList.get(position).getItemValue());
-            try {
-                String n = model.getName();
-                String p = model.getPhone();
-                if(n.equals("")){
-                    n = context.getResources().getString(R.string.empty_name);
-                    holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
-                }
-                if(p.equals("")){
-                    p = context.getResources().getString(R.string.empty_phone);
-                    holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
-                }
-                holder.name.setText(n);
-                holder.phone.setText(p);
+            if(model != null) {
+                try {
+                    String n = model.getName();
+                    String p = model.getPhone();
+                    if (n.equals("")) {
+                        n = context.getResources().getString(R.string.empty_name);
+                        holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
+                    }
+                    if (p.equals("")) {
+                        p = context.getResources().getString(R.string.empty_phone);
+                        holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
+                    }
+                    holder.name.setText(n);
+                    holder.phone.setText(p);
 
-            }catch(Exception e){
-                Tracer.log(TAG, "InvitationViewHolder.exception: ", e);
+                } catch (Exception e) {
+                    Tracer.log(TAG, "InvitationViewHolder.exception: ", e);
+                }
             }
         }
     }

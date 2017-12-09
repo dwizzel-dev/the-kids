@@ -23,7 +23,7 @@ Examples:
 https://github.com/MahmoudAlyuDeen/FirebaseIM
 https://developers.google.com/cloud-messaging/concept-options
 
-
+TODO: il faut un triger dans la DB pour faire le cleanup de ceux qui ne ce sont pas deconnecte
 
 */
 
@@ -31,7 +31,6 @@ https://developers.google.com/cloud-messaging/concept-options
 const DEFAULT_LOCALE = "en";
 const TYPE_NOTIF_INVITATION = 101;
 
-//TODO: pour les textes ca va etre a amelierer
 const lang = {
     en: {
         title: "Invitation accepted",

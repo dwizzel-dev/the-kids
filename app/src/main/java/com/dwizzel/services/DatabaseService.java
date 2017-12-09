@@ -119,6 +119,14 @@ class DatabaseService implements IDatabaseService{
         );
     }
 
+    private void removeListenersOnSingleWatchingsActive(String watchingUid){
+        Tracer.log(TAG, "removeListenersOnSingleWatchingsActive: " + watchingUid);
+        if(mWatchingsActiveListener != null) {
+            mWatchingsActiveListener.get(watchingUid).remove();
+            mWatchingsActiveListener.remove(watchingUid);
+        }
+    }
+
     private void removeListenersOnWatchingsActive(){
         Tracer.log(TAG, "removeListenersOnWatchingsActive");
         if(mWatchingsActiveListener != null) {
@@ -171,6 +179,14 @@ class DatabaseService implements IDatabaseService{
         );
     }
 
+    private void removeListenersOnSingleWatchersActive(String watcherUid){
+        Tracer.log(TAG, "removeListenersOnSingleWatchersActive: " + watcherUid);
+        if(mWatchingsActiveListener != null) {
+            mWatchersActiveListener.get(watcherUid).remove();
+            mWatchersActiveListener.remove(watcherUid);
+        }
+    }
+
     private void removeListenersOnWatchersActive(){
         Tracer.log(TAG, "removeListenersOnWatchersActive");
         if(mWatchersActiveListener != null) {
@@ -219,7 +235,8 @@ class DatabaseService implements IDatabaseService{
                                             "].REMOVED: " + dc.getDocument().getData());
                                     //remove de la liste
                                     mUser.removeWatcher(dc.getDocument().getId());
-                                    //TODO: remove le watchersActive listener
+                                    //remove le listener active
+                                    removeListenersOnSingleWatchersActive(dc.getDocument().getId());
                                     break;
                                 case MODIFIED:
                                     Tracer.data(TAG, "watchers[" + dc.getDocument().getId() +
@@ -276,7 +293,8 @@ class DatabaseService implements IDatabaseService{
                                             "].REMOVED: " + dc.getDocument().getData());
                                     //remove de la liste
                                     mUser.removeWatching(dc.getDocument().getId());
-                                    //TODO: remove le watchingActive listener
+                                    //remove le listener active
+                                    removeListenersOnSingleWatchingsActive(dc.getDocument().getId());
                                     break;
                                 case MODIFIED:
                                     Tracer.data(TAG, "watchings[" + dc.getDocument().getId() +

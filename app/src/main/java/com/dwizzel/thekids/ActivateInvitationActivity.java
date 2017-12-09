@@ -118,8 +118,7 @@ public class ActivateInvitationActivity extends BaseActivity {
                     public void onClick(View v) {
                         //on call la function et on met le loader
                         checkMandatoryFieldsAndActivate();
-                        //TODO: a enlever
-                        //watchingProfilModified(true);
+
                     }
                 });
 

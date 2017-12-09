@@ -77,8 +77,7 @@ public class WatchOverSomeoneActivity extends BaseActivity{
                     public void onClick(View v) {
                         //on call la function et on met le loader
                         checkMandatoryFieldsAndValidate();
-                        //TODO: a enlever
-                        //createNicknameForWatchings("blablalba");
+
                     }
                 });
 
@@ -252,11 +251,13 @@ public class WatchOverSomeoneActivity extends BaseActivity{
                     //test case
                     switch (observerNotifObject.getType()){
                         case Const.notif.WATCHING_UPDATE:
-                            updateWatchingsListSingleViewItem((String)observerNotifObject.getValue());
+                            updateWatchings((String)observerNotifObject.getValue());
                             break;
                         case Const.notif.WATCHING_REMOVE:
+                            removeWatchings((String)observerNotifObject.getValue());
                             break;
                         case Const.notif.WATCHING_ADDED:
+                            addWatchings((String)observerNotifObject.getValue());
                             break;
                         default:
                             break;
@@ -291,31 +292,65 @@ public class WatchOverSomeoneActivity extends BaseActivity{
         return list;
     }
 
-    private void updateWatchingsListSingleViewItem(String uid){
-        Tracer.log(TAG, "updateWatchingsListSingleViewItem: " + uid);
-        //get la position selon le uid avec le array ref/pos list
-        WatchingModel watchingModel = mUser.getWatching(uid);
-        if(mWatchingsPair.containsKey(uid) && watchingModel != null) {
-            //avec la position on cherche la view
-            View itemView = mRecyclerView.getLayoutManager()
-                    .findViewByPosition(mWatchingsPair.get(uid));
-            if(itemView != null){
-                //changer l'etat
-                ImageView image = itemView.findViewById(R.id.imageView);
-                switch(watchingModel.getStatus()){
-                    case Const.status.OFFLINE:
-                        image.setImageResource(R.drawable.icon_person_offline);
-                        break;
-                    case Const.status.ONLINE:
-                        image.setImageResource(R.drawable.icon_person_watcher);
-                        break;
-                    case Const.status.OCCUPIED:
-                        image.setImageResource(R.drawable.icon_person_occupied);
-                        break;
-                    default:
-                        image.setImageResource(R.drawable.icon_person_watcher);
-                        break;
+    private void updateWatchings(String uid){
+        Tracer.log(TAG, "updateWatchings: " + uid);
+        if(mWatchingsPair.containsKey(uid)){
+            try {
+                mRecyclerView.getAdapter().notifyItemChanged(mWatchingsPair.get(uid));
+            }catch(Exception e){
+                Tracer.log(TAG, "updateWatchings.exception: ", e);
+            }
+        }
+    }
+
+    private void removeWatchings(String uid){
+        Tracer.log(TAG, "removeWatchings: " + uid);
+        if(mWatchingsPair.containsKey(uid)){
+            try {
+                int removedPos = mWatchingsPair.get(uid);
+                ((WatchOverSomeoneListAdapter)mRecyclerView.getAdapter()).removeItem(removedPos);
+                mWatchingsPair.remove(uid);
+                if(mWatchingsPair.size() == 0){
+                    ((WatchOverSomeoneListAdapter)mRecyclerView.getAdapter()).addItem(
+                            ListItems.Type.TYPE_TEXT,
+                            new ListItems.TextItem(getResources().getString(R.string.watchings_list_empty)),
+                            removedPos
+                            );
+                }else{
+                    int pos = 1;
+                    for(String invitationUid : mWatchingsPair.keySet()){
+                        mWatchingsPair.put(invitationUid, pos++);
+                    }
                 }
+            }catch(Exception e){
+                Tracer.log(TAG, "removeWatchings.exception: ", e);
+            }
+        }
+    }
+
+    private void addWatchings(String uid){
+        Tracer.log(TAG, "addWatchings: " + uid);
+        if(!mWatchingsPair.containsKey(uid)){
+            try {
+                int size = mWatchingsPair.size();
+                if(size > 0){
+                    mWatchingsPair.put(uid, (size + 1));
+                    ((WatchOverSomeoneListAdapter)mRecyclerView.getAdapter()).addItem(
+                            ListItems.Type.TYPE_WATCHING,
+                            new ListItems.WatchingItem(uid),
+                            (size + 1)
+                            );
+                }else{
+                    mWatchingsPair.put(uid, 1);
+                    ((WatchOverSomeoneListAdapter)mRecyclerView.getAdapter()).removeItem(1);
+                    ((WatchOverSomeoneListAdapter)mRecyclerView.getAdapter()).addItem(
+                            ListItems.Type.TYPE_WATCHING,
+                            new ListItems.WatchingItem(uid),
+                            1
+                            );
+                }
+            }catch(Exception e){
+                Tracer.log(TAG, "addWatchings.exception: ", e);
             }
         }
     }

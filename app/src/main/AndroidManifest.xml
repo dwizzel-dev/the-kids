@@ -76,7 +76,6 @@
             android:name=".SignInUserWithEmailActivity"
             android:parentActivityName=".SignInUserActivity" />
 
-        <!-- TODO: va falloir checker ca plus profondement pour la securite -->
         <!--
         avec AIDL
         <service

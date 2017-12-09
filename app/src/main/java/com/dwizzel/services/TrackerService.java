@@ -43,7 +43,6 @@ import java.util.Locale;
  * NOTES: vu que le service peut repartir sans l'application on va chercher les infos de base et on set
  * les infos du user dans le service
  *
- * TODO: il faut un triger dans la DB pour faire le cleanup de ceux qui ne ce sont pas deconnecte
  * normalement, genre appli force stop, une pile morte, plus de reseaux, etc...
  */
 

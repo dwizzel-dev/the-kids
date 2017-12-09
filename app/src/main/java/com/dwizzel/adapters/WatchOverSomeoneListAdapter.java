@@ -20,8 +20,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Dwizzel on 22/11/2017.
- * TODO: trigger event on status change of the watchers with an observer ou autres
- */
+  */
 
 public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverSomeoneListAdapter.ViewHolder> {
 
@@ -75,6 +74,21 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
     public int getItemViewType(int position) {
         //Tracer.log(TAG, "getItemViewType");
         return mList.get(position).getItemType();
+    }
+
+    public void removeItem(int position){
+        //remove form the list
+        mList.remove(position);
+        //notify item remove from the views
+        notifyItemRemoved(position);
+        //notify the range of list has changed
+        notifyItemRangeChanged(position, mList.size());
+    }
+
+    public void addItem(int type, ListItems.Item item, int position){
+        mList.add(position, item);
+        notifyItemInserted(position);
+        notifyItemRangeChanged(position, mList.size());
     }
 
 
@@ -132,48 +146,50 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             WatchingViewHolder holder = (WatchingViewHolder) viewholder;
             WatchingModel model = mUser.getWatching(mList.get(position).getItemValue());
-            try {
+            if(model != null) {
+                try {
 
-                String n = model.getName();
-                String e = model.getEmail();
-                String p = model.getPhone();
-                int ir;
+                    String n = model.getName();
+                    String e = model.getEmail();
+                    String p = model.getPhone();
+                    int ir;
 
-                if(n.equals("")){
-                    n = context.getResources().getString(R.string.empty_name);
-                    holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
+                    if (n.equals("")) {
+                        n = context.getResources().getString(R.string.empty_name);
+                        holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
+                    }
+                    if (e.equals("")) {
+                        e = context.getResources().getString(R.string.empty_email);
+                        holder.email.setTypeface(holder.email.getTypeface(), Typeface.ITALIC);
+                    }
+                    if (p.equals("")) {
+                        p = context.getResources().getString(R.string.empty_phone);
+                        holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
+                    }
+
+                    switch (model.getStatus()) {
+                        case Const.status.ONLINE:
+                            ir = R.drawable.icon_person_watcher;
+                            break;
+                        case Const.status.OFFLINE:
+                            ir = R.drawable.icon_person_offline;
+                            break;
+                        case Const.status.OCCUPIED:
+                            ir = R.drawable.icon_person_occupied;
+                            break;
+                        default:
+                            ir = R.drawable.icon_person_offline;
+                            break;
+                    }
+
+                    holder.name.setText(n);
+                    holder.phone.setText(p);
+                    holder.email.setText(e);
+                    holder.image.setImageResource(ir);
+
+                } catch (Exception e) {
+                    Tracer.log(TAG, "WatchingViewHolder.exception: ", e);
                 }
-                if(e.equals("")){
-                    e = context.getResources().getString(R.string.empty_email);
-                    holder.email.setTypeface(holder.email.getTypeface(), Typeface.ITALIC);
-                }
-                if(p.equals("")){
-                    p = context.getResources().getString(R.string.empty_phone);
-                    holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
-                }
-
-                switch(model.getStatus()){
-                    case Const.status.ONLINE:
-                        ir = R.drawable.icon_person_watcher;
-                        break;
-                    case Const.status.OFFLINE:
-                        ir = R.drawable.icon_person_offline;
-                        break;
-                    case Const.status.OCCUPIED:
-                        ir = R.drawable.icon_person_occupied;
-                        break;
-                    default:
-                        ir = R.drawable.icon_person_offline;
-                        break;
-                }
-
-                holder.name.setText(n);
-                holder.phone.setText(p);
-                holder.email.setText(e);
-                holder.image.setImageResource(ir);
-
-            }catch(Exception e){
-                Tracer.log(TAG, "WatchingViewHolder.exception: ", e);
             }
         }
     }

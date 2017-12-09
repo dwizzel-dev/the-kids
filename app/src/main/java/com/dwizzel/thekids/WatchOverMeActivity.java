@@ -213,6 +213,7 @@ public class WatchOverMeActivity extends BaseActivity {
                         case Const.notif.INVITATION_UPDATE:
                             break;
                         case Const.notif.INVITATION_REMOVE:
+                            removeInvitations((String)observerNotifObject.getValue());
                             break;
                         case Const.notif.INVITATION_ADDED:
                             break;
@@ -277,11 +278,33 @@ public class WatchOverMeActivity extends BaseActivity {
         Tracer.log(TAG, "removeWatchers: " + uid);
         if(mWatchersPair.containsKey(uid)){
             try {
+                int removedPos = mWatchersPair.get(uid);
                 //on le retire en callant la methode de l'adapter qui lui fera le clean de sa liste
-                ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).removeItem(mWatchersPair.get(uid));
+                ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).removeItem(removedPos);
                 //on le retire de la liste des pairs
                 mWatchersPair.remove(uid);
-
+                //si plus rien dans le mWatchersPair,
+                // alors on doit remettre le message de base apres le watchers title
+                if(mWatchersPair.size() == 0){
+                    //il remplace la position du dernier watchers enleve avec le text
+                    //donc on a pas besoin de decaler les mInvitationsPair
+                    ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).addItem(
+                            ListItems.Type.TYPE_TEXT,
+                            new ListItems.TextItem(getResources().getString(R.string.watchers_list_empty)),
+                            removedPos
+                            ); //1 car tout de suite apres le watchers title
+                }else{
+                    //si non il faut recalculer les positions
+                    int pos = 1; // 1 = tout de suite apres le titre
+                    for(String invitationUid : mWatchersPair.keySet()){
+                        mWatchersPair.put(invitationUid, pos++);
+                    }
+                    //si non il faut decaler les mInvitationsPair aussi
+                    //on decale les mInvitationPair de -1
+                    for(String invitationUid : mInvitationsPair.keySet()){
+                        mInvitationsPair.put(invitationUid, (mInvitationsPair.get(invitationUid) - 1));
+                    }
+                }
             }catch(Exception e){
                 Tracer.log(TAG, "removeWatchers.exception: ", e);
             }
@@ -300,12 +323,12 @@ public class WatchOverMeActivity extends BaseActivity {
             try {
                 //il est deja rajouter a mUser
                 //on va chercher la derniere position des mWatcherPair
-                int lastPosInPair = mWatchersPair.size();
-                if(lastPosInPair > 0){
-                    //si on a au moins un item
-                    mWatchersPair.put(uid, --lastPosInPair);
+                int size = mWatchersPair.size();
+                if(size > 0){
+                    //si on a au moins un item on le rajoute a la fin de la liste
+                    mWatchersPair.put(uid, (size + 1)); //+1 le titre watchers
                     //on decale les mInvitationPair de +1
-                    for(String invitationUid : mInvitationsPair.keySet()){
+                    for (String invitationUid : mInvitationsPair.keySet()) {
                         mInvitationsPair.put(invitationUid, (mInvitationsPair.get(invitationUid) + 1));
                     }
                     //on le rajoute a la liste du adapter
@@ -314,25 +337,56 @@ public class WatchOverMeActivity extends BaseActivity {
                     ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).addItem(
                             ListItems.Type.TYPE_WATCHER,
                             new ListItems.WatcherItem(uid),
-                            (lastPosInPair + 1)
-                    );
+                            (size + 1)
+                            );
                 }else{
                     //si la liste de watchers est vide
                     //0 = watchers title
                     //1 = text items car la liste est vide,
                     // maintenant il faut le remplacer par le watcher et virer le text item
                     //donc on a pas besoin de decaler les mInvitationsPair
-                    ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).removeItem(1);
                     mWatchersPair.put(uid, 1); //1 car le watchers title est en premier
+                    ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).removeItem(1);
                     ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).addItem(
                             ListItems.Type.TYPE_WATCHER,
                             new ListItems.WatcherItem(uid),
                             1
+                            );
+                }
+            }catch(Exception e){
+                Tracer.log(TAG, "addWatchers.exception: ", e);
+            }
+        }
+    }
+
+    private void removeInvitations(String uid){
+        Tracer.log(TAG, "removeInvitations: " + uid);
+        if(mInvitationsPair.containsKey(uid)){
+            try {
+                //on le retire en callant la methode de l'adapter qui lui fera le clean de sa liste
+                int removedPos = mInvitationsPair.get(uid);
+                ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).removeItem(removedPos);
+                //on le retire de la liste des pairs
+                mInvitationsPair.remove(uid);
+                //si plus rien dans le mInviationsPair,
+                // alors on doit remettre le message de base apres le watchers title
+                if(mInvitationsPair.size() == 0){
+                    //il remplace la position du dernier invitations enleve
+                    ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).addItem(
+                            ListItems.Type.TYPE_TEXT,
+                            new ListItems.TextItem(getResources().getString(R.string.invitations_list_empty)),
+                            removedPos
                     );
+                }else{
+                    //si non il faut decaler les mInvitationsPair
+                    //on decale les mInvitationPair de -1
+                    for(String invitationUid : mInvitationsPair.keySet()){
+                        mInvitationsPair.put(invitationUid, (mInvitationsPair.get(invitationUid) - 1));
+                    }
                 }
 
             }catch(Exception e){
-                Tracer.log(TAG, "addWatchers.exception: ", e);
+                Tracer.log(TAG, "removeWatchers.exception: ", e);
             }
         }
     }
