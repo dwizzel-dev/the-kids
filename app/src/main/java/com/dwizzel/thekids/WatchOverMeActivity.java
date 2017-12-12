@@ -10,7 +10,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.dwizzel.Const;
+import com.dwizzel.adapters.IRecyclerViewItemClickListener;
 import com.dwizzel.adapters.WatchOverMeListAdapter;
+import com.dwizzel.adapters.WatchOverSomeoneListAdapter;
 import com.dwizzel.objects.ListItems;
 import com.dwizzel.objects.ObserverNotifObject;
 import com.dwizzel.objects.ServiceResponseObject;
@@ -32,7 +34,7 @@ import java.util.Observer;
 *
 * */
 
-public class WatchOverMeActivity extends BaseActivity {
+public class WatchOverMeActivity extends BaseActivity implements IRecyclerViewItemClickListener.ActivityClickListener {
 
     private static final String TAG = "WatchOverMeActivity";
     private boolean isActivityCreated = false;
@@ -165,21 +167,40 @@ public class WatchOverMeActivity extends BaseActivity {
         mRecyclerView = new RecyclerView(WatchOverMeActivity.this);
         mRecyclerView.setPaddingRelative(0,0,0,0);
         mRecyclerView.setHorizontalScrollBarEnabled(true);
-        mRecyclerView.setLayoutParams(new RecyclerView.LayoutParams(
-                RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT));
+        mRecyclerView.setLayoutParams(
+                new RecyclerView.LayoutParams(
+                        RecyclerView.LayoutParams.MATCH_PARENT,
+                        RecyclerView.LayoutParams.MATCH_PARENT
+                )
+        );
         //mRecyclerView.setHasFixedSize(true);
         // use a linear layout manager
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(WatchOverMeActivity.this);
-        mRecyclerView.setLayoutManager(layoutManager);
-        RecyclerView.Adapter adapter = new WatchOverMeListAdapter(createWatchersList());
+        mRecyclerView.setLayoutManager(
+                new LinearLayoutManager(
+                        WatchOverMeActivity.this
+                )
+        );
         // specify an adapter
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(
+                new WatchOverMeListAdapter(
+                        createWatchersList(),
+                        WatchOverMeActivity.this
+                )
+        );
+        setRecycleViewClickListener();
         //le padding de 8px au dessus et dessous
-        mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverMeActivity.this));
+        mRecyclerView.addItemDecoration(
+                new ListPaddingDecoration(
+                        WatchOverMeActivity.this
+                )
+        );
         //l'animation
         mRecyclerView.setLayoutAnimation(
-                AnimationUtils.loadLayoutAnimation(WatchOverMeActivity.this,
-                        R.anim.layout_animation_slide_from_bottom));
+                AnimationUtils.loadLayoutAnimation(
+                        WatchOverMeActivity.this,
+                        R.anim.layout_animation_slide_from_bottom
+                )
+        );
         //rajoute a la view principale
         CoordinatorLayout layout = findViewById(R.id.mainView);
         layout.addView(mRecyclerView, layout.getChildCount()); //en dessous du floating button
@@ -389,6 +410,25 @@ public class WatchOverMeActivity extends BaseActivity {
                 Tracer.log(TAG, "removeWatchers.exception: ", e);
             }
         }
+    }
+
+    public void onRecycleViewItemClick(int position, String uid, int type){
+        Tracer.log(TAG, "onItemClick[" + position + ":" + type + "]: " + uid);
+        switch(type){
+            case IRecyclerViewItemClickListener.TYPE_DELETE_ITEM_WATCHER:
+                //on enleve sur les serveur DB aussi
+                mTrackerBinder.deleteWatchersItem(uid);
+                break;
+            case IRecyclerViewItemClickListener.TYPE_MODIFY_ITEM_WATCHER:
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void setRecycleViewClickListener(){
+        //get de l'adapter
+        ((WatchOverMeListAdapter)mRecyclerView.getAdapter()).setClickListener(WatchOverMeActivity.this);
     }
 
 

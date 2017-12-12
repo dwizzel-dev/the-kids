@@ -504,6 +504,24 @@ public class TrackerService extends Service implements ITrackerService{
             }
         }
 
+        public void deleteWatchingsItem(String uid){
+            //bd
+            mDatabaseService.deleteWatchingsItem(uid);
+        }
+
+        public void modifyWatchingsItem(String uid){
+            mDatabaseService.modifyWatchingsItem(uid);
+        }
+
+        public void deleteWatchersItem(String uid){
+            //bd
+            mDatabaseService.deleteWatchersItem(uid);
+        }
+
+        public void modifyWatchersItem(String uid){
+            mDatabaseService.modifyWatchersItem(uid);
+        }
+
 
     }
 

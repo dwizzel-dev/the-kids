@@ -2,8 +2,10 @@ package com.dwizzel.adapters;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -23,17 +25,20 @@ import java.util.ArrayList;
  * Created by Dwizzel on 22/11/2017.
  */
 
-public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeListAdapter.ViewHolder> {
+public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeListAdapter.ViewHolder> implements IRecyclerViewItemClickListener.AdapterClickListener {
 
     private static final String TAG = "WatchOverMeListAdapter";
     private ArrayList<ListItems.Item> mList;
     private UserObject mUser;
+    private Context mContext;
+    private IRecyclerViewItemClickListener.ActivityClickListener mClickListener;
 
     // fill la liste avec les headers
-    public WatchOverMeListAdapter(ArrayList<ListItems.Item> list) {
+    public WatchOverMeListAdapter(ArrayList<ListItems.Item> list, Context context) {
         Tracer.log(TAG, "WatchOverMeListAdapter");
         mList = list;
         mUser = UserObject.getInstance();
+        mContext = context;
     }
 
     // Create new views (invoked by the layout manager)
@@ -120,6 +125,16 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
 
     }
 
+    public void setClickListener(IRecyclerViewItemClickListener.ActivityClickListener listener){
+        mClickListener = listener;
+    }
+
+    public void onItemClick(int position, int type){
+        if(mClickListener != null){
+            mClickListener.onRecycleViewItemClick(position, mList.get(position).getItemValue(), type);
+        }
+    }
+
 
 
     //-------------------------------------------------------------------------------------
@@ -161,7 +176,7 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
     //-----------------------------------
     public class WatcherViewHolder extends ViewHolder {
         TextView name, phone, email;
-        ImageView image;
+        ImageView image, itemMenuOption;
         Context context;
         WatcherViewHolder(View itemView) {
             super(itemView);
@@ -170,9 +185,10 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
             phone = itemView.findViewById(R.id.phone);
             email = itemView.findViewById(R.id.email);
             image = itemView.findViewById(R.id.imageView);
+            itemMenuOption = itemView.findViewById(R.id.itemMenuOption);
         }
-        public void bindToViewHolder(ViewHolder viewholder, int position) {
-            WatcherViewHolder holder = (WatcherViewHolder) viewholder;
+        public void bindToViewHolder(ViewHolder viewholder, final int position) {
+            final WatcherViewHolder holder = (WatcherViewHolder) viewholder;
             WatcherModel model = mUser.getWatcher(mList.get(position).getItemValue());
             if(model != null) {
                 try {
@@ -214,6 +230,38 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
                     holder.phone.setText(p);
                     holder.email.setText(e);
                     holder.image.setImageResource(ir);
+
+                    //le option sub menu
+                    holder.itemMenuOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(final View view) {
+                            //creating a popup menu
+                            PopupMenu popup = new PopupMenu(mContext, holder.itemMenuOption);
+                            //inflating menu from xml resource
+                            popup.inflate(R.menu.menu_recyclerview_watcher_item);
+                            //adding click listener
+                            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+                                    switch (item.getItemId()) {
+                                        case R.id.deleteItem:
+                                            onItemClick(position,
+                                                    IRecyclerViewItemClickListener.TYPE_DELETE_ITEM_WATCHER);
+                                            break;
+                                        case R.id.modifyItem:
+                                            onItemClick(position,
+                                                    IRecyclerViewItemClickListener.TYPE_MODIFY_ITEM_WATCHER);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    return false;
+                                }
+                            });
+                            //displaying the popup
+                            popup.show();
+                        }
+                    });
 
                 } catch (Exception e) {
                     Tracer.log(TAG, "WatcherViewHolder.exception: ", e);

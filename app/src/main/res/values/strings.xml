@@ -118,8 +118,10 @@
     <string name="menu_action_about">About</string>
 
     <!-- SUB MENU -->
-    <string name="menu_delete_item">Delete Watching</string>
-    <string name="menu_modify_item">Modify Informations</string>
+    <string name="menu_delete_watching_item">Delete Watching</string>
+    <string name="menu_modify_watching_item">Modify Informations</string>
+    <string name="menu_delete_watcher_item">Delete Watcher</string>
+    <string name="menu_modify_watcher_item">Modify Informations</string>
 
     <!-- FACEBOOK LOGIN -->
     <string name="facebook_app_id">135994336994028</string>

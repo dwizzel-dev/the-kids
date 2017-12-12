@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.dwizzel.Const;
+import com.dwizzel.adapters.IRecyclerViewItemClickListener;
 import com.dwizzel.adapters.WatchOverSomeoneListAdapter;
 import com.dwizzel.datamodels.InviteInfoModel;
 import com.dwizzel.objects.ListItems;
@@ -29,7 +30,7 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
-public class WatchOverSomeoneActivity extends BaseActivity{
+public class WatchOverSomeoneActivity extends BaseActivity implements IRecyclerViewItemClickListener.ActivityClickListener {
 
     private static final String TAG = "WatchOverSomeoneActivity";
     private boolean isActivityCreated = false;
@@ -37,7 +38,6 @@ public class WatchOverSomeoneActivity extends BaseActivity{
     private HashMap<String, Integer> mWatchingsPair;
     private RecyclerView mRecyclerView;
     TrackerService.TrackerBinder mTrackerBinder;
-
 
     public void onSubDestroy(){
         Tracer.log(TAG, "onSubDestroy");
@@ -212,22 +212,40 @@ public class WatchOverSomeoneActivity extends BaseActivity{
         mRecyclerView = new RecyclerView(WatchOverSomeoneActivity.this);
         mRecyclerView.setPaddingRelative(0,0,0,0);
         mRecyclerView.setHorizontalScrollBarEnabled(true);
-        mRecyclerView.setLayoutParams(new RecyclerView.LayoutParams(
-                RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT));
+        mRecyclerView.setLayoutParams(
+                new RecyclerView.LayoutParams(
+                        RecyclerView.LayoutParams.MATCH_PARENT,
+                        RecyclerView.LayoutParams.MATCH_PARENT
+                )
+        );
         //mRecyclerView.setHasFixedSize(true);
         // use a linear layout manager
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(WatchOverSomeoneActivity.this);
-        mRecyclerView.setLayoutManager(layoutManager);
-        RecyclerView.Adapter adapter = new WatchOverSomeoneListAdapter(createWatchingsList(),
-                WatchOverSomeoneActivity.this);
+        mRecyclerView.setLayoutManager(
+                new LinearLayoutManager(
+                        WatchOverSomeoneActivity.this
+                )
+        );
         // specify an adapter
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(
+                new WatchOverSomeoneListAdapter(
+                        createWatchingsList(),
+                        WatchOverSomeoneActivity.this
+                )
+        );
+        setRecycleViewClickListener();
         //le padding de 8px au dessus et dessous
-        mRecyclerView.addItemDecoration(new ListPaddingDecoration(WatchOverSomeoneActivity.this));
+        mRecyclerView.addItemDecoration(
+                new ListPaddingDecoration(
+                        WatchOverSomeoneActivity.this
+                )
+        );
         //l'animation
         mRecyclerView.setLayoutAnimation(
-                AnimationUtils.loadLayoutAnimation(WatchOverSomeoneActivity.this,
-                        R.anim.layout_animation_slide_from_bottom));
+                AnimationUtils.loadLayoutAnimation(
+                        WatchOverSomeoneActivity.this,
+                        R.anim.layout_animation_slide_from_bottom
+                )
+        );
         //rajoute a la view principale
         CoordinatorLayout layout = findViewById(R.id.bottomView);
         layout.addView(mRecyclerView, layout.getChildCount()); //en dessous du floating button
@@ -365,6 +383,25 @@ public class WatchOverSomeoneActivity extends BaseActivity{
             progressBar.setVisibility(View.INVISIBLE);
             butt.setVisibility(View.VISIBLE);
         }
+    }
+
+    public void onRecycleViewItemClick(int position, String uid, int type){
+        Tracer.log(TAG, "onItemClick[" + position + ":" + type + "]: " + uid);
+        switch(type){
+            case IRecyclerViewItemClickListener.TYPE_DELETE_ITEM_WATCHING:
+                //on enleve sur les serveur DB aussi
+                mTrackerBinder.deleteWatchingsItem(uid);
+                break;
+            case IRecyclerViewItemClickListener.TYPE_MODIFY_ITEM_WATCHING:
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void setRecycleViewClickListener(){
+        //get de l'adapter
+        ((WatchOverSomeoneListAdapter)mRecyclerView.getAdapter()).setClickListener(WatchOverSomeoneActivity.this);
     }
 
 

@@ -7,6 +7,7 @@ $ firebase init
 
 Deploy your functions:
 $ firebase deploy
+$ firebase deploy --only functions:funcName
 
 $ git init
 $ git config --global user.email "dwizzel.dev@gmail.com"
@@ -23,7 +24,8 @@ Examples:
 https://github.com/MahmoudAlyuDeen/FirebaseIM
 https://developers.google.com/cloud-messaging/concept-options
 
-TODO: il faut un triger dans la DB pour faire le cleanup de ceux qui ne ce sont pas deconnecte
+TODO: il faut un cronjob dans la DB pour faire le cleanup de ceux qui ne ce sont pas deconnecte
+dans la collection actives
 
 */
 
@@ -53,7 +55,7 @@ function getRandomIntInclusive(min, max) {
 
 function createUniqueActivationCode(event){
     //genere le code
-    const randomCode = getRandomIntInclusive(10000,99999);
+    const randomCode = getRandomIntInclusive(100,999);
     let unique = false;
     //check si le unique code existe
 }
@@ -220,6 +222,49 @@ exports.activateInvitation = functions.firestore
             })
             .catch((err) => {
                 console.log(err);
+            });
+	});
+
+exports.deleteFromWatchings = functions.firestore
+	.document('users/{userId}/watchings/{watchingId}')
+	.onDelete((event) => {
+	    const userId = event.params.userId;
+	    const watchingId = event.params.watchingId;
+	    if(userId == "" || watchingId == ""){
+	        return false;
+	    }
+	    //il faut supprimer notre user de la liste des watchers de watchingId
+        return db.collection('users').doc(watchingId).collection("watchers").doc(userId)
+            .delete()
+            .then(() =>{
+                console.log("succesfull delete of '" + userId + "' from watchers list of '" + watchingId + "'");
+                return true;
+            })
+            .catch((err) => {
+                console.log(err);
+                return false;
+            });
+
+	});
+
+exports.deleteFromWatchers = functions.firestore
+	.document('users/{userId}/watchers/{watcherId}')
+	.onDelete((event) => {
+	    const userId = event.params.userId;
+	    const watcherId = event.params.watcherId;
+	    if(userId == "" || watcherId == ""){
+	        return false;
+	    }
+	    //il faut supprimer notre user de la liste des watchings de watcherId
+        return db.collection('users').doc(watcherId).collection("watchings").doc(userId)
+            .delete()
+            .then(() =>{
+                console.log("succesfull delete of '" + userId + "' from watchings list of '" + watcherId + "'");
+                return true;
+            })
+            .catch((err) => {
+                console.log(err);
+                return false;
             });
 	});
 

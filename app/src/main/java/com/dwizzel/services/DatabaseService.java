@@ -594,7 +594,7 @@ class DatabaseService implements IDatabaseService{
             //alors on va disable la cache pour certaine query
             //les events listener sur ce que l'on veut
             removeListenerOnUser();
-            addListenerOnUser();
+            //addListenerOnUser();
 
             mDb.collection("users").document(mUser.getUid())
                     .get()
@@ -627,6 +627,8 @@ class DatabaseService implements IDatabaseService{
                                     mUser.setCreated(true);
                                     //on call le Trackerservice pour dire qu'il est pret
                                     mTrackerService.onUserCreated(new ServiceResponseObject());
+                                    //
+                                    addListenerOnUser();
                                 }else{
                                     Tracer.log(TAG, "getUserInfos: NO DATA");
                                     // si on a rien alors on a un nouveau user
@@ -722,6 +724,7 @@ class DatabaseService implements IDatabaseService{
         Tracer.log(TAG, "getWatchingsList");
         try{
             mDb.collection("users").document(mUser.getUid()).collection("watchings")
+                    .orderBy("name")
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
@@ -770,6 +773,7 @@ class DatabaseService implements IDatabaseService{
         Tracer.log(TAG, "getWatchersList");
         try{
             mDb.collection("users").document(mUser.getUid()).collection("watchers")
+                    .orderBy("name")
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
@@ -1065,6 +1069,119 @@ class DatabaseService implements IDatabaseService{
                     new ServiceResponseObject(Const.error.ERROR_INVITE_INFOS_FAILURE));
         }
 
+    }
+
+
+
+    public void deleteWatchingsItem(final String uid){
+        Tracer.log(TAG, "deleteWatchingsItem: " + uid);
+        try{
+            //delete
+            mDb.collection("users").document(mUser.getUid()).collection("watchings").document(uid)
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "deleteWatchingsItem.addOnSuccessListener");
+                                            }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG,"deleteWatchingsItem.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+        }catch (Exception e){
+            Tracer.log(TAG, "deleteWatchingsItem.Exception: ", e);
+        }
+    }
+
+    public void modifyWatchingsItem(String uid){
+        Tracer.log(TAG, "modifyWatchingsItem: " + uid);
+        //on cherche les valeurs modifiees par le trackerService de cet uid watchings
+        try {
+            WatchingModel watchingModel = mUser.getWatching(uid);
+            if(watchingModel == null) {
+                throw new NullPointerException(String.format("watchings item \"%s\" dont't exist", uid));
+            }
+            //on update dans la db
+            mDb.collection("users").document(mUser.getUid()).collection("watchings").document(uid)
+                    .update(
+                            "email", watchingModel.getEmail(),
+                            "name", watchingModel.getName(),
+                            "phone", watchingModel.getPhone()
+                    )
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "modifyWatchingsItem.addOnSuccessListener");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG, "modifyWatchingsItem.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+        } catch (Exception e) {
+            Tracer.log(TAG, "modifyWatchingsItem.Exception: ", e);
+        }
+    }
+
+    public void deleteWatchersItem(final String uid){
+        Tracer.log(TAG, "deleteWatchersItem: " + uid);
+        try{
+            //delete
+            mDb.collection("users").document(mUser.getUid()).collection("watchers").document(uid)
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "deleteWatchersItem.addOnSuccessListener");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG,"deleteWatchersItem.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+        }catch (Exception e){
+            Tracer.log(TAG, "deleteWatchersItem.Exception: ", e);
+        }
+
+    }
+
+    public void modifyWatchersItem(String uid){
+        Tracer.log(TAG, "modifyWatchersItem: " + uid);
+        //on cherche les valeurs modifiees par le trackerService de cet uid watchers
+        try {
+            WatcherModel watcherModel= mUser.getWatcher(uid);
+            if(watcherModel == null) {
+                throw new NullPointerException(String.format("watchers item \"%s\" dont't exist", uid));
+            }
+            //on update dans la db
+            mDb.collection("users").document(mUser.getUid()).collection("watchers").document(uid)
+                    .update(
+                            "email", watcherModel.getEmail(),
+                            "name", watcherModel.getName(),
+                            "phone", watcherModel.getPhone()
+                    )
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "modifyWatchersItem.addOnSuccessListener");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG, "modifyWatchersItem.addOnFailureListener.Exception: ", e);
+                        }
+                    });
+        } catch (Exception e) {
+            Tracer.log(TAG, "modifyWatchersItem.Exception: ", e);
+        }
     }
 
 

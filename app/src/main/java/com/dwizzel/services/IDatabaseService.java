@@ -16,6 +16,12 @@ public interface IDatabaseService {
     void updateUserInfos();
     void updateTokenId();
 
+    void deleteWatchingsItem(String uid);
+    void modifyWatchingsItem(String uid);
+
+    void deleteWatchersItem(String uid);
+    void modifyWatchersItem(String uid);
+
     void getWatchersList();
     void getInvitationsList();
     void getWatchingsList();

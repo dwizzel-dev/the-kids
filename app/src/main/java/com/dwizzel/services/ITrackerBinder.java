@@ -11,19 +11,31 @@ public interface ITrackerBinder {
 
     long getCounter();
     long getTimeDiff();
+
     void registerCallback(ITrackerBinderCallback callback);
     void unregisterCallback();
-    boolean isSignedIn();
-    void signOut();
+
     void signIn(String user, String psw);
     void signIn(AuthCredential authCredential);
     void createUser(String user, String psw);
+    boolean isSignedIn();
+    void signOut();
+
     void getWatchersList();
     void getInvitationsList();
+    void getWatchingsList();
+
+    void deleteWatchingsItem(String uid);
+    void deleteWatchersItem(String uid);
+
+    void modifyWatchingsItem(String uid);
+    void modifyWatchersItem(String uid);
+
     void createInviteId();
     void createInvitation(String inviteId, String name, String phone, String email);
-    void getWatchingsList();
-    void saveInviteInfo(InviteInfoModel inviteInfoModel);
+
     void validateInviteCode(String code);
+    void saveInviteInfo(InviteInfoModel inviteInfoModel);
+
 
 }

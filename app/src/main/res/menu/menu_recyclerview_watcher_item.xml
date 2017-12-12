@@ -3,10 +3,10 @@
 
     <item
         android:id="@+id/deleteItem"
-        android:title="@string/menu_delete_watching_item" />
+        android:title="@string/menu_delete_watcher_item" />
 
     <item
         android:id="@+id/modifyItem"
-        android:title="@string/menu_modify_watching_item" />
+        android:title="@string/menu_modify_watcher_item" />
 
 </menu>

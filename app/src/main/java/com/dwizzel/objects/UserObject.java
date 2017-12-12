@@ -115,33 +115,30 @@ public class UserObject extends Observable{
     public void updateWatchers(String uid, ActiveModel activeModel) {
         //ces infos ne viennent pas de la meme collection et arrive apres
         //du au limitation de firestore
-        if (watchers != null) {
-            if (watchers.containsKey(uid)) {
-                try {
-                    WatcherModel watcher = watchers.get(uid);
-                    watcher.setGps(activeModel.isGps());
-                    watcher.setStatus(activeModel.getStatus());
-                    watcher.setPosition(activeModel.getPosition());
-                    watcher.setUpdateTime(activeModel.getUpdateTime());
-                    //et on replace
-                    watchers.put(uid, watcher);
-                    //on notifie les observers
-                    setChanged();
-                    notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_UPDATE, uid));
-                }catch(Exception e){
-                    // null pointer
-                }
+        if (watchers.containsKey(uid)) {
+            try {
+                WatcherModel watcher = watchers.get(uid);
+                watcher.setGps(activeModel.isGps());
+                watcher.setStatus(activeModel.getStatus());
+                watcher.setPosition(activeModel.getPosition());
+                watcher.setUpdateTime(activeModel.getUpdateTime());
+                //et on replace
+                watchers.put(uid, watcher);
+                //on notifie les observers
+                setChanged();
+                notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_UPDATE, uid));
+            }catch(Exception e){
+                // null pointer
             }
         }
+
     }
 
     public void updateWatchers(String uid, WatcherModel watcher) {
-        if (watchers != null) {
-            watchers.put(uid, watcher);
-            //on notifie les observers
-            setChanged();
-            notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_UPDATE, uid));
-        }
+        watchers.put(uid, watcher);
+        //on notifie les observers
+        setChanged();
+        notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_UPDATE, uid));
     }
 
     public boolean addWatcher(String uid, WatcherModel watcher) {
@@ -156,13 +153,11 @@ public class UserObject extends Observable{
     }
 
     public void removeWatcher(String uid) {
-        if (watchers != null) {
-            if (watchers.containsKey(uid)) {
-                watchers.remove(uid);
-                //on notifie les observers
-                setChanged();
-                notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_REMOVE, uid));
-            }
+        if (watchers.containsKey(uid)) {
+            watchers.remove(uid);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_REMOVE, uid));
         }
     }
 
@@ -171,11 +166,9 @@ public class UserObject extends Observable{
     }
 
     public WatcherModel getWatcher(String uid){
-        if (watchers != null) {
-            if (watchers.containsKey(uid)) {
-                return watchers.get(uid);
+        if (watchers.containsKey(uid)) {
+            return watchers.get(uid);
             }
-        }
         return null;
     }
 
@@ -193,33 +186,30 @@ public class UserObject extends Observable{
     public void updateWatchings(String uid, ActiveModel active) {
         //ces infos ne viennent pas de la meme collection et arrive apres
         //du au limitation de firestore
-        if (watchings != null) {
-            if (watchings.containsKey(uid)) {
-                try {
-                    WatchingModel watching = watchings.get(uid);
-                    watching.setGps(active.isGps());
-                    watching.setStatus(active.getStatus());
-                    watching.setPosition(active.getPosition());
-                    watching.setUpdateTime(active.getUpdateTime());
-                    //et on replace
-                    watchings.put(uid, watching);
-                    //on notifie les observers
-                    setChanged();
-                    notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_UPDATE, uid));
-                }catch(Exception e){
-                    // null pointer
-                }
+        if (watchings.containsKey(uid)) {
+            try {
+                WatchingModel watching = watchings.get(uid);
+                watching.setGps(active.isGps());
+                watching.setStatus(active.getStatus());
+                watching.setPosition(active.getPosition());
+                watching.setUpdateTime(active.getUpdateTime());
+                //et on replace
+                watchings.put(uid, watching);
+                //on notifie les observers
+                setChanged();
+                notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_UPDATE, uid));
+            }catch(Exception e){
+                // null pointer
             }
         }
+
     }
 
     public void updateWatchings(String uid, WatchingModel watching) {
-        if (watchings != null) {
-            watchings.put(uid, watching);
-            //on notifie les observers
-            setChanged();
-            notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_UPDATE, uid));
-        }
+        watchings.put(uid, watching);
+        //on notifie les observers
+        setChanged();
+        notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_UPDATE, uid));
     }
 
     public boolean addWatching(String uid, WatchingModel watching) {
@@ -234,13 +224,11 @@ public class UserObject extends Observable{
     }
 
     public void removeWatching(String uid) {
-        if (watchings != null) {
-            if (watchings.containsKey(uid)) {
-                watchings.remove(uid);
-                //on notifie les observers
-                setChanged();
-                notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_REMOVE, uid));
-            }
+        if (watchings.containsKey(uid)) {
+            watchings.remove(uid);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_REMOVE, uid));
         }
     }
 
@@ -249,10 +237,8 @@ public class UserObject extends Observable{
     }
 
     public WatchingModel getWatching(String uid){
-        if (watchings != null) {
-            if (watchings.containsKey(uid)) {
-                return watchings.get(uid);
-            }
+        if (watchings.containsKey(uid)) {
+            return watchings.get(uid);
         }
         return null;
     }
@@ -271,13 +257,11 @@ public class UserObject extends Observable{
     public void updateInvitation(String inviteId, InvitationModel invite) {
         //ces infos ne viennent pas de la meme collection et arrive apres
         //du au limitation de firestore
-        if (invitations != null) {
-            //et on replace
-            invitations.put(inviteId, invite);
-            //on notifie les observers
-            setChanged();
-            notifyObservers(new ObserverNotifObject(Const.notif.INVITATION_UPDATE, inviteId));
-        }
+        //et on replace
+        invitations.put(inviteId, invite);
+        //on notifie les observers
+        setChanged();
+        notifyObservers(new ObserverNotifObject(Const.notif.INVITATION_UPDATE, inviteId));
     }
 
     public void addInvitation(String inviteId, InvitationModel invite) {
@@ -290,13 +274,11 @@ public class UserObject extends Observable{
     }
 
     public void removeInvitation(String inviteId) {
-        if (invitations != null) {
-            if (invitations.containsKey(inviteId)) {
-                invitations.remove(inviteId);
-                //on notifie les observers
-                setChanged();
-                notifyObservers(new ObserverNotifObject(Const.notif.INVITATION_REMOVE, inviteId));
-            }
+        if (invitations.containsKey(inviteId)) {
+            invitations.remove(inviteId);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.INVITATION_REMOVE, inviteId));
         }
     }
 
@@ -305,13 +287,12 @@ public class UserObject extends Observable{
     }
 
     public InvitationModel getInvitation(String inviteId){
-        if (invitations != null) {
-            if (invitations.containsKey(inviteId)) {
-                return invitations.get(inviteId);
-            }
+        if (invitations.containsKey(inviteId)) {
+            return invitations.get(inviteId);
         }
         return null;
     }
+
 
 
 

@@ -24,12 +24,13 @@ import java.util.ArrayList;
  * Created by Dwizzel on 22/11/2017.
   */
 
-public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverSomeoneListAdapter.ViewHolder> {
+public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverSomeoneListAdapter.ViewHolder>  implements IRecyclerViewItemClickListener.AdapterClickListener{
 
     private static final String TAG = "WatchOverSomeoneListAdapter";
     private ArrayList<ListItems.Item> mList;
     private UserObject mUser;
     private Context mContext;
+    private IRecyclerViewItemClickListener.ActivityClickListener mClickListener;
 
     // fill la liste avec les headers
     public WatchOverSomeoneListAdapter(ArrayList<ListItems.Item> list, Context context) {
@@ -98,6 +99,16 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
         mList.add(position, item);
         notifyItemInserted(position);
         notifyItemRangeChanged(position, mList.size());
+    }
+
+    public void setClickListener(IRecyclerViewItemClickListener.ActivityClickListener listener){
+        mClickListener = listener;
+    }
+
+    public void onItemClick(int position, int type){
+        if(mClickListener != null){
+            mClickListener.onRecycleViewItemClick(position, mList.get(position).getItemValue(), type);
+        }
     }
 
 
@@ -200,7 +211,7 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
                     //le option sub menu
                     holder.itemMenuOption.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(View view) {
+                        public void onClick(final View view) {
                             //creating a popup menu
                             PopupMenu popup = new PopupMenu(mContext, holder.itemMenuOption);
                             //inflating menu from xml resource
@@ -211,10 +222,12 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
                                 public boolean onMenuItemClick(MenuItem item) {
                                     switch (item.getItemId()) {
                                         case R.id.deleteItem:
-                                            Tracer.log(TAG, "onClick: menuDelete");
+                                            onItemClick(position,
+                                                    IRecyclerViewItemClickListener.TYPE_DELETE_ITEM_WATCHING);
                                             break;
                                         case R.id.modifyItem:
-                                            Tracer.log(TAG, "onClick: menuModify");
+                                            onItemClick(position,
+                                                    IRecyclerViewItemClickListener.TYPE_MODIFY_ITEM_WATCHING);
                                             break;
                                         default:
                                             break;
