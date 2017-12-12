@@ -2,8 +2,10 @@ package com.dwizzel.adapters;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -27,12 +29,14 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
     private static final String TAG = "WatchOverSomeoneListAdapter";
     private ArrayList<ListItems.Item> mList;
     private UserObject mUser;
+    private Context mContext;
 
     // fill la liste avec les headers
-    public WatchOverSomeoneListAdapter(ArrayList<ListItems.Item> list) {
+    public WatchOverSomeoneListAdapter(ArrayList<ListItems.Item> list, Context context) {
         Tracer.log(TAG, "WatchOverSomeoneListAdapter");
         mList = list;
         mUser = UserObject.getInstance();
+        mContext = context;
     }
 
     // Create new views (invoked by the layout manager)
@@ -138,7 +142,7 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
     //-----------------------------------
     public class WatchingViewHolder extends ViewHolder {
         TextView name, phone, email;
-        ImageView image;
+        ImageView image, itemMenuOption;
         Context context;
         WatchingViewHolder(View itemView) {
             super(itemView);
@@ -147,9 +151,10 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
             phone = itemView.findViewById(R.id.phone);
             email = itemView.findViewById(R.id.email);
             image = itemView.findViewById(R.id.imageView);
+            itemMenuOption = itemView.findViewById(R.id.itemMenuOption);
         }
-        public void bindToViewHolder(ViewHolder viewholder, int position) {
-            WatchingViewHolder holder = (WatchingViewHolder) viewholder;
+        public void bindToViewHolder(ViewHolder viewholder, final int position) {
+            final WatchingViewHolder holder = (WatchingViewHolder) viewholder;
             WatchingModel model = mUser.getWatching(mList.get(position).getItemValue());
             if(model != null) {
                 try {
@@ -191,6 +196,36 @@ public class WatchOverSomeoneListAdapter extends RecyclerView.Adapter<WatchOverS
                     holder.phone.setText(p);
                     holder.email.setText(e);
                     holder.image.setImageResource(ir);
+
+                    //le option sub menu
+                    holder.itemMenuOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //creating a popup menu
+                            PopupMenu popup = new PopupMenu(mContext, holder.itemMenuOption);
+                            //inflating menu from xml resource
+                            popup.inflate(R.menu.menu_recyclerview_watching_item);
+                            //adding click listener
+                            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+                                    switch (item.getItemId()) {
+                                        case R.id.deleteItem:
+                                            Tracer.log(TAG, "onClick: menuDelete");
+                                            break;
+                                        case R.id.modifyItem:
+                                            Tracer.log(TAG, "onClick: menuModify");
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    return false;
+                                }
+                            });
+                            //displaying the popup
+                            popup.show();
+                        }
+                    });
 
                 } catch (Exception e) {
                     Tracer.log(TAG, "WatchingViewHolder.exception: ", e);

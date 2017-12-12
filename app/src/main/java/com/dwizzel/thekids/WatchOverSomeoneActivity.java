@@ -9,14 +9,12 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.dwizzel.Const;
 import com.dwizzel.adapters.WatchOverSomeoneListAdapter;
 import com.dwizzel.datamodels.InviteInfoModel;
-import com.dwizzel.datamodels.WatchingModel;
 import com.dwizzel.objects.ListItems;
 import com.dwizzel.objects.ObserverNotifObject;
 import com.dwizzel.objects.ServiceResponseObject;
@@ -220,7 +218,8 @@ public class WatchOverSomeoneActivity extends BaseActivity{
         // use a linear layout manager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(WatchOverSomeoneActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
-        RecyclerView.Adapter adapter = new WatchOverSomeoneListAdapter(createWatchingsList());
+        RecyclerView.Adapter adapter = new WatchOverSomeoneListAdapter(createWatchingsList(),
+                WatchOverSomeoneActivity.this);
         // specify an adapter
         mRecyclerView.setAdapter(adapter);
         //le padding de 8px au dessus et dessous

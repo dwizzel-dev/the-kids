@@ -117,6 +117,10 @@
     <string name="menu_action_logout">Sign Out</string>
     <string name="menu_action_about">About</string>
 
+    <!-- SUB MENU -->
+    <string name="menu_delete_item">Delete Watching</string>
+    <string name="menu_modify_item">Modify Informations</string>
+
     <!-- FACEBOOK LOGIN -->
     <string name="facebook_app_id">135994336994028</string>
     <string name="fb_login_protocol_scheme">fb135994336994028</string>
