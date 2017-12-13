@@ -68,36 +68,6 @@ public class WatchOverSomeoneActivity extends BaseActivity
         isActivityCreated = true;
     }
 
-    private void setButton() {
-        Button butt = findViewById(R.id.buttValidate);
-        //butt create
-        butt.setOnClickListener(
-                new View.OnClickListener() {
-                    public void onClick(View v) {
-                        //on call la function et on met le loader
-                        checkMandatoryFieldsAndValidate();
-
-                    }
-                });
-
-    }
-
-    private void checkMandatoryFieldsAndValidate(){
-        displayErrMsg(Const.error.NO_ERROR);
-        //on va chercher les infos et on les sets
-        String code = String.format("%s",((EditText)findViewById(R.id.txtInviteCode)).getText());
-        //minor check
-        if(code.isEmpty()){
-            displayErrMsg(R.string.err_invalid_invite_code);
-            return;
-        }
-        //on a le tout allors on fait le call au service
-        showSpinner(true);
-        //mTrackerBinder.activateInvites(mInviteId);
-        mTrackerBinder.validateInviteCode(code);
-
-    }
-
     private void setTrackerBinderCallback(){
         //on peut le caller sinon l'activity ne serait meme pas partis
         //on overwrite celui de BaseActivity
@@ -155,6 +125,61 @@ public class WatchOverSomeoneActivity extends BaseActivity
         mTrackerBinder.registerCallback(serviceCallback);
     }
 
+    //------------------------------------------------------
+
+    private void setButton() {
+        Button butt = findViewById(R.id.buttValidate);
+        //butt create
+        butt.setOnClickListener(
+                new View.OnClickListener() {
+                    public void onClick(View v) {
+                        //on call la function et on met le loader
+                        checkMandatoryFieldsAndValidate();
+
+                    }
+                });
+
+    }
+
+    private void showSpinner(boolean show){
+        //le bouton et le spinner
+        ProgressBar progressBar = findViewById(R.id.loading_spinner_butt);
+        Button butt = findViewById(R.id.buttValidate);
+        if(show){
+            progressBar.setVisibility(View.VISIBLE);
+            butt.setVisibility(View.INVISIBLE);
+        }else{
+            progressBar.setVisibility(View.INVISIBLE);
+            butt.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void checkMandatoryFieldsAndValidate(){
+        displayErrMsg(Const.error.NO_ERROR);
+        //on va chercher les infos et on les sets
+        String code = String.format("%s",((EditText)findViewById(R.id.txtInviteCode)).getText());
+        //minor check
+        if(code.isEmpty()){
+            displayErrMsg(R.string.err_invalid_invite_code);
+            return;
+        }
+        //on a le tout allors on fait le call au service
+        showSpinner(true);
+        //mTrackerBinder.activateInvites(mInviteId);
+        mTrackerBinder.validateInviteCode(code);
+
+    }
+
+    public void displayErrMsg(int msgId){
+        showSpinner(false);
+        TextView txtView = findViewById(R.id.errMsg);
+        if(msgId != 0) {
+            txtView.setText(msgId);
+        }else {
+            txtView.setText("");
+        }
+    }
+
     private void createNicknameForActivation(InviteInfoModel inviteInfoModel){
         Tracer.log(TAG, "createNicknameForActivation", inviteInfoModel);
         //on va a edition de profil
@@ -172,15 +197,7 @@ public class WatchOverSomeoneActivity extends BaseActivity
 
     }
 
-    public void displayErrMsg(int msgId){
-        showSpinner(false);
-        TextView txtView = findViewById(R.id.errMsg);
-        if(msgId != 0) {
-            txtView.setText(msgId);
-        }else {
-            txtView.setText("");
-        }
-    }
+
 
     private void contentListLoaded() {
         Tracer.log(TAG, "contentListLoaded");
@@ -373,27 +390,22 @@ public class WatchOverSomeoneActivity extends BaseActivity
         }
     }
 
-    private void showSpinner(boolean show){
-        //le bouton et le spinner
-        ProgressBar progressBar = findViewById(R.id.loading_spinner_butt);
-        Button butt = findViewById(R.id.buttValidate);
-        if(show){
-            progressBar.setVisibility(View.VISIBLE);
-            butt.setVisibility(View.INVISIBLE);
-        }else{
-            progressBar.setVisibility(View.INVISIBLE);
-            butt.setVisibility(View.VISIBLE);
-        }
-    }
-
     public void onRecycleViewItemClick(int position, String uid, int type){
         Tracer.log(TAG, "onItemClick[" + position + ":" + type + "]: " + uid);
         switch(type){
             case IRecyclerViewItemClickListener.TYPE_DELETE_ITEM_WATCHING:
+                //on enleve de mUser meme si le serveur va recaller sur le REMOVED du watching
+                //pour que ce soit instantanee au cas d'une deconnection
+                mUser.removeWatching(uid);
                 //on enleve sur les serveur DB aussi
                 mTrackerBinder.deleteWatchingsItem(uid);
                 break;
             case IRecyclerViewItemClickListener.TYPE_MODIFY_ITEM_WATCHING:
+                // Click action
+                Intent intent = new Intent(WatchOverSomeoneActivity.this,
+                        ModifyWatchingActivity.class);
+                intent.putExtra("uid", uid);
+                startActivity(intent);
                 break;
             default:
                 break;

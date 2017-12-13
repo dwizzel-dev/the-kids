@@ -273,13 +273,14 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
 
     //-----------------------------------
     public class InvitationViewHolder extends ViewHolder {
-        TextView name, phone;
+        TextView name, phone, code;
         Context context;
         InvitationViewHolder(View itemView) {
             super(itemView);
             context = itemView.getContext();
             name = itemView.findViewById(R.id.name);
             phone = itemView.findViewById(R.id.phone);
+            code = itemView.findViewById(R.id.code);
         }
         public void bindToViewHolder(ViewHolder viewholder, int position) {
             InvitationViewHolder holder = (InvitationViewHolder) viewholder;
@@ -288,6 +289,7 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
                 try {
                     String n = model.getName();
                     String p = model.getPhone();
+                    String c = context.getResources().getString(R.string.code, model.getCode());
                     if (n.equals("")) {
                         n = context.getResources().getString(R.string.empty_name);
                         holder.name.setTypeface(holder.name.getTypeface(), Typeface.ITALIC);
@@ -296,8 +298,10 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
                         p = context.getResources().getString(R.string.empty_phone);
                         holder.phone.setTypeface(holder.phone.getTypeface(), Typeface.ITALIC);
                     }
+
                     holder.name.setText(n);
                     holder.phone.setText(p);
+                    holder.code.setText(c);
 
                 } catch (Exception e) {
                     Tracer.log(TAG, "InvitationViewHolder.exception: ", e);

@@ -220,7 +220,7 @@ public class SendInvitationForWatchingActivity extends BaseActivity {
             case Const.error.NO_ERROR:
                 //on creer l'invitation du user dans la DB
                 //le retour du service fera le reste
-                mTrackerBinder.createInvitation(mInviteId, mName, mPhone, mEmail);
+                mTrackerBinder.createInvitation(mInviteId, mName, mPhone, mEmail, mCode);
                 break;
             case Const.error.ERROR_SMS_NOT_SENT:
                 //on set le message et on dit que l'on a eu un probleme

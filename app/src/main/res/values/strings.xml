@@ -19,6 +19,8 @@
     <string name="watch_over_someone_title">Watch Over Someone</string>
     <string name="watch_over_me_send_invitation">Send An Invitation</string>
     <string name="activate_invitation">Invitation Profil</string>
+    <string name="modify_watcher_title">Modify Watcher Profil</string>
+    <string name="modify_watching_title">Modify Watching Profil</string>
 
     <!-- LIST HEADER -->
     <string name="watchers_header">Watchers</string>
@@ -35,6 +37,10 @@
     <string name="signin_user_description">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
     <string name="send_invitation_description">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
     <string name="activate_invitation_description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</string>
+
+    <!-- IMAGE DESCRIPTION -->
+    <string name="image_icon_person">icon person</string>
+    <string name="image_menu_options">menu options</string>
 
     <!-- COPYRIGHT -->
     <string name="txt_copyright">TheKidsLove @ 2017</string>
@@ -97,6 +103,7 @@
 
     <!-- TEXT -->
     <string name="or"> OR </string>
+    <string name="code">Code: %1$s</string>
 
     <!-- DIALOG MESSAGE -->
     <string name="dialog_loading">in progress</string>

@@ -21,7 +21,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:contentDescription="..."
+        android:contentDescription="@string/image_icon_person"
         android:scaleType="fitCenter"
         app:srcCompat="@drawable/icon_person_watcher" />
 
@@ -31,9 +31,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginEnd="40dp"
+            android:layout_marginEnd="56dp"
             android:layout_marginStart="72dp"
             android:layout_marginTop="16dp"
+            android:singleLine="true"
             android:textColor="@color/colorPrimary"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -45,9 +46,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/name"
-            android:layout_marginEnd="40dp"
+            android:layout_marginEnd="56dp"
             android:layout_marginStart="72dp"
-            android:textColor="@color/grey"
+            android:singleLine="true"
+            android:textColor="@color/lightgrey"
             android:textSize="14sp"
             tools:text="514-666-6666" />
 
@@ -57,9 +59,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/phone"
-            android:layout_marginEnd="40dp"
+            android:layout_marginEnd="56dp"
             android:layout_marginStart="72dp"
-            android:textColor="@color/lightgrey"
+            android:singleLine="true"
+            android:textColor="@color/verylightgrey"
             android:textSize="14sp"
             tools:text="super.dwizzel@gmail.com" />
 
@@ -68,11 +71,11 @@
             android:id="@+id/itemMenuOption"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:layout_marginEnd="16dp"
             android:layout_marginTop="16dp"
-            android:contentDescription="..."
+            android:contentDescription="@string/image_menu_options"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/ic_item_menu_option" />
 

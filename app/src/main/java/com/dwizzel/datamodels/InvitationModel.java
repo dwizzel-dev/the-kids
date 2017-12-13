@@ -15,10 +15,19 @@ public class InvitationModel{
     private String inviteId;
     private String phone;
     private String name;
+    private String code;
     private Date updateTime;
 
     public InvitationModel(){
 
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getPhone() {

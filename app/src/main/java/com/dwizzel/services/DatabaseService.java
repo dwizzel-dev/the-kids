@@ -104,7 +104,7 @@ class DatabaseService implements IDatabaseService{
                                             + "]: " + documentSnapshot.getData());
                                     try {
                                         //on tranforme en activeModel et on met dans mUser
-                                        mUser.updateWatchings(documentSnapshot.getId(),
+                                        mUser.updateWatching(documentSnapshot.getId(),
                                                 documentSnapshot.toObject(ActiveModel.class));
                                     }catch(Exception excpt){
                                         Tracer.log(TAG, "watchings-active[" + documentSnapshot.getId()
@@ -164,7 +164,7 @@ class DatabaseService implements IDatabaseService{
                                             + "]: " + documentSnapshot.getData());
                                     try {
                                         //on tranforme en activeModel et on met dans mUser
-                                        mUser.updateWatchers(documentSnapshot.getId(),
+                                        mUser.updateWatcher(documentSnapshot.getId(),
                                                 documentSnapshot.toObject(ActiveModel.class));
                                     }catch(Exception excpt){
                                         Tracer.log(TAG, "watchers-active[" + documentSnapshot.getId()
@@ -224,7 +224,7 @@ class DatabaseService implements IDatabaseService{
                                     Tracer.data(TAG, "watchers[" + dc.getDocument().getId() +
                                             "].ADDED: " + dc.getDocument().getData());
                                     //on rajoute a mUser
-                                    if(mUser.addWatcher(dc.getDocument().getId(),
+                                    if(mUser.updateWatcher(dc.getDocument().getId(),
                                             dc.getDocument().toObject(WatcherModel.class))){
                                         //si pas deja la alors on met un listener
                                         addListenerOnWatchersActive(dc.getDocument().getId());
@@ -242,7 +242,7 @@ class DatabaseService implements IDatabaseService{
                                     Tracer.data(TAG, "watchers[" + dc.getDocument().getId() +
                                             "].MODIFIED: " + dc.getDocument().getData());
                                     //update les infos
-                                    mUser.updateWatchers(dc.getDocument().getId(),
+                                    mUser.updateWatcher(dc.getDocument().getId(),
                                             dc.getDocument().toObject(WatcherModel.class));
                                     break;
                                 default:
@@ -282,7 +282,7 @@ class DatabaseService implements IDatabaseService{
                                     Tracer.data(TAG, "watchings[" + dc.getDocument().getId() +
                                             "].ADDED: " + dc.getDocument().getData());
                                     //on rajoute a mUser
-                                    if(mUser.addWatching(dc.getDocument().getId(),
+                                    if(mUser.updateWatching(dc.getDocument().getId(),
                                             dc.getDocument().toObject(WatchingModel.class))){
                                         //si pas deja la alors on met un listener
                                         addListenerOnWatchingsActive(dc.getDocument().getId());
@@ -300,7 +300,7 @@ class DatabaseService implements IDatabaseService{
                                     Tracer.data(TAG, "watchings[" + dc.getDocument().getId() +
                                             "].MODIFIED: " + dc.getDocument().getData());
                                     //update les infos
-                                    mUser.updateWatchings(dc.getDocument().getId(),
+                                    mUser.updateWatching(dc.getDocument().getId(),
                                             dc.getDocument().toObject(WatchingModel.class));
                                     break;
                                 default:
@@ -340,7 +340,7 @@ class DatabaseService implements IDatabaseService{
                                     Tracer.data(TAG, "invitations[" + dc.getDocument().getId() +
                                             "].ADDED: " + dc.getDocument().getData());
                                     //on rajoute invitation a mUser
-                                    mUser.addInvitation(dc.getDocument().getId(),
+                                    mUser.updateInvitation(dc.getDocument().getId(),
                                             dc.getDocument().toObject(InvitationModel.class));
                                     break;
                                 case REMOVED:
@@ -737,13 +737,11 @@ class DatabaseService implements IDatabaseService{
                                                 "]: " + documentSnapshot.getData());
                                         try{
                                             //rajoute la liste en interne a mUser
-                                            mUser.addWatching(documentSnapshot.getId(),
-                                                    documentSnapshot.toObject(WatchingModel.class));
-                                            //on mets un listener sur les changement de state du watchings
-                                            //si n'est pas deja dans la liste des watchers, car c'est mUser
-                                            //qui va trigger un observer
-                                            //le listener sur les watchings state
-                                            addListenerOnWatchingsActive(documentSnapshot.getId());
+                                            if(mUser.updateWatching(documentSnapshot.getId(),
+                                                    documentSnapshot.toObject(WatchingModel.class))){
+                                                //on mets un listener sur les changement de state du watchings
+                                                addListenerOnWatchingsActive(documentSnapshot.getId());
+                                            }
                                         }catch (Exception e){
                                             Tracer.log(TAG, "getWatchingsList.addOnCompleteListener.exception[0]: ", e);
                                         }
@@ -786,10 +784,11 @@ class DatabaseService implements IDatabaseService{
                                                 "]: " + documentSnapshot.getData());
                                         try{
                                             //rajoute la liste en interne a mUser
-                                            mUser.addWatcher(documentSnapshot.getId(),
-                                                    documentSnapshot.toObject(WatcherModel.class));
-                                            //on mets un listener sur les changement de ceux qui peuvent nous watcher
-                                            addListenerOnWatchersActive(documentSnapshot.getId());
+                                            if(mUser.updateWatcher(documentSnapshot.getId(),
+                                                    documentSnapshot.toObject(WatcherModel.class))) {
+                                                //on mets un listener sur les changement de state du watchers
+                                                addListenerOnWatchersActive(documentSnapshot.getId());
+                                            }
                                         }catch (Exception e){
                                             Tracer.log(TAG, "getWatchersList.addOnCompleteListener.exception[0]: ", e);
                                         }
@@ -830,11 +829,8 @@ class DatabaseService implements IDatabaseService{
                                                 "]: " + documentSnapshot.getData());
                                         try{
                                             //rajoute la liste en interne a mUser
-                                            mUser.addInvitation(documentSnapshot.getId(),
+                                            mUser.updateInvitation(documentSnapshot.getId(),
                                                     documentSnapshot.toObject(InvitationModel.class));
-                                            //on mets un listener sur les changement de ceux qui peuvent nous accepter
-                                            //on recoit le event tout de suite apres
-                                            //addListenerOnInvitations(document.getId());
                                         }catch (Exception e){
                                             Tracer.log(TAG, "getInvitationsList.addOnCompleteListener.exception[0]: ", e);
                                         }
@@ -896,13 +892,14 @@ class DatabaseService implements IDatabaseService{
 
     }
 
-    public void createInvitation(String inviteId, String name, String phone, String email){
+    public void createInvitation(String inviteId, String name, String phone, String email, String code){
         Tracer.log(TAG, "createInvitation: " + inviteId);
         try{
             //add the new user collection with his id
             WriteBatch batch = mDb.batch();
-            batch.set(mDb.collection("users").document(mUser.getUid()).collection("invitations").document(inviteId),
-                    mUser.toInvitationData(inviteId, name, phone, email)
+            batch.set(mDb.collection("users").document(mUser.getUid()).collection("invitations")
+                            .document(inviteId),
+                    mUser.toInvitationData(inviteId, name, phone, email, code)
             );
             batch.commit()
                     .addOnSuccessListener(new OnSuccessListener<Void>() {

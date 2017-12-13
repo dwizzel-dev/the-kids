@@ -60,7 +60,6 @@ public class TrackerService extends Service implements ITrackerService{
     private IDatabaseService mDatabaseService;
     private IGpsService mGpsService;
     private UserObject mUser;
-    private TokenIdService mTokenIdService;
     private IBinder mTrackerBinder = new TrackerBinder();
 
     //timer
@@ -121,9 +120,10 @@ public class TrackerService extends Service implements ITrackerService{
             mAuthService = new AuthService(TrackerService.this, TrackerService.this);
             mDatabaseService = new DatabaseService(TrackerService.this);
             mGpsService = new GpsService(TrackerService.this, TrackerService.this);
-            mTokenIdService = new TokenIdService(TrackerService.this);
+            //le token service
+            new TokenIdService(TrackerService.this);
             //start running keep alive timer
-            startRunningTime();
+            startThread();
             //check pour user infos si etait deja connecte avant le restart du tracker service
             setUser();
         }catch(Exception e){
@@ -150,8 +150,10 @@ public class TrackerService extends Service implements ITrackerService{
         Tracer.log(TAG, "onRebind: " + intent);
     }
 
-    private void startRunningTime() {
-        Tracer.log(TAG, "startRunningTime");
+
+
+    private void startThread() {
+        Tracer.log(TAG, "startThread");
         try {
             if(mHandlerTimer == null) {
                 //on part le timer sur le main loop, sinon quand Idle il run 1 fois sur 10
@@ -162,7 +164,7 @@ public class TrackerService extends Service implements ITrackerService{
                 mHandlerTimer.sendEmptyMessage(MSG_UPDATE_TIME);
             }
         }catch (Exception e){
-            Tracer.log(TAG, "startTimer.Exception: ", e);
+            Tracer.log(TAG, "startThread.Exception: ", e);
         }
         /*
         if(mThTimer == null) {
@@ -177,11 +179,45 @@ public class TrackerService extends Service implements ITrackerService{
                 //le start du thread loop
                 mHandlerTimer.sendEmptyMessage(MSG_UPDATE_TIME);
             }catch (Exception e){
-                Tracer.log(TAG, "startTimer.Exception: ", e);
+                Tracer.log(TAG, "startThread.Exception: ", e);
             }
         }
         */
     }
+
+    private void checkGps(){
+        Tracer.log(TAG, "checkGps");
+        //on va checke les permissions du gps si etait OFF, peut-etre maintenant il est ON
+        //car quand on enleve des permissions il restart, mais si on les redonne il ne fait rien
+        if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.error.NO_ERROR){
+            if(!mGpsService.startLocationUpdate(Const.gpsUpdateType.SOFT)){
+                Tracer.log(TAG, "checkGps: FAILED");
+            }else{
+                Tracer.log(TAG, "checkGps: SUCCESS");
+                //check la position maintenant qu'il est restarte
+                GeoPoint position = mGpsService.getLastPosition();
+                if(position != null){
+                    mUser.setPosition(position);
+                }
+                mUser.setGps(true);
+            }
+        }
+
+    }
+
+    private void keepActive(){
+        Tracer.log(TAG, "keepActive");
+        if(mAuthService.isSignedIn()){
+            checkGps();
+            //update les infos de l'usager
+            mDatabaseService.keepUserActive();
+        }
+        //for debug check user object
+        //Tracer.log(TAG, "User: ", mUser);
+    }
+
+
+
 
     private void changeUserStatus(int status){
         Tracer.log(TAG, "changeUserStatus: " + status);
@@ -241,36 +277,7 @@ public class TrackerService extends Service implements ITrackerService{
     }
 
 
-    private void checkGps(){
-        Tracer.log(TAG, "checkGps");
-        //on va checke les permissions du gps si etait OFF, peut-etre maintenant il est ON
-        //car quand on enleve des permissions il restart, mais si on les redonne il ne fait rien
-        if(!mUser.isGps() && mGpsService.checkGpsStatus() == Const.error.NO_ERROR){
-            if(!mGpsService.startLocationUpdate(Const.gpsUpdateType.SOFT)){
-                Tracer.log(TAG, "checkGps: FAILED");
-            }else{
-                Tracer.log(TAG, "checkGps: SUCCESS");
-                //check la position maintenant qu'il est restarte
-                GeoPoint position = mGpsService.getLastPosition();
-                if(position != null){
-                    mUser.setPosition(position);
-                }
-                mUser.setGps(true);
-            }
-        }
 
-    }
-
-    private void keepActive(){
-        Tracer.log(TAG, "keepActive");
-        if(mAuthService.isSignedIn()){
-            checkGps();
-            //update les infos de l'usager
-            mDatabaseService.keepUserActive();
-        }
-        //for debug check user object
-        //Tracer.log(TAG, "User: ", mUser);
-    }
 
     public void onTokenRefreshed(String token){
         Tracer.log(TAG, "onTokenRefreshed: " + token);
@@ -454,9 +461,9 @@ public class TrackerService extends Service implements ITrackerService{
             mDatabaseService.createInviteId();
         }
 
-        public void createInvitation(String inviteId, String name, String phone, String email){
+        public void createInvitation(String inviteId, String name, String phone, String email, String code){
             Tracer.log(TAG, "TrackerBinder.createInvitation: " + inviteId);
-            mDatabaseService.createInvitation(inviteId, name, phone, email);
+            mDatabaseService.createInvitation(inviteId, name, phone, email, code);
         }
 
         public void validateInviteCode(String code){

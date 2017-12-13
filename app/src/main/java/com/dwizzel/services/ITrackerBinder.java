@@ -32,7 +32,7 @@ public interface ITrackerBinder {
     void modifyWatchersItem(String uid);
 
     void createInviteId();
-    void createInvitation(String inviteId, String name, String phone, String email);
+    void createInvitation(String inviteId, String name, String phone, String email, String code);
 
     void validateInviteCode(String code);
     void saveInviteInfo(InviteInfoModel inviteInfoModel);

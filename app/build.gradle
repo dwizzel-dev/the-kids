@@ -7,7 +7,7 @@ android {
         minSdkVersion 22
         targetSdkVersion 26
         versionCode 1
-        versionName '1.7.52'
+        versionName '1.7.6'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -41,6 +41,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation 'com.facebook.android:facebook-android-sdk:4.27.0'
 }
+
 
 
 apply plugin: 'com.google.gms.google-services'

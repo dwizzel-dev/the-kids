@@ -1,6 +1,7 @@
 package com.dwizzel.thekids;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,7 +13,6 @@ import android.view.animation.AnimationUtils;
 import com.dwizzel.Const;
 import com.dwizzel.adapters.IRecyclerViewItemClickListener;
 import com.dwizzel.adapters.WatchOverMeListAdapter;
-import com.dwizzel.adapters.WatchOverSomeoneListAdapter;
 import com.dwizzel.objects.ListItems;
 import com.dwizzel.objects.ObserverNotifObject;
 import com.dwizzel.objects.ServiceResponseObject;
@@ -75,18 +75,6 @@ public class WatchOverMeActivity extends BaseActivity
         isActivityCreated = true;
     }
 
-    private void setFloatingActionButton(){
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Click action
-                Intent intent = new Intent(WatchOverMeActivity.this, SendInvitationForWatchingActivity.class);
-                startActivity(intent);
-            }
-        });
-    }
-
     private void setTrackerBinderCallback(){
         //on peut le caller sinon l'activity ne serait meme pas partis
         //on overwrite celui de BaseActivity
@@ -131,6 +119,20 @@ public class WatchOverMeActivity extends BaseActivity
         mTrackerBinder.unregisterCallback();
         //set le nouveau callback qui overwrite celui de BaseActivity
         mTrackerBinder.registerCallback(serviceCallback);
+    }
+
+    //------------------------------------------------------
+
+    private void setFloatingActionButton(){
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Click action
+                Intent intent = new Intent(WatchOverMeActivity.this, SendInvitationForWatchingActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private boolean isContentLoaded(){
@@ -417,10 +419,18 @@ public class WatchOverMeActivity extends BaseActivity
         Tracer.log(TAG, "onItemClick[" + position + ":" + type + "]: " + uid);
         switch(type){
             case IRecyclerViewItemClickListener.TYPE_DELETE_ITEM_WATCHER:
+                //on enleve de mUser meme si le serveur va recaller sur le REMOVED du watching
+                //pour que ce soit instantanee au cas d'une deconnection
+                mUser.removeWatcher(uid);
                 //on enleve sur les serveur DB aussi
                 mTrackerBinder.deleteWatchersItem(uid);
                 break;
             case IRecyclerViewItemClickListener.TYPE_MODIFY_ITEM_WATCHER:
+                // Click action
+                Intent intent = new Intent(WatchOverMeActivity.this,
+                        ModifyWatcherActivity.class);
+                intent.putExtra("uid", uid);
+                startActivity(intent);
                 break;
             default:
                 break;

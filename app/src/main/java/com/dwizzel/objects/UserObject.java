@@ -112,7 +112,7 @@ public class UserObject extends Observable{
         this.fetchWatchers = fetchWatchers;
     }
 
-    public void updateWatchers(String uid, ActiveModel activeModel) {
+    public void updateWatcher(String uid, ActiveModel activeModel) {
         //ces infos ne viennent pas de la meme collection et arrive apres
         //du au limitation de firestore
         if (watchers.containsKey(uid)) {
@@ -134,22 +134,31 @@ public class UserObject extends Observable{
 
     }
 
-    public void updateWatchers(String uid, WatcherModel watcher) {
-        watchers.put(uid, watcher);
-        //on notifie les observers
-        setChanged();
-        notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_UPDATE, uid));
-    }
-
-    public boolean addWatcher(String uid, WatcherModel watcher) {
-        if (!watchers.containsKey(uid)){
+    public boolean updateWatcher(String uid, WatcherModel watcher) {
+        //on a un probleme car le users->watchers->[status, gps, updateTime, position] est toujours rien
+        //car c'est ActiveModel qui maintient ca
+        //alors on va prendre ce qu'il y avait avant et le remetttre dedans si existait deja
+        if(watchers.containsKey(uid)){
+            WatcherModel watcherModel = watchers.get(uid);
+            watcher.setStatus(watcherModel.getStatus());
+            watcher.setGps(watcherModel.isGps());
+            watcher.setUpdateTime(watcherModel.getUpdateTime());
+            watcher.setPosition(watcherModel.getPosition());
+            //et la on le remet dedans
             watchers.put(uid, watcher);
-            //on notifie les observers
+            //on notifie les observers d'un update
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_UPDATE, uid));
+            //car existe deja
+            return false;
+        }else{
+            //on le met directement dedans
+            watchers.put(uid, watcher);
+            //on notifie les observers d'un addded
             setChanged();
             notifyObservers(new ObserverNotifObject(Const.notif.WATCHER_ADDED, uid));
-            return true;
         }
-        return false;
+        return true;
     }
 
     public void removeWatcher(String uid) {
@@ -183,7 +192,7 @@ public class UserObject extends Observable{
         this.fetchWatchings = fetchWatchings;
     }
 
-    public void updateWatchings(String uid, ActiveModel active) {
+    public void updateWatching(String uid, ActiveModel active) {
         //ces infos ne viennent pas de la meme collection et arrive apres
         //du au limitation de firestore
         if (watchings.containsKey(uid)) {
@@ -205,22 +214,31 @@ public class UserObject extends Observable{
 
     }
 
-    public void updateWatchings(String uid, WatchingModel watching) {
-        watchings.put(uid, watching);
-        //on notifie les observers
-        setChanged();
-        notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_UPDATE, uid));
-    }
-
-    public boolean addWatching(String uid, WatchingModel watching) {
-        if (!watchings.containsKey(uid)){
+    public boolean updateWatching(String uid, WatchingModel watching) {
+        //on a un probleme car le users->watchers->[status, gps, updateTime, position] est toujours rien
+        //car c'est ActiveModel qui maintient ca
+        //alors on va prendre ce qu'il y avait avant et le remetttre dedans si existait deja
+        if(watchings.containsKey(uid)){
+            WatchingModel watchingModel = watchings.get(uid);
+            watching.setStatus(watchingModel.getStatus());
+            watching.setGps(watchingModel.isGps());
+            watching.setUpdateTime(watchingModel.getUpdateTime());
+            watching.setPosition(watchingModel.getPosition());
+            //et la on le remet dedans
             watchings.put(uid, watching);
-            //on notifie les observers
+            //on notifie les observers d'un update
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_UPDATE, uid));
+            //car existe deja
+            return false;
+        }else{
+            //on le met directement dedans
+            watchings.put(uid, watching);
+            //on notifie les observers d'un addded
             setChanged();
             notifyObservers(new ObserverNotifObject(Const.notif.WATCHING_ADDED, uid));
-            return true;
         }
-        return false;
+        return true;
     }
 
     public void removeWatching(String uid) {
@@ -255,17 +273,12 @@ public class UserObject extends Observable{
     }
 
     public void updateInvitation(String inviteId, InvitationModel invite) {
-        //ces infos ne viennent pas de la meme collection et arrive apres
-        //du au limitation de firestore
-        //et on replace
-        invitations.put(inviteId, invite);
-        //on notifie les observers
-        setChanged();
-        notifyObservers(new ObserverNotifObject(Const.notif.INVITATION_UPDATE, inviteId));
-    }
-
-    public void addInvitation(String inviteId, InvitationModel invite) {
-        if (!invitations.containsKey(inviteId)){
+        if (invitations.containsKey(inviteId)){
+            invitations.put(inviteId, invite);
+            //on notifie les observers
+            setChanged();
+            notifyObservers(new ObserverNotifObject(Const.notif.INVITATION_UPDATE, inviteId));
+        }else{
             invitations.put(inviteId, invite);
             //on notifie les observers
             setChanged();
@@ -446,13 +459,14 @@ public class UserObject extends Observable{
         return map;
     }
 
-    public Map<String, Object> toInvitationData(String inviteId, String name, String phone, String email){
-        Map<String, Object> map = new HashMap<>(5);
+    public Map<String, Object> toInvitationData(String inviteId, String name, String phone, String email, String code){
+        Map<String, Object> map = new HashMap<>(6);
         map.put("email", email);
         map.put("name", name);
         map.put("phone", phone);
         map.put("inviteId", inviteId);
         map.put("updateTime", FieldValue.serverTimestamp());
+        map.put("code", code);
         return map;
     }
 
