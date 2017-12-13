@@ -25,7 +25,8 @@ import java.util.ArrayList;
  * Created by Dwizzel on 22/11/2017.
  */
 
-public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeListAdapter.ViewHolder> implements IRecyclerViewItemClickListener.AdapterClickListener {
+public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeListAdapter.ViewHolder>
+        implements IRecyclerViewItemClickListener.AdapterClickListener {
 
     private static final String TAG = "WatchOverMeListAdapter";
     private ArrayList<ListItems.Item> mList;

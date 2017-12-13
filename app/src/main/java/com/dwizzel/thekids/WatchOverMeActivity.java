@@ -34,7 +34,8 @@ import java.util.Observer;
 *
 * */
 
-public class WatchOverMeActivity extends BaseActivity implements IRecyclerViewItemClickListener.ActivityClickListener {
+public class WatchOverMeActivity extends BaseActivity
+        implements IRecyclerViewItemClickListener.ActivityClickListener {
 
     private static final String TAG = "WatchOverMeActivity";
     private boolean isActivityCreated = false;

@@ -66,7 +66,7 @@
     <string name="name_hint">Name</string>
     <string name="phone_hint">Phone number</string>
     <string name="activate_hint">Invitation ID</string>
-    <string name="validate_hint">Invitation Code</string>
+    <string name="validate_hint">Enter Invitation Code</string>
     <string name="invitation_message_hint">Your invitation message here</string>
     <string name="nickname_hint">Nickname</string>
 

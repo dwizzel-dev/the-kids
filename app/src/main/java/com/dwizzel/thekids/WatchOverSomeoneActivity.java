@@ -30,7 +30,8 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
-public class WatchOverSomeoneActivity extends BaseActivity implements IRecyclerViewItemClickListener.ActivityClickListener {
+public class WatchOverSomeoneActivity extends BaseActivity
+        implements IRecyclerViewItemClickListener.ActivityClickListener {
 
     private static final String TAG = "WatchOverSomeoneActivity";
     private boolean isActivityCreated = false;
