@@ -27,6 +27,15 @@ https://developers.google.com/cloud-messaging/concept-options
 TODO: il faut un cronjob dans la DB pour faire le cleanup de ceux qui ne ce sont pas deconnecte
 dans la collection actives
 
+
+
+to update in functions/package.json
+	npm i --save firebase-functions@latest
+	npm i --save firebase-admin@latest
+	
+
+
+
 */
 
 //type de notification

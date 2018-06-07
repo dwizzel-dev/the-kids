@@ -59,7 +59,8 @@
     <string name="butt_cancel">Cancel</string>
     <string name="butt_send_invitation">Send Sms Invitation</string>
     <string name="butt_select_from_contacts">Select From Your Contacts</string>
-    <string name="butt_enter_phone_number">Enter Phone Number</string>
+    <string name="butt_enter_phone_number">Enter It Manually</string>
+    <string name="butt_generate_code_only">Generate Code</string>
     <string name="butt_validate">Validate</string>
     <string name="butt_activate">Activate</string>
     <string name="butt_save">Save</string>
