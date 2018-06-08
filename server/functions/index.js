@@ -7,7 +7,7 @@ $ firebase init
 
 Deploy your functions:
 $ firebase deploy
-$ firebase deploy --only functions:funcName
+$ firebase deploy --only functions:createInvitation
 
 $ git init
 $ git config --global user.email "dwizzel.dev@gmail.com"
@@ -23,6 +23,15 @@ $ git push --set-upstream origin master
 Examples:
 https://github.com/MahmoudAlyuDeen/FirebaseIM
 https://developers.google.com/cloud-messaging/concept-options
+
+
+DB:
+https://console.firebase.google.com/project/thekids-dab99/database/firestore/data~2F
+
+FUNCTIONS:
+https://console.firebase.google.com/project/thekids-dab99/database/firestore/data~2Finvites~2F3kbpBWkDA3J0AolhT0uI
+
+
 
 TODO: il faut un cronjob dans la DB pour faire le cleanup de ceux qui ne ce sont pas deconnecte
 dans la collection actives
@@ -81,6 +90,7 @@ function sendNotification(type, args){
                 .then((doc) => {
                     console.log("get recevier infos: " + uid);
                     const data = doc.data();
+					console.log("user data for notification: " + data);
                     return {
                         token: data.token,
                         locale: data.locale
@@ -119,10 +129,10 @@ function sendNotification(type, args){
 
 exports.createInvitation = functions.firestore
 	.document('invites/{inviteId}')
-	.onCreate((event) => {
+	.onCreate((snap, context) => {
 		//on va generer un code
 		const randomCode = getRandomIntInclusive(10000,99999);
-		const inviteId = event.params.inviteId;
+		const inviteId = context.params.inviteId;
 		//on va mettre une nouvelle collection ce qui va eviter de trigger activateInvitation
 		//car avec firestore on ne peut pas mettre de trigger sur un single field
 		//on va le mettre dans la collection invites
@@ -141,18 +151,19 @@ exports.createInvitation = functions.firestore
 
 exports.activateInvitation = functions.firestore
 	.document('invites/{inviteId}/state/{userId}')
-	.onCreate((event) => {
+	.onCreate((snap, context) => {
         //le userID de celui qui accepte l'invitation
-        const userA = event.params.userId; //2UT3SOpMxPOfAPrTFUwWTswAA0l1
+        const userA = context.params.userId; //2UT3SOpMxPOfAPrTFUwWTswAA0l1
         if(userA == null || userA == ""){
             return false;
         }
         //le userID de celui qui a envoye l'invitation
         //le inviteId
-        const inviteId = event.params.inviteId; //PC6L4STvnhjqpI3Y94az
-        const userB = event.data.data().from; //0CDFrsffJKbmVnU2St3NIQd0yOe2
+        const inviteId = context.params.inviteId; //PC6L4STvnhjqpI3Y94az
+        const userB = snap.data().from; //0CDFrsffJKbmVnU2St3NIQd0yOe2
         if(userB == null || userB == "" || inviteId == null || inviteId == ""){
-            return false;
+			console.log('userB is null or empty');
+			return false;
         }
         //sinon
         //on va chercher les infos de l'invitation
@@ -164,6 +175,7 @@ exports.activateInvitation = functions.firestore
         return userRefB.collection('invitations').doc(inviteId)
             .get()
             .then((doc) => {
+				console.log(doc);
                 let data = doc.data();
                 console.log("get invitation: " + inviteId);
                 phoneNumSentTo = data.phone;
@@ -236,9 +248,9 @@ exports.activateInvitation = functions.firestore
 
 exports.deleteFromWatchings = functions.firestore
 	.document('users/{userId}/watchings/{watchingId}')
-	.onDelete((event) => {
-	    const userId = event.params.userId;
-	    const watchingId = event.params.watchingId;
+	.onDelete((snap, context) => {
+	    const userId = context.params.userId;
+	    const watchingId = context.params.watchingId;
 	    if(userId == "" || watchingId == ""){
 	        return false;
 	    }
@@ -258,9 +270,9 @@ exports.deleteFromWatchings = functions.firestore
 
 exports.deleteFromWatchers = functions.firestore
 	.document('users/{userId}/watchers/{watcherId}')
-	.onDelete((event) => {
-	    const userId = event.params.userId;
-	    const watcherId = event.params.watcherId;
+	.onDelete((snap, context) => {
+	    const userId = context.params.userId;
+	    const watcherId = context.params.watcherId;
 	    if(userId == "" || watcherId == ""){
 	        return false;
 	    }
