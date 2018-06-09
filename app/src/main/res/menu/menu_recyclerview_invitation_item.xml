@@ -5,13 +5,7 @@
     <item
         android:id="@+id/deleteItem"
         android:orderInCategory="100"
-        android:title="@string/menu_delete_watcher_item"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/modifyItem"
-        android:orderInCategory="100"
-        android:title="@string/menu_modify_watcher_item"
+        android:title="@string/menu_delete_invitation_item"
         app:showAsAction="never"/>
 
 </menu>

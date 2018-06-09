@@ -275,15 +275,17 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
     public class InvitationViewHolder extends ViewHolder {
         TextView name, phone, code;
         Context context;
+        ImageView itemMenuOption;
         InvitationViewHolder(View itemView) {
             super(itemView);
             context = itemView.getContext();
             name = itemView.findViewById(R.id.name);
             phone = itemView.findViewById(R.id.phone);
             code = itemView.findViewById(R.id.code);
+            itemMenuOption = itemView.findViewById(R.id.itemMenuOption);
         }
-        public void bindToViewHolder(ViewHolder viewholder, int position) {
-            InvitationViewHolder holder = (InvitationViewHolder) viewholder;
+        public void bindToViewHolder(ViewHolder viewholder, final int position) {
+            final InvitationViewHolder holder = (InvitationViewHolder) viewholder;
             InvitationModel model = mUser.getInvitation(mList.get(position).getItemValue());
             if(model != null) {
                 try {
@@ -302,6 +304,34 @@ public class WatchOverMeListAdapter extends RecyclerView.Adapter<WatchOverMeList
                     holder.name.setText(n);
                     holder.phone.setText(p);
                     holder.code.setText(c);
+
+                    //le option sub menu
+                    holder.itemMenuOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(final View view) {
+                            //creating a popup menu
+                            PopupMenu popup = new PopupMenu(mContext, holder.itemMenuOption);
+                            //inflating menu from xml resource
+                            popup.inflate(R.menu.menu_recyclerview_invitation_item);
+                            //adding click listener
+                            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+                                    switch (item.getItemId()) {
+                                        case R.id.deleteItem:
+                                            onItemClick(position,
+                                                    IRecyclerViewItemClickListener.TYPE_DELETE_ITEM_INVITATION);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    return false;
+                                }
+                            });
+                            //displaying the popup
+                            popup.show();
+                        }
+                    });
 
                 } catch (Exception e) {
                     Tracer.log(TAG, "InvitationViewHolder.exception: ", e);

@@ -15,13 +15,14 @@
         android:background="?android:attr/selectableItemBackground"
 
         >
+
         <TextView
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="56dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:singleLine="true"
@@ -36,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/name"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="56dp"
             android:layout_marginStart="16dp"
             android:singleLine="true"
             android:textColor="@color/verylightgrey"
@@ -49,11 +50,23 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/phone"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="56dp"
             android:layout_marginStart="16dp"
             android:textColor="@color/verylightgrey"
             android:textSize="14sp"
             tools:text="super.dwizzel@gmail.com" />
+
+        <ImageView
+            android:id="@+id/itemMenuOption"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:contentDescription="@string/image_menu_options"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_item_menu_option" />
 
     </RelativeLayout>
 

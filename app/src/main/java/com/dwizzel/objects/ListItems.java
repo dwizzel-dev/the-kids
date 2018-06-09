@@ -74,10 +74,10 @@ public class ListItems {
 
     //-----------------------------------
     public static class InvitationItem extends Item {
-        private String uid;
-        public InvitationItem(String uid) {
+        private String inviteId;
+        public InvitationItem(String inviteId) {
             super();
-            this.uid = uid;
+            this.inviteId = inviteId;
         }
         @Override
         public int getItemType() {
@@ -85,7 +85,7 @@ public class ListItems {
         }
         @Override
         public String getItemValue() {
-            return uid;
+            return inviteId;
         }
     }
 

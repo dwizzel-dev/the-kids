@@ -130,6 +130,7 @@
     <string name="menu_modify_watching_item">Modify Informations</string>
     <string name="menu_delete_watcher_item">Remove Walker</string>
     <string name="menu_modify_watcher_item">Modify Informations</string>
+    <string name="menu_delete_invitation_item">Remove Invitation</string>
 
     <!-- FACEBOOK LOGIN -->
     <string name="facebook_app_id">135994336994028</string>

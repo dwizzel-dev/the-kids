@@ -1069,7 +1069,7 @@ class DatabaseService implements IDatabaseService{
     }
 
 
-
+    //watchings list modifications
     public void deleteWatchingsItem(final String uid){
         Tracer.log(TAG, "deleteWatchingsItem: " + uid);
         try{
@@ -1125,6 +1125,8 @@ class DatabaseService implements IDatabaseService{
         }
     }
 
+
+    //watchers list modifications
     public void deleteWatchersItem(final String uid){
         Tracer.log(TAG, "deleteWatchersItem: " + uid);
         try{
@@ -1181,5 +1183,46 @@ class DatabaseService implements IDatabaseService{
         }
     }
 
+
+    //inviations list modifications
+    public void deleteInvitationsItem(final String uid){
+        Tracer.log(TAG, "deleteInvitationsItem: " + uid);
+        try{
+            //delete a partir du user
+            mDb.collection("users").document(mUser.getUid()).collection("invitations").document(uid)
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "deleteInvitationsItem.addOnSuccessListener [users]");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG,"deleteInvitationsItem.addOnFailureListener.Exception [users]: ", e);
+                        }
+                    });
+            //on supprime le invites aussi, car plus valides maintenant
+            mDb.collection("invites").document(uid)
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void avoid) {
+                            Tracer.log(TAG, "deleteInvitationsItem.addOnSuccessListener [invites]");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Tracer.log(TAG,"deleteInvitationsItem.addOnFailureListener.Exception [invites]: ", e);
+                        }
+                    });
+
+        }catch (Exception e){
+            Tracer.log(TAG, "deleteInvitationsItem.Exception: ", e);
+        }
+
+    }
 
  }

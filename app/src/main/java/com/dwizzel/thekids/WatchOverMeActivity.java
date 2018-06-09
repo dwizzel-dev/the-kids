@@ -432,6 +432,14 @@ public class WatchOverMeActivity extends BaseActivity
                 intent.putExtra("uid", uid);
                 startActivity(intent);
                 break;
+            case IRecyclerViewItemClickListener.TYPE_DELETE_ITEM_INVITATION:
+                //on enleve de mUser meme si le serveur va recaller sur le REMOVED du invitation
+                //pour que ce soit instantanee au cas d'une deconnection
+                // Click action
+                mUser.removeInvitation(uid);
+                //on enleve sur les serveur DB aussi
+                mTrackerBinder.deleteInvitationsItem(uid);
+                break;
             default:
                 break;
         }
