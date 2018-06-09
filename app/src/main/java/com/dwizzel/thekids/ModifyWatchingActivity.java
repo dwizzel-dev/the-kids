@@ -31,7 +31,7 @@ public class ModifyWatchingActivity extends BaseActivity {
         //pas qu'il recommence au onStart
         if(!isActivityCreated) {
             setContentView(R.layout.activity_modify_watcher);
-            setTitle(R.string.modify_watcher_title);
+            setTitle(R.string.modify_watching_title);
             setButton();
             //get le binder
             mTrackerBinder = getTrackerBinder();

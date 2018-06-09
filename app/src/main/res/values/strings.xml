@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">The Kids Watcher</string>
+    <string name="app_name">Walk Me Home</string>
 
 
     <!-- DUMMY TEXT -->
@@ -9,25 +9,25 @@
     <string name="longer_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
 
     <!-- TITLE -->
-    <string name="main_title">The Kids Watcher</string>
+    <string name="main_title">Walk Me Home</string>
     <string name="login_title">Sign In</string>
     <string name="create_user_title">Create An Account</string>
     <string name="signin_title">Sign In</string>
     <string name="register_with_email_title">Register With Email</string>
     <string name="signin_with_email_title">Sign Up With Email</string>
-    <string name="watch_over_me_title">Watch Over Me</string>
-    <string name="watch_over_someone_title">Watch Over Someone</string>
+    <string name="watch_over_me_title">Walkers</string>
+    <string name="watch_over_someone_title">Walking With</string>
     <string name="watch_over_me_send_invitation">Send An Invitation</string>
     <string name="activate_invitation">Invitation Profil</string>
-    <string name="modify_watcher_title">Modify Watcher Profil</string>
-    <string name="modify_watching_title">Modify Watching Profil</string>
+    <string name="modify_watcher_title">Modify Walker Profil</string>
+    <string name="modify_watching_title">Modify Walking With Profil</string>
 
     <!-- LIST HEADER -->
-    <string name="watchers_header">Watchers</string>
+    <string name="watchers_header">Walkers</string>
     <string name="watchers_list_empty">Your list is empty, start by sending an invitation to someone you know to had him to your list of watchers. Untill he accept, the invitation will remain in the "<i>pending invitations</i>" list below</string>
     <string name="invitations_header">Pending Invitations</string>
     <string name="invitations_list_empty">You have no pending invitation.</string>
-    <string name="watchings_header">Watching On</string>
+    <string name="watchings_header">Walking With</string>
     <string name="watchings_list_empty">Your list is empty, if you have received a code by SMS, enter it in the box above and press activate.</string>
 
 
@@ -43,7 +43,7 @@
     <string name="image_menu_options">menu options</string>
 
     <!-- COPYRIGHT -->
-    <string name="txt_copyright">TheKidsLove @ 2017</string>
+    <string name="txt_copyright">TheWalkGuard @ 2018</string>
 
     <!-- BUTTON -->
     <string name="butt_create_signin">Create Account</string>
@@ -52,8 +52,8 @@
     <string name="butt_signin_from_email">Sign up with email</string>
     <string name="butt_next">Next</string>
     <string name="butt_register">Register</string>
-    <string name="butt_watch_over_someone">Watch Over Someone</string>
-    <string name="butt_watch_over_me">Watch Over Me</string>
+    <string name="butt_watch_over_someone">Walk With Someone</string>
+    <string name="butt_watch_over_me">Walk With Me</string>
     <string name="butt_watch_current">Current Traject</string>
     <string name="butt_settings">Settings</string>
     <string name="butt_cancel">Cancel</string>
@@ -126,9 +126,9 @@
     <string name="menu_action_about">About</string>
 
     <!-- SUB MENU -->
-    <string name="menu_delete_watching_item">Delete Watching</string>
+    <string name="menu_delete_watching_item">Remove Walking With</string>
     <string name="menu_modify_watching_item">Modify Informations</string>
-    <string name="menu_delete_watcher_item">Delete Watcher</string>
+    <string name="menu_delete_watcher_item">Remove Walker</string>
     <string name="menu_modify_watcher_item">Modify Informations</string>
 
     <!-- FACEBOOK LOGIN -->
@@ -136,9 +136,7 @@
     <string name="fb_login_protocol_scheme">fb135994336994028</string>
 
     <!-- HOMEPAGE -->
-    <string name="home_title">The Kids Watcher</string>
-    <string name="home_title_1">Watch over someone</string>
-    <string name="home_title_2">Watch over me</string>
+    <string name="home_title">Walk Me Home</string>
 
     <!-- ALERT GPS -->
     <string name="alert_gps_title">GPS settings</string>

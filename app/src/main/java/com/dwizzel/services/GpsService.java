@@ -132,16 +132,16 @@ public class GpsService implements IGpsService{
         //type de update
         switch(type){
             case Const.gpsUpdateType.MED:
-                minDistanceUpdate = 100;
-                minTimeUpdate = 300000;
+                minDistanceUpdate = 100; //100 metres
+                minTimeUpdate = 300000; //5 minutes
                 break;
             case Const.gpsUpdateType.HARD:
-                minDistanceUpdate = 10;
-                minTimeUpdate = 60000;
+                minDistanceUpdate = 5; //5 metres
+                minTimeUpdate = 10000; //10 secondes
                 break;
-            default:
-                minDistanceUpdate = 1000;
-                minTimeUpdate = 1800000;
+            default: //SOFT
+                minDistanceUpdate = 1000; //1 kilometres
+                minTimeUpdate = 1800000; //30 minutes
                 break;
         }
 
