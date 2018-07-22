@@ -1,0 +1,7 @@
+
+++ DwiZZel-Dev Notes ++
+
+Notifications Handling:
+
+    - Foreground and Background appz
+      https://github.com/firebase/quickstart-android/tree/master/messaging/app/src/main/java/com/google/firebase/quickstart/fcm
