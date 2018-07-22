@@ -53,6 +53,7 @@
         </activity>
         <activity
             android:name=".HomeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -65,16 +66,44 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".CreateUserActivity"
+            android:screenOrientation="portrait"
             android:parentActivityName=".LoginActivity" />
         <activity
             android:name=".CreateUserWithEmailActivity"
+            android:screenOrientation="portrait"
             android:parentActivityName=".CreateUserActivity" />
         <activity
             android:name=".SignInUserActivity"
+            android:screenOrientation="portrait"
             android:parentActivityName=".LoginActivity" />
         <activity
             android:name=".SignInUserWithEmailActivity"
+            android:screenOrientation="portrait"
             android:parentActivityName=".SignInUserActivity" />
+        <activity
+            android:name=".WatchOverMeActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".HomeActivity" />
+        <activity
+            android:name=".WatchOverSomeoneActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".HomeActivity" />
+        <activity
+            android:name=".SendInvitationForWatchingActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".WatchOverMeActivity" />
+        <activity
+            android:name=".ActivateInvitationActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".WatchOverSomeoneActivity" />
+        <activity
+            android:name=".ModifyWatcherActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".WatchOverMeActivity" />
+        <activity
+            android:name=".ModifyWatchingActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".WatchOverSomeoneActivity" />
 
         <!--
         avec AIDL
@@ -101,24 +130,7 @@
         -->
         <!-- android:process=":remote" -->
 
-        <activity
-            android:name=".WatchOverMeActivity"
-            android:parentActivityName=".HomeActivity" />
-        <activity
-            android:name=".WatchOverSomeoneActivity"
-            android:parentActivityName=".HomeActivity" />
-        <activity
-            android:name=".SendInvitationForWatchingActivity"
-            android:parentActivityName=".WatchOverMeActivity" />
-        <activity
-            android:name=".ActivateInvitationActivity"
-            android:parentActivityName=".WatchOverSomeoneActivity" />
-        <activity
-            android:name=".ModifyWatcherActivity"
-            android:parentActivityName=".WatchOverMeActivity" />
-        <activity
-            android:name=".ModifyWatchingActivity"
-            android:parentActivityName=".WatchOverSomeoneActivity" />
+
     </application>
 
 </manifest>

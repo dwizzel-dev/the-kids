@@ -10,6 +10,9 @@ public class TokenIdService extends FirebaseInstanceIdService {
     private static final String TAG = "TokenIdService";
     private ITrackerService mTrackerService;
 
+    //default constructor for android manifest error
+    public TokenIdService(){}
+
     TokenIdService(ITrackerService trackerService){
         super();
         mTrackerService = trackerService;
