@@ -8,23 +8,23 @@ public final class Const {
     public static final class error {
         public static final int NO_ERROR = 0;
 
-        public static final int ERROR_INVALID_PASSWORD = 203;
-        public static final int ERROR_INVALID_CREDENTIALS = 204;
-        public static final int ERROR_INVALID_EMAIL = 205;
-        public static final int ERROR_EMAIL_EXIST = 206;
-        public static final int ERROR_WEAK_PASSWORD = 207;
+        public static final int ERROR_INVALID_PASSWORD = 200;
+        public static final int ERROR_INVALID_CREDENTIALS = 201;
+        public static final int ERROR_INVALID_EMAIL = 202;
+        public static final int ERROR_EMAIL_EXIST = 203;
+        public static final int ERROR_WEAK_PASSWORD = 204;
 
-        public static final int ERROR_SMS_NOT_SENT = 208;
-        public static final int ERROR_SMS_SEND_PERMISSION = 209;
+        public static final int ERROR_SMS_NOT_SENT = 210;
+        public static final int ERROR_SMS_SEND_PERMISSION = 211;
 
-        public static final int ERROR_INVITE_ID_FAILURE = 211;
-        public static final int ERROR_INVALID_INVITE_CODE_FAILURE = 212;
-        public static final int ERROR_INVALID_INVITE_CODE = 213;
+        public static final int ERROR_INVITE_ID_FAILURE = 220;
+        public static final int ERROR_INVALID_INVITE_CODE_FAILURE = 221;
+        public static final int ERROR_INVALID_INVITE_CODE = 222;
 
-        public static final int ERROR_INVITE_CREATION_FAILURE = 214;
-        public static final int ERROR_INVITATION_CREATION_FAILURE = 215;
+        public static final int ERROR_INVITE_CREATION_FAILURE = 230;
+        public static final int ERROR_INVITATION_CREATION_FAILURE = 231;
 
-        public static final int ERROR_INVITE_INFOS_FAILURE = 216;
+        public static final int ERROR_INVITE_INFOS_FAILURE = 240;
 
 
 
@@ -67,15 +67,17 @@ public final class Const {
         public static final int WATCHER_UPDATE = 900;
         public static final int INVITATION_UPDATE = 901;
         public static final int WATCHING_UPDATE = 902;
+        public static final int TRAJECT_UPDATE = 903;
 
-        public static final int WATCHER_REMOVE = 903;
-        public static final int INVITATION_REMOVE = 904;
-        public static final int WATCHING_REMOVE = 905;
+        public static final int WATCHER_REMOVE = 910;
+        public static final int INVITATION_REMOVE = 911;
+        public static final int WATCHING_REMOVE = 912;
+        public static final int TRAJECT_REMOVE = 913;
 
-        public static final int WATCHER_ADDED = 906;
-        public static final int INVITATION_ADDED = 907;
-        public static final int WATCHING_ADDED = 908;
-
+        public static final int WATCHER_ADDED = 920;
+        public static final int INVITATION_ADDED = 921;
+        public static final int WATCHING_ADDED = 922;
+        public static final int TRAJECT_ADDED = 923;
     }
     public static final class conn {
         public static final int CONNECTED = 1000;

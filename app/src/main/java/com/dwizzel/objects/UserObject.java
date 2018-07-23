@@ -64,7 +64,7 @@ public class UserObject extends Observable{
         if(sInst == null){
             sInst = new UserObject();
         }
-        return  sInst;
+        return sInst;
     }
 
     public void resetUser(){

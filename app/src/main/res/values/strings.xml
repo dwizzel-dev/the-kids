@@ -15,20 +15,20 @@
     <string name="signin_title">Sign In</string>
     <string name="register_with_email_title">Register With Email</string>
     <string name="signin_with_email_title">Sign Up With Email</string>
-    <string name="watch_over_me_title">Walkers</string>
-    <string name="watch_over_someone_title">Walking With</string>
+    <string name="watch_over_me_title">Who Can Walk With Me</string>
+    <string name="watch_over_someone_title">Who Can I Walk Home</string>
     <string name="watch_over_me_send_invitation">Send An Invitation</string>
     <string name="activate_invitation">Invitation Profil</string>
-    <string name="modify_watcher_title">Modify Walker Profil</string>
-    <string name="modify_watching_title">Modify Walking With Profil</string>
+    <string name="modify_watcher_title">Modify Profil</string>
+    <string name="modify_watching_title">Modify Profil</string>
 
     <!-- LIST HEADER -->
-    <string name="watchers_header">Walkers</string>
-    <string name="watchers_list_empty">Your list is empty, start by sending an invitation to someone you know to had him to your list of watchers. Untill he accept, the invitation will remain in the "<i>pending invitations</i>" list below</string>
+    <string name="watchers_header">People who can walk you home</string>
+    <string name="watchers_list_empty">Your list is empty, start by sending an invitation to someone you know to had him to your list. Untill he accept, the invitation will remain in the "<i>pending invitations</i>" list below</string>
     <string name="invitations_header">Pending Invitations</string>
     <string name="invitations_list_empty">You have no pending invitation.</string>
-    <string name="watchings_header">Walking With</string>
-    <string name="watchings_list_empty">Your list is empty, if you have received a code by SMS, enter it in the box above and press activate.</string>
+    <string name="watchings_header">People you can walk home</string>
+    <string name="watchings_list_empty">Your list is empty, if you have received a code by SMS or other, enter it in the box above and press activate.</string>
 
 
     <!-- DESCRIPTION -->
@@ -52,9 +52,10 @@
     <string name="butt_signin_from_email">Sign up with email</string>
     <string name="butt_next">Next</string>
     <string name="butt_register">Register</string>
-    <string name="butt_watch_over_someone">Walk With Someone</string>
-    <string name="butt_watch_over_me">Walk With Me</string>
+    <string name="butt_watch_over_someone">Who Can I Walk Home</string>
+    <string name="butt_watch_over_me">Who Can Walk With Me</string>
     <string name="butt_watch_current">Current Traject</string>
+    <string name="butt_watch_start_new_traject">Start New Traject</string>
     <string name="butt_settings">Settings</string>
     <string name="butt_cancel">Cancel</string>
     <string name="butt_send_invitation">Send Sms Invitation</string>

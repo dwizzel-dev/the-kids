@@ -7,6 +7,7 @@ import java.util.Date;
 
 /**
  * Created by Dwizzel on 20/11/2017.
+ * /invites/BUTzMIp2HpEMuANFaTl1
  */
 
 public class InviteModel{

@@ -1,12 +1,10 @@
 package com.dwizzel.datamodels;
 
 
-import com.dwizzel.Const;
-
-import java.util.Date;
-
 /**
  * Created by Dwizzel on 20/11/2017.
+ * * /invites/kyTfJf0t0u0ajtTFxLNp/state/UvgafUiWY7aFkUPqcTUqZij2Tmu2
+ *
  */
 
 public class InviteStateModel {
