@@ -296,7 +296,7 @@ public class TrackerService extends Service implements ITrackerService{
             }
         //on tranmet la reponse object au caller
         if(mBinderCallback != null) {
-            mBinderCallback.onSignedIn(sro);
+            mBinderCallback.handleResponse(sro);
         }
 
     }
@@ -309,7 +309,7 @@ public class TrackerService extends Service implements ITrackerService{
         //on peut maintenant ouvrir la appz
         //on tranmet la reponse au activy qui a caller si il y a
         if(mBinderCallback != null) {
-            mBinderCallback.onCreated(sro);
+            mBinderCallback.handleResponse(sro);
         }
         //on update les infos dans la DB et on met active en meme temps avec un batch write
         mDatabaseService.updateUserInfos();
@@ -344,6 +344,7 @@ public class TrackerService extends Service implements ITrackerService{
     }
 
     public void onUserSignedOut(ServiceResponseObject sro){
+        //sro is generally at null for now
         Tracer.log(TAG, "onUserSignedOut");
         //NOTE: est appele par databaseService quand le deactivate est fini
         // firebaseAuthentification
@@ -352,7 +353,7 @@ public class TrackerService extends Service implements ITrackerService{
         mUser.resetUser();
         //on call l'activity appelante pour le signOut
         if(mBinderCallback != null) {
-            mBinderCallback.onSignedOut(sro);
+            mBinderCallback.handleResponse(sro);
         }
     }
 
@@ -616,14 +617,14 @@ public class TrackerService extends Service implements ITrackerService{
                         onConnectivityChange(
                                 new ServiceResponseObject(
                                         Const.conn.NOT_CONNECTED,
-                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                        "error message will come one day"
                                 )
                         );
                     }else if(!mHasConnectivity && conn){
                         onConnectivityChange(
                                 new ServiceResponseObject(
                                         Const.conn.RECONNECTED,
-                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                        "error message will come one day"
                                 )
                         );
                     }

@@ -26,8 +26,9 @@ public final class Const {
 
         public static final int ERROR_INVITE_INFOS_FAILURE = 240;
 
-
-
+        public static final int ERROR_ON_USER_SIGNIN = 250;
+        public static final int ERROR_ON_USER_SIGNOUT = 251;
+        public static final int ERROR_ON_USER_CREATED = 252;
     }
     public static final class except {
         public static final int GENERIC = 301;
@@ -103,6 +104,10 @@ public final class Const {
         public static final int ON_INVITE_ID_CREATED = 2021;
         public static final int ON_INVITE_ID_ACTIVATED = 2022;
         public static final int ON_INVITATION_CREATED = 2023;
+
+        public static final int ON_USER_SIGNIN = 2030;
+        public static final int ON_USER_SIGNOUT = 2031;
+        public static final int ON_USER_CREATED = 2032;
     }
 
 

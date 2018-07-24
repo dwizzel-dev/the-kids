@@ -59,45 +59,37 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
         private static final String TAG = "SignInUserWithEmailActivity.ITrackerBinder";
         public void handleResponse(ServiceResponseObject sro){
             Tracer.log(TAG, "handleResponse", sro);
-        }
-        public void onSignedIn(ServiceResponseObject sro){
-            Tracer.log(TAG, "onSignedIn");
-            //on enleve le loader
-            if(sro.getErr() != Const.error.NO_ERROR){
+            //only handle signin
+            if(sro.getErr() == Const.error.NO_ERROR){
+                switch(sro.getMsg()) {
+                    case Const.response.ON_USER_SIGNIN:
+                        break;
+                    case Const.response.ON_USER_CREATED:
+                        userIsCreated();
+                        break;
+                    default:
+                        break;
+                }
+            }else{
                 //ppour aficher les erreurs sinon il continue au created
                 showSpinner(false);
-            }
-            switch(sro.getErr()){
-                case Const.error.NO_ERROR:
-                    break;
-                case Const.except.NO_CONNECTION:
-                    Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
-                            R.string.err_no_connectivity);
-                    break;
-                case Const.error.ERROR_INVALID_PASSWORD:
-                    displayErrMsg(R.string.err_invalid_password);
-                    break;
-                case Const.error.ERROR_INVALID_CREDENTIALS:
-                    displayErrMsg(R.string.err_invalid_credential);
-                    break;
-                default:
-                    break;
+                switch(sro.getErr()){
+                    case Const.except.NO_CONNECTION:
+                        Utils.getInstance().showToastMsg(SignInUserWithEmailActivity.this,
+                                R.string.err_no_connectivity);
+                        break;
+                    case Const.error.ERROR_INVALID_PASSWORD:
+                        displayErrMsg(R.string.err_invalid_password);
+                        break;
+                    case Const.error.ERROR_INVALID_CREDENTIALS:
+                        displayErrMsg(R.string.err_invalid_credential);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-        public void onSignedOut(ServiceResponseObject sro){
-            Tracer.log(TAG, "onSignedOut");
-        }
-        public void onCreated(ServiceResponseObject sro){
-            Tracer.log(TAG, "onCreated");
-            //tout est beau on peut starter
-            switch(sro.getErr()) {
-                case Const.error.NO_ERROR:
-                    userIsCreated();
-                    break;
-                default:
-                    break;
-            }
-        }
+
     };
 
     public void setEmail(String email) {

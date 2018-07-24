@@ -626,7 +626,9 @@ class DatabaseService implements IDatabaseService{
                                     //il avait deja ete cree precedement
                                     mUser.setCreated(true);
                                     //on call le Trackerservice pour dire qu'il est pret
-                                    mTrackerService.onUserCreated(new ServiceResponseObject());
+                                    mTrackerService.onUserCreated(new ServiceResponseObject(
+                                            Const.response.ON_USER_CREATED
+                                    ));
                                     //
                                     addListenerOnUser();
                                 }else{
@@ -700,19 +702,25 @@ class DatabaseService implements IDatabaseService{
                             //on set le dernier UID actif pour la verif au delete
                             Tracer.data(TAG, "users.deactivate[" + mUser.getUid() +
                                     "]");
-                            mTrackerService.onUserSignedOut(null);
+                            mTrackerService.onUserSignedOut(
+                                    new ServiceResponseObject(Const.response.ON_USER_SIGNOUT)
+                            );
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Tracer.log(TAG, "deactivateUser.addOnFailureListener.exception: ", e);
-                            mTrackerService.onUserSignedOut(null);
+                            mTrackerService.onUserSignedOut(
+                                    new ServiceResponseObject(Const.response.ON_USER_SIGNOUT)
+                            );
                         }
                     });
         }catch (Exception e){
             Tracer.log(TAG, "deactivateUser.exception: ", e);
-            mTrackerService.onUserSignedOut(null);
+            mTrackerService.onUserSignedOut(
+                    new ServiceResponseObject(Const.response.ON_USER_SIGNOUT)
+            );
         }
 
     }
@@ -882,7 +890,7 @@ class DatabaseService implements IDatabaseService{
                             mTrackerService.onInviteIdCreated(
                                     new ServiceResponseObject(
                                         Const.error.ERROR_INVITE_CREATION_FAILURE,
-                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                        "error message will come one day"
                                     )
                             );
                         }
@@ -893,7 +901,7 @@ class DatabaseService implements IDatabaseService{
             mTrackerService.onInviteIdCreated(
                     new ServiceResponseObject(
                         Const.error.ERROR_INVITE_CREATION_FAILURE,
-                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                        "error message will come one day"
                     )
             );
         }
@@ -934,7 +942,7 @@ class DatabaseService implements IDatabaseService{
                             mTrackerService.onInvitationCreated(
                                     new ServiceResponseObject(
                                         Const.error.ERROR_INVITATION_CREATION_FAILURE,
-                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                        "error message will come one day"
                                     )
                             );
                         }
@@ -944,7 +952,7 @@ class DatabaseService implements IDatabaseService{
             mTrackerService.onInvitationCreated(
                     new ServiceResponseObject(
                         Const.error.ERROR_INVITATION_CREATION_FAILURE,
-                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                        "error message will come one day"
                     )
             );
         }
@@ -978,7 +986,7 @@ class DatabaseService implements IDatabaseService{
                             mTrackerService.onActivateInvite(
                                     new ServiceResponseObject(
                                             Const.error.ERROR_INVITE_ID_FAILURE,
-                                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                                            "error message will come one day"
                                     )
                             );
                         }
@@ -988,7 +996,7 @@ class DatabaseService implements IDatabaseService{
             mTrackerService.onActivateInvite(
                     new ServiceResponseObject(
                             Const.error.ERROR_INVITE_ID_FAILURE,
-                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                            "error message will come one day"
                     )
             );
         }
@@ -1035,7 +1043,7 @@ class DatabaseService implements IDatabaseService{
                                             mTrackerService.onValidateInviteCode(
                                                     new ServiceResponseObject(
                                                             Const.error.ERROR_INVALID_INVITE_CODE,
-                                                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                            "error message will come one day"
                                                     )
                                             );
                                         }
@@ -1045,7 +1053,7 @@ class DatabaseService implements IDatabaseService{
                                     mTrackerService.onValidateInviteCode(
                                             new ServiceResponseObject(
                                                     Const.error.ERROR_INVALID_INVITE_CODE,
-                                                    Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                    "error message will come one day"
                                             )
                                     );
                                 }
@@ -1055,7 +1063,7 @@ class DatabaseService implements IDatabaseService{
                                 mTrackerService.onValidateInviteCode(
                                         new ServiceResponseObject(
                                                 Const.error.ERROR_INVALID_INVITE_CODE_FAILURE,
-                                                Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                "error message will come one day"
                                         )
                                 );
                             }
@@ -1066,7 +1074,7 @@ class DatabaseService implements IDatabaseService{
             mTrackerService.onValidateInviteCode(
                     new ServiceResponseObject(
                             Const.error.ERROR_INVALID_INVITE_CODE_FAILURE,
-                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                            "error message will come one day"
                     )
             );
         }
@@ -1097,7 +1105,7 @@ class DatabaseService implements IDatabaseService{
                             mTrackerService.onActivateInvite(
                                     new ServiceResponseObject(
                                             Const.error.ERROR_INVITE_INFOS_FAILURE,
-                                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                                            "error message will come one day"
                                     )
                             );
                         }
@@ -1107,7 +1115,7 @@ class DatabaseService implements IDatabaseService{
             mTrackerService.onActivateInvite(
                     new ServiceResponseObject(
                             Const.error.ERROR_INVITE_INFOS_FAILURE,
-                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                            "error message will come one day"
                     )
             );
         }

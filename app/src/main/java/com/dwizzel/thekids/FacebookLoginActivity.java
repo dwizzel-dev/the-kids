@@ -69,37 +69,29 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
         private static final String TAG = "FacebookLoginActivity.ITrackerBinder";
         public void handleResponse(ServiceResponseObject sro){
             Tracer.log(TAG, "handleResponse", sro);
-        }
-        public void onSignedIn(ServiceResponseObject sro){
-            Tracer.log(TAG, "onSignedIn");
-            //on enleve le loader
-            if(sro.getErr() != Const.error.NO_ERROR){
+            //only handle the signin
+            if(sro.getErr() == Const.error.NO_ERROR){
+                switch(sro.getMsg()){
+                    case Const.response.ON_USER_SIGNIN:
+                        break;
+                    case Const.response.ON_USER_CREATED:
+                        userIsCreated();
+                        break;
+                    default:
+                        break;
+                }
+            }else {
+                //on enleve le loader
                 Utils.getInstance().hideProgressDialog();
-            }
-            //check les erreurs et exception
-            switch(sro.getErr()){
-                case Const.error.NO_ERROR:
-                    break;
-                case Const.except.NO_CONNECTION:
-                    Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
-                            R.string.err_no_connectivity);
-                    break;
-                default:
-                    break;
-            }
-        }
-        public void onSignedOut(ServiceResponseObject sro){
-            Tracer.log(TAG, "onSignedOut");
-        }
-        public void onCreated(ServiceResponseObject sro){
-            Tracer.log(TAG, "onCreated");
-            //tout est beau on peut starter
-            switch(sro.getErr()) {
-                case Const.error.NO_ERROR:
-                    userIsCreated();
-                    break;
-                default:
-                    break;
+                //check les erreurs et exception
+                switch(sro.getErr()){
+                    case Const.except.NO_CONNECTION:
+                        Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
+                                R.string.err_no_connectivity);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     };

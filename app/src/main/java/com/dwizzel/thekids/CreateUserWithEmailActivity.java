@@ -64,45 +64,38 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         private static final String TAG = "CreateUserWithEmailActivity.ITrackerBinder";
         public void handleResponse(ServiceResponseObject sro){
             Tracer.log(TAG, "handleResponse", sro);
-        }
-        public void onSignedIn(ServiceResponseObject sro){
-            Tracer.log(TAG, "onSignedIn");
-            //on enleve le loader
-            switch(sro.getErr()){
-                case Const.error.NO_ERROR:
-                    break;
-                case Const.except.NO_CONNECTION:
-                    Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
-                            R.string.err_no_connectivity);
-                    break;
-                case Const.error.ERROR_WEAK_PASSWORD:
-                    gotoFragmentAndShowErrors(1, R.string.err_psw_weak);
-                    break;
-                case Const.error.ERROR_EMAIL_EXIST:
-                    gotoFragmentAndShowErrors(0, R.string.email_in_use);
-                    break;
-                case Const.error.ERROR_INVALID_CREDENTIALS:
-                    gotoFragmentAndShowErrors(0, R.string.err_email_invalid);
-                    break;
-                default:
-                    break;
+            //only handle the signin
+            if(sro.getErr() == Const.error.NO_ERROR){
+                switch(sro.getMsg()) {
+                    case Const.response.ON_USER_SIGNIN:
+                        break;
+                    case Const.response.ON_USER_CREATED:
+                        userIsCreated();
+                        break;
+                    default:
+                        break;
+                }
+            }else{
+                switch(sro.getErr()){
+                    case Const.except.NO_CONNECTION:
+                        Utils.getInstance().showToastMsg(CreateUserWithEmailActivity.this,
+                                R.string.err_no_connectivity);
+                        break;
+                    case Const.error.ERROR_WEAK_PASSWORD:
+                        gotoFragmentAndShowErrors(1, R.string.err_psw_weak);
+                        break;
+                    case Const.error.ERROR_EMAIL_EXIST:
+                        gotoFragmentAndShowErrors(0, R.string.email_in_use);
+                        break;
+                    case Const.error.ERROR_INVALID_CREDENTIALS:
+                        gotoFragmentAndShowErrors(0, R.string.err_email_invalid);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-        public void onSignedOut(ServiceResponseObject sro){
-            Tracer.log(TAG, "onSignedOut");
-        }
-        public void onCreated(ServiceResponseObject sro){
-            Tracer.log(TAG, "onCreated");
-            //Utils.getInstance().hideProgressDialog();
-            //tout est beau on peut starter
-            switch(sro.getErr()) {
-                case Const.error.NO_ERROR:
-                    userIsCreated();
-                    break;
-                default:
-                    break;
-            }
-        }
+
     };
 
     @Override

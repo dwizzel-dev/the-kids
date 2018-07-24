@@ -109,9 +109,6 @@ public class WatchOverMeActivity extends BaseActivity
                     Tracer.log(TAG, "handleResponse: RECONNECTED");
                 }
             }
-            public void onSignedIn(ServiceResponseObject sro){}
-            public void onSignedOut(ServiceResponseObject sro){}
-            public void onCreated(ServiceResponseObject sro){}
         };
         //get le binder
         mTrackerBinder = getTrackerBinder();

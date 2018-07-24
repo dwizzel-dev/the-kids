@@ -9,9 +9,5 @@ import com.dwizzel.objects.ServiceResponseObject;
 public interface ITrackerBinderCallback {
 
     void handleResponse(ServiceResponseObject sro);
-    void onSignedIn(ServiceResponseObject sro);
-    void onSignedOut(ServiceResponseObject sro);
-    void onCreated(ServiceResponseObject sro);
-
 
 }

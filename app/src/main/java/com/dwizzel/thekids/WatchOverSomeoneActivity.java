@@ -75,7 +75,7 @@ public class WatchOverSomeoneActivity extends BaseActivity
             private static final String TAG = "WatchOverSomeoneActivity.ITrackerBinder";
             public void handleResponse(ServiceResponseObject sro){
                 Tracer.log(TAG, "handleResponse", sro);
-                if(sro.getErr() == 0) {
+                if(sro.getErr() == Const.error.NO_ERROR) {
                     switch (sro.getMsg()) {
                         case Const.response.ON_WATCHINGS_LIST:
                         case Const.response.ON_EMPTY_WATCHINGS_LIST:
@@ -113,9 +113,7 @@ public class WatchOverSomeoneActivity extends BaseActivity
                     }
                 }
             }
-            public void onSignedIn(ServiceResponseObject sro){}
-            public void onSignedOut(ServiceResponseObject sro){}
-            public void onCreated(ServiceResponseObject sro){}
+
         };
         //get le binder
         mTrackerBinder = getTrackerBinder();

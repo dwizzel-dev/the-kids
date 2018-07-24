@@ -10,6 +10,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.dwizzel.Const;
 import com.dwizzel.objects.ServiceResponseObject;
 import com.dwizzel.observers.BooleanObserver;
 import com.dwizzel.services.*;
@@ -61,17 +62,17 @@ public abstract class BaseActivity extends AppCompatActivity implements IBaseAct
         private static final String TAG = "BaseActivity.ITrackerBinder";
         public void handleResponse(ServiceResponseObject sro){
             Tracer.log(TAG, "handleResponse", sro);
+            switch(sro.getMsg()){
+                case Const.response.ON_USER_SIGNOUT:
+                    Utils.getInstance().showToastMsg(BaseActivity.this, R.string.toast_signed_out);
+                    startLoginActivity();
+                    break;
+                default:
+                    break;
+            }
+
         }
-        public void onSignedIn(ServiceResponseObject sro){
-            Tracer.log(TAG, "onSignedIn");
-        }
-        public void onSignedOut(ServiceResponseObject sro){
-            Utils.getInstance().showToastMsg(BaseActivity.this, R.string.toast_signed_out);
-            startLoginActivity();
-        }
-        public void onCreated(ServiceResponseObject sro){
-            Tracer.log(TAG, "onCreated");
-        }
+
     };
 
     @Override

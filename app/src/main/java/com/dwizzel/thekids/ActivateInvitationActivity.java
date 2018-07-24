@@ -52,7 +52,7 @@ public class ActivateInvitationActivity extends BaseActivity {
         ITrackerBinderCallback serviceCallback = new ITrackerBinderCallback() {
             private static final String TAG = "ActivateInvitationActivity.ITrackerBinder";
             public void handleResponse(ServiceResponseObject sro) {
-                if (sro.getErr() == 0) {
+                if (sro.getErr() == Const.error.NO_ERROR) {
                     //c'est beau
                     switch (sro.getMsg()) {
                         case Const.response.ON_INVITE_ID_ACTIVATED:
@@ -84,9 +84,7 @@ public class ActivateInvitationActivity extends BaseActivity {
 
 
             }
-            public void onSignedIn(ServiceResponseObject sro){}
-            public void onSignedOut(ServiceResponseObject sro){}
-            public void onCreated(ServiceResponseObject sro){}
+
         };
         //get le binder
         mTrackerBinder = getTrackerBinder();

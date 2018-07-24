@@ -121,25 +121,25 @@ class AuthService implements IAuthService {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.error.ERROR_INVALID_PASSWORD,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     } catch (FirebaseAuthInvalidUserException invalidCredential) {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.error.ERROR_INVALID_CREDENTIALS,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     } catch (NullPointerException npe) {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.except.NULL_POINTER,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     } catch (Exception e) {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.except.GENERIC,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     }
                                 } else {
@@ -147,7 +147,9 @@ class AuthService implements IAuthService {
                                         //on set le user comme signed in
                                         mUser.setLoginType(Const.user.TYPE_EMAIL);
                                         //pas erreur alors on continue
-                                        mTrackerService.onUserSignedIn(new ServiceResponseObject());
+                                        mTrackerService.onUserSignedIn(new ServiceResponseObject(
+                                                Const.response.ON_USER_SIGNIN
+                                        ));
                                     }catch(NullPointerException npe){
                                         Tracer.log(TAG, "signInUser.onComplete.NullPointerException: ", npe);
                                     }
@@ -161,7 +163,7 @@ class AuthService implements IAuthService {
             try {
                 mTrackerService.onUserSignedIn(new ServiceResponseObject(
                         Const.except.NO_CONNECTION,
-                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                        "error message will come one day"
                         ));
             }catch (NullPointerException npe){
                 Tracer.log(TAG, "signInUser.NullPointerException: ", npe);
@@ -185,38 +187,40 @@ class AuthService implements IAuthService {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.error.ERROR_EMAIL_EXIST,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                         ));
                                     }catch (FirebaseAuthWeakPasswordException weakPsw) {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.error.ERROR_WEAK_PASSWORD,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     } catch (FirebaseAuthInvalidCredentialsException invalidEmail) {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.error.ERROR_INVALID_EMAIL,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     } catch (NullPointerException npe) {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.except.NULL_POINTER,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     } catch (Exception e) {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.except.GENERIC,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     }
                                 } else {
                                     try {
                                         mUser.setLoginType(Const.user.TYPE_EMAIL);
                                         //pas erreur alors on continue
-                                        mTrackerService.onUserSignedIn(new ServiceResponseObject());
+                                        mTrackerService.onUserSignedIn(new ServiceResponseObject(
+                                                Const.response.ON_USER_SIGNIN
+                                        ));
                                     }catch(NullPointerException npe){
                                         Tracer.log(TAG, "createUser.onComplete.NullPointerException: ", npe);
                                     }
@@ -230,7 +234,7 @@ class AuthService implements IAuthService {
             try {
                 mTrackerService.onUserSignedIn(new ServiceResponseObject(
                         Const.except.NO_CONNECTION,
-                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                        "error message will come one day"
                 ));
             }catch (NullPointerException npe){
                 Tracer.log(TAG, "createUser.NullPointerException: ", npe);
@@ -253,20 +257,22 @@ class AuthService implements IAuthService {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.except.NULL_POINTER,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     } catch (Exception e) {
                                         mTrackerService.onUserSignedIn(
                                                 new ServiceResponseObject(
                                                         Const.except.GENERIC,
-                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        "error message will come one day"
                                                 ));
                                     }
                                 } else {
                                     try {
                                         mUser.setLoginType(Const.user.TYPE_FACEBOOK);
                                         //pas erreur alors on continue
-                                        mTrackerService.onUserSignedIn(new ServiceResponseObject());
+                                        mTrackerService.onUserSignedIn(new ServiceResponseObject(
+                                                Const.response.ON_USER_SIGNIN
+                                        ));
                                     } catch (NullPointerException npe) {
                                         Tracer.log(TAG, "signInCredential.onComplete.NullPointerException: ", npe);
                                     }
@@ -280,7 +286,7 @@ class AuthService implements IAuthService {
             try {
                 mTrackerService.onUserSignedIn(new ServiceResponseObject(
                         Const.except.NO_CONNECTION,
-                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                        "error message will come one day"
                 ));
             }catch (NullPointerException npe){
                 Tracer.log(TAG, "signInUser.NullPointerException: ", npe);
