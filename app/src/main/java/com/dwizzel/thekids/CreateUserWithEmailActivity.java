@@ -24,7 +24,7 @@ import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 
-public class CreateUserWithEmailActivity extends AppCompatActivity {
+public class CreateUserWithEmailActivity extends ACommonSignInActivity {
 
     private static final String TAG = "CreateUserWithEmailActivity";
     private String email = "";
@@ -186,6 +186,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
         return 0;
     }
 
+    /*
     private void userIsCreated(){
         //on affiche qu'il est logue
         try{
@@ -206,6 +207,7 @@ public class CreateUserWithEmailActivity extends AppCompatActivity {
             Tracer.log(TAG, "userIsCreated.Exception: " , e);
         }
     }
+    */
 
     private void createUser() {
         //on va faire un listener sur le resultat

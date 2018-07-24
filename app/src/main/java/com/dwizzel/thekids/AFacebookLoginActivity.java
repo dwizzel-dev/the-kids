@@ -32,9 +32,9 @@ import com.facebook.login.widget.LoginButton;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
 
-public abstract class FacebookLoginActivity extends AppCompatActivity {
+public abstract class AFacebookLoginActivity extends ACommonSignInActivity {
 
-    private final static String TAG = "FacebookLoginActivity";
+    private final static String TAG = "AFacebookLoginActivity";
     private CallbackManager mFacebookCallbackManager;
     private BooleanObserver mServiceBoundObservable = new BooleanObserver(false);
     public TrackerService.TrackerBinder mTrackerBinder;
@@ -58,7 +58,7 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
 
     private void bindToAuthService(){
         if(!mServiceBoundObservable.get()) {
-            Intent intent = TrackerService.getIntent(FacebookLoginActivity.this);
+            Intent intent = TrackerService.getIntent(AFacebookLoginActivity.this);
             startService(intent);
             //bind to the service, si pas de startService se ferme auto apres la femeture de L'appli
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -86,7 +86,7 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
                 //check les erreurs et exception
                 switch(sro.getErr()){
                     case Const.except.NO_CONNECTION:
-                        Utils.getInstance().showToastMsg(FacebookLoginActivity.this,
+                        Utils.getInstance().showToastMsg(AFacebookLoginActivity.this,
                                 R.string.err_no_connectivity);
                         break;
                     default:
@@ -153,22 +153,22 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
         //on va faire un listener sur le resultat
         if (mTrackerBinder != null) {
             //on met un loader
-            Utils.getInstance().showProgressDialog(FacebookLoginActivity.this);
+            Utils.getInstance().showProgressDialog(AFacebookLoginActivity.this);
             //on call le service
             mTrackerBinder.signIn(authCredential);
         }
     }
-
+    /*
     private void userIsCreated(){
         //on affiche qu'il est logue
         try {
             Utils.getInstance().showToastMsg(
-                    FacebookLoginActivity.this,
+                    AFacebookLoginActivity.this,
                     getResources().getString(R.string.toast_connected_as_and_last,
                             UserObject.getInstance().getEmail(),
-                            UserObject.getInstance().getLastConnection(FacebookLoginActivity.this)));
+                            UserObject.getInstance().getLastConnection(AFacebookLoginActivity.this)));
             //on va a activity principal
-            Intent intent = new Intent(FacebookLoginActivity.this,
+            Intent intent = new Intent(AFacebookLoginActivity.this,
                     HomeActivity.class);
             //start activity and clear the backStack
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -181,7 +181,7 @@ public abstract class FacebookLoginActivity extends AppCompatActivity {
             Tracer.log(TAG, "userIsCreated.Exception: " , e);
         }
     }
-
+    */
 
 
 }

@@ -22,7 +22,7 @@ import com.dwizzel.services.TrackerService;
 import com.dwizzel.utils.Tracer;
 import com.dwizzel.utils.Utils;
 
-public class SignInUserWithEmailActivity extends AppCompatActivity {
+public class SignInUserWithEmailActivity extends ACommonSignInActivity {
 
     private static final String TAG = "SignInUserWithEmail";
     private String email;
@@ -169,7 +169,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
             txtView.setText("");
         }
     }
-
+    /*
     private void userIsCreated(){
         //on affiche qu'il est logue
         try {
@@ -192,6 +192,7 @@ public class SignInUserWithEmailActivity extends AppCompatActivity {
             Tracer.log(TAG, "userIsCreated.Exception: " , e);
         }
     }
+    */
 
     private void signInUser() {
         //on va faire un listener sur le resultat

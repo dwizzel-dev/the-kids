@@ -7,7 +7,7 @@ import android.widget.Button;
 
 import com.dwizzel.utils.Tracer;
 
-public class CreateUserActivity extends FacebookLoginActivity {
+public class CreateUserActivity extends AFacebookLoginActivity {
 
     private final static String TAG = "CreateUserActivity";
 
