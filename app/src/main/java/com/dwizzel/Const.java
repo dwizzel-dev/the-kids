@@ -85,25 +85,26 @@ public final class Const {
         public static final int RECONNECTING = 1002;
         public static final int NOT_CONNECTED = 1003;
     }
-    public static final class response {
-        public static final String ON_WATCHERS_LIST = "ON_WATCHERS_LIST";
-        public static final String ON_INVITATIONS_LIST = "ON_INVITATIONS_LIST";
-        public static final String ON_WATCHINGS_LIST = "ON_WATCHINGS_LIST";
-
-        public static final String ON_EMPTY_WATCHERS_LIST = "ON_EMPTY_WATCHERS_LIST";
-        public static final String ON_EMPTY_INVITATIONS_LIST = "ON_EMPTY_INVITATIONS_LIST";
-        public static final String ON_EMPTY_WATCHINGS_LIST = "ON_EMPTY_WATCHINGS_LIST";
-
-        public static final String ON_INVITE_CODE_VALIDATED = "ON_INVITE_CODE_VALIDATED";
-        public static final String ON_INVITE_ID_CREATED = "ON_INVITE_ID_CREATED";
-        public static final String ON_INVITE_ID_ACTIVATED = "ON_INVITE_ID_ACTIVATED";
-        public static final String ON_INVITATION_CREATED = "ON_INVITATION_CREATED";
-    }
     public static final class gpsUpdateType {
         public static final int SOFT = 1100;
         public static final int MED = 1101;
         public static final int HARD = 1102;
     }
+    public static final class response {
+        public static final int ON_WATCHERS_LIST = 2000;
+        public static final int ON_INVITATIONS_LIST = 2001;
+        public static final int ON_WATCHINGS_LIST = 2002;
+
+        public static final int ON_EMPTY_WATCHERS_LIST = 2010;
+        public static final int ON_EMPTY_INVITATIONS_LIST = 2011;
+        public static final int ON_EMPTY_WATCHINGS_LIST = 2012;
+
+        public static final int ON_INVITE_CODE_VALIDATED = 2020;
+        public static final int ON_INVITE_ID_CREATED = 2021;
+        public static final int ON_INVITE_ID_ACTIVATED = 2022;
+        public static final int ON_INVITATION_CREATED = 2023;
+    }
+
 
 
 }

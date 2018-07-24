@@ -119,16 +119,28 @@ class AuthService implements IAuthService {
                                         throw task.getException();
                                     } catch (FirebaseAuthInvalidCredentialsException invalidPsw) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.error.ERROR_INVALID_PASSWORD));
+                                                new ServiceResponseObject(
+                                                        Const.error.ERROR_INVALID_PASSWORD,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     } catch (FirebaseAuthInvalidUserException invalidCredential) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.error.ERROR_INVALID_CREDENTIALS));
+                                                new ServiceResponseObject(
+                                                        Const.error.ERROR_INVALID_CREDENTIALS,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     } catch (NullPointerException npe) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.except.NULL_POINTER));
+                                                new ServiceResponseObject(
+                                                        Const.except.NULL_POINTER,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     } catch (Exception e) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.except.GENERIC));
+                                                new ServiceResponseObject(
+                                                        Const.except.GENERIC,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     }
                                 } else {
                                     try {
@@ -147,7 +159,10 @@ class AuthService implements IAuthService {
             }
         }else{
             try {
-                mTrackerService.onUserSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
+                mTrackerService.onUserSignedIn(new ServiceResponseObject(
+                        Const.except.NO_CONNECTION,
+                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                        ));
             }catch (NullPointerException npe){
                 Tracer.log(TAG, "signInUser.NullPointerException: ", npe);
             }
@@ -168,19 +183,34 @@ class AuthService implements IAuthService {
                                         throw task.getException();
                                     } catch (FirebaseAuthUserCollisionException existEmail) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.error.ERROR_EMAIL_EXIST));
+                                                new ServiceResponseObject(
+                                                        Const.error.ERROR_EMAIL_EXIST,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                        ));
                                     }catch (FirebaseAuthWeakPasswordException weakPsw) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.error.ERROR_WEAK_PASSWORD));
+                                                new ServiceResponseObject(
+                                                        Const.error.ERROR_WEAK_PASSWORD,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     } catch (FirebaseAuthInvalidCredentialsException invalidEmail) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.error.ERROR_INVALID_EMAIL));
+                                                new ServiceResponseObject(
+                                                        Const.error.ERROR_INVALID_EMAIL,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     } catch (NullPointerException npe) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.except.NULL_POINTER));
+                                                new ServiceResponseObject(
+                                                        Const.except.NULL_POINTER,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     } catch (Exception e) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.except.GENERIC));
+                                                new ServiceResponseObject(
+                                                        Const.except.GENERIC,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     }
                                 } else {
                                     try {
@@ -198,7 +228,10 @@ class AuthService implements IAuthService {
             }
         }else{
             try {
-                mTrackerService.onUserSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
+                mTrackerService.onUserSignedIn(new ServiceResponseObject(
+                        Const.except.NO_CONNECTION,
+                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                ));
             }catch (NullPointerException npe){
                 Tracer.log(TAG, "createUser.NullPointerException: ", npe);
             }
@@ -218,10 +251,16 @@ class AuthService implements IAuthService {
                                         throw task.getException();
                                     } catch (NullPointerException npe) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.except.NULL_POINTER));
+                                                new ServiceResponseObject(
+                                                        Const.except.NULL_POINTER,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     } catch (Exception e) {
                                         mTrackerService.onUserSignedIn(
-                                                new ServiceResponseObject(Const.except.GENERIC));
+                                                new ServiceResponseObject(
+                                                        Const.except.GENERIC,
+                                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                ));
                                     }
                                 } else {
                                     try {
@@ -239,7 +278,10 @@ class AuthService implements IAuthService {
             }
         }else{
             try {
-                mTrackerService.onUserSignedIn(new ServiceResponseObject(Const.except.NO_CONNECTION));
+                mTrackerService.onUserSignedIn(new ServiceResponseObject(
+                        Const.except.NO_CONNECTION,
+                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                ));
             }catch (NullPointerException npe){
                 Tracer.log(TAG, "signInUser.NullPointerException: ", npe);
             }

@@ -2,7 +2,6 @@ package com.dwizzel.objects;
 
 import com.dwizzel.datamodels.InviteInfoModel;
 
-import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,47 +14,31 @@ public final class ServiceResponseObject{
 
     private Object obj;
     private int err = 0;
-    private String msg = "";
-    private String arg = "";
-    private Map<String, Object> args = new HashMap<String, Object>();
+    private int msg = 0;
+    private String errMsg = "";
+    private Map<String, Object> args = new HashMap<>();
 
-    public ServiceResponseObject() {
+    public ServiceResponseObject() {}
 
-    }
-
-    public ServiceResponseObject(String msg) {
+    public ServiceResponseObject(int msg) {
         this.msg = msg;
     }
 
     public ServiceResponseObject(int err, String msg) {
         this.err = err;
-        this.msg = msg;
-    }
-
-    public ServiceResponseObject(int err) {
-        this.err = err;
+        this.errMsg = msg;
     }
 
     public ServiceResponseObject(Object obj) {
         this.obj = obj;
     }
 
-    public ServiceResponseObject(Object obj, String msg) {
-        this.obj = obj;
-        this.msg = msg;
-    }
-
-    public ServiceResponseObject(String msg, String arg) {
-        this.msg = msg;
-        this.arg = arg;
-    }
-
-    public ServiceResponseObject(String msg, HashMap<String, Object> args) {
+    public ServiceResponseObject(int msg, HashMap<String, Object> args) {
         this.msg = msg;
         this.args.putAll(args);
     }
 
-    public ServiceResponseObject(String msg, InviteInfoModel inviteInfoModel) {
+    public ServiceResponseObject(int msg, InviteInfoModel inviteInfoModel) {
         this.msg = msg;
         this.obj = inviteInfoModel;
     }
@@ -64,12 +47,12 @@ public final class ServiceResponseObject{
         return err;
     }
 
-    public String getMsg(){
-        return msg;
+    public String getErrMsg(){
+        return errMsg;
     }
 
-    public String getArg(){
-        return arg;
+    public int getMsg(){
+        return msg;
     }
 
     public Map<String, Object> getArgs(){

@@ -613,9 +613,19 @@ public class TrackerService extends Service implements ITrackerService{
                 if (mTimer % checkConnectivityDelay == 0) {
                     boolean conn = Utils.getInstance().checkConnectivity(TrackerService.this);
                     if (mHasConnectivity && !conn){
-                        onConnectivityChange(new ServiceResponseObject(Const.conn.NOT_CONNECTED));
+                        onConnectivityChange(
+                                new ServiceResponseObject(
+                                        Const.conn.NOT_CONNECTED,
+                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                )
+                        );
                     }else if(!mHasConnectivity && conn){
-                        onConnectivityChange(new ServiceResponseObject(Const.conn.RECONNECTED));
+                        onConnectivityChange(
+                                new ServiceResponseObject(
+                                        Const.conn.RECONNECTED,
+                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                )
+                        );
                     }
                     mHasConnectivity = conn;
                 }

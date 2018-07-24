@@ -6,6 +6,7 @@ import android.os.Parcelable;
 /**
  * Created by Dwizzel on 20/11/2017.
  * /invites/Ykd3PiB15IRoF7oaVcBh/infos/GAGPWfDW9QYEIGNol1hLjinfoTF3
+ * used to by the parcelable for passing extras between activities or fragments
  */
 
 public class InviteInfoModel implements Parcelable {

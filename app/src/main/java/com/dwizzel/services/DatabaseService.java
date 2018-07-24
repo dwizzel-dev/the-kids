@@ -879,15 +879,23 @@ class DatabaseService implements IDatabaseService{
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Tracer.log(TAG, "createInviteId.addOnFailureListener.exception: ", e);
-                            mTrackerService.onInviteIdCreated(new ServiceResponseObject(
-                                    Const.error.ERROR_INVITE_CREATION_FAILURE));
+                            mTrackerService.onInviteIdCreated(
+                                    new ServiceResponseObject(
+                                        Const.error.ERROR_INVITE_CREATION_FAILURE,
+                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                    )
+                            );
                         }
                     });
 
         }catch (Exception e){
             Tracer.log(TAG, "createInviteId.exception: ", e);
-            mTrackerService.onInviteIdCreated(new ServiceResponseObject(
-                    Const.error.ERROR_INVITE_CREATION_FAILURE));
+            mTrackerService.onInviteIdCreated(
+                    new ServiceResponseObject(
+                        Const.error.ERROR_INVITE_CREATION_FAILURE,
+                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                    )
+            );
         }
 
     }
@@ -923,14 +931,22 @@ class DatabaseService implements IDatabaseService{
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Tracer.log(TAG, "createInvitation.addOnFailureListener.Exception: ", e);
-                            mTrackerService.onInvitationCreated(new ServiceResponseObject(
-                                    Const.error.ERROR_INVITATION_CREATION_FAILURE));
+                            mTrackerService.onInvitationCreated(
+                                    new ServiceResponseObject(
+                                        Const.error.ERROR_INVITATION_CREATION_FAILURE,
+                                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                                    )
+                            );
                         }
                     });
         }catch (Exception e){
             Tracer.log(TAG, "createInvitation.Exception: ", e);
-            mTrackerService.onInvitationCreated(new ServiceResponseObject(
-                    Const.error.ERROR_INVITATION_CREATION_FAILURE));
+            mTrackerService.onInvitationCreated(
+                    new ServiceResponseObject(
+                        Const.error.ERROR_INVITATION_CREATION_FAILURE,
+                        Thread.currentThread().getStackTrace()[1].getMethodName()
+                    )
+            );
         }
 
     }
@@ -960,13 +976,21 @@ class DatabaseService implements IDatabaseService{
                         public void onFailure(@NonNull Exception e) {
                             Tracer.log(TAG,"activateInvite.addOnFailureListener.Exception: ", e);
                             mTrackerService.onActivateInvite(
-                                    new ServiceResponseObject(Const.error.ERROR_INVITE_ID_FAILURE));
+                                    new ServiceResponseObject(
+                                            Const.error.ERROR_INVITE_ID_FAILURE,
+                                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                                    )
+                            );
                         }
                     });
         }catch (Exception e){
             Tracer.log(TAG, "activateInvite.Exception: ", e);
             mTrackerService.onActivateInvite(
-                    new ServiceResponseObject(Const.error.ERROR_INVITE_ID_FAILURE));
+                    new ServiceResponseObject(
+                            Const.error.ERROR_INVITE_ID_FAILURE,
+                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                    )
+            );
         }
 
     }
@@ -1010,27 +1034,41 @@ class DatabaseService implements IDatabaseService{
                                                     , e);
                                             mTrackerService.onValidateInviteCode(
                                                     new ServiceResponseObject(
-                                                            Const.error.ERROR_INVALID_INVITE_CODE));
+                                                            Const.error.ERROR_INVALID_INVITE_CODE,
+                                                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                                                    )
+                                            );
                                         }
                                     }
                                 }else{
                                     Tracer.data(TAG, "code-validate: NO DATA");
                                     mTrackerService.onValidateInviteCode(
-                                            new ServiceResponseObject(Const.error.ERROR_INVALID_INVITE_CODE));
+                                            new ServiceResponseObject(
+                                                    Const.error.ERROR_INVALID_INVITE_CODE,
+                                                    Thread.currentThread().getStackTrace()[1].getMethodName()
+                                            )
+                                    );
                                 }
                             } else {
                                 Tracer.log(TAG, "validateInviteCode.addOnCompleteListener.exception[1]: "
                                         , task.getException());
                                 mTrackerService.onValidateInviteCode(
                                         new ServiceResponseObject(
-                                                Const.error.ERROR_INVALID_INVITE_CODE_FAILURE));
+                                                Const.error.ERROR_INVALID_INVITE_CODE_FAILURE,
+                                                Thread.currentThread().getStackTrace()[1].getMethodName()
+                                        )
+                                );
                             }
                         }
                     });
         }catch (Exception e){
             Tracer.log(TAG, "validateInviteCode.Exception: ", e);
             mTrackerService.onValidateInviteCode(
-                    new ServiceResponseObject(Const.error.ERROR_INVALID_INVITE_CODE_FAILURE));
+                    new ServiceResponseObject(
+                            Const.error.ERROR_INVALID_INVITE_CODE_FAILURE,
+                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                    )
+            );
         }
 
     }
@@ -1057,13 +1095,21 @@ class DatabaseService implements IDatabaseService{
                         public void onFailure(@NonNull Exception e) {
                             Tracer.log(TAG,"saveInviteInfo.addOnFailureListener.Exception: ", e);
                             mTrackerService.onActivateInvite(
-                                    new ServiceResponseObject(Const.error.ERROR_INVITE_INFOS_FAILURE));
+                                    new ServiceResponseObject(
+                                            Const.error.ERROR_INVITE_INFOS_FAILURE,
+                                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                                    )
+                            );
                         }
                     });
         }catch (Exception e){
             Tracer.log(TAG, "saveInviteInfo.Exception: ", e);
             mTrackerService.onActivateInvite(
-                    new ServiceResponseObject(Const.error.ERROR_INVITE_INFOS_FAILURE));
+                    new ServiceResponseObject(
+                            Const.error.ERROR_INVITE_INFOS_FAILURE,
+                            Thread.currentThread().getStackTrace()[1].getMethodName()
+                    )
+            );
         }
 
     }
